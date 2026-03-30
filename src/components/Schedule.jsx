@@ -5,7 +5,7 @@ const Schedule = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5091/api/activities')
+    fetch(`${import.meta.env.VITE_API_URL}/api/activities`)
       .then(res => res.json())
       .then(data => {
         setActivities(data);

@@ -11,7 +11,7 @@ const GalleryPage = () => {
 
     const fetchPhotos = async () => {
         try {
-            const res = await fetch('http://localhost:5091/api/photos');
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/photos`);
             if (res.ok) {
                 const data = await res.json();
                 setPhotos(data);
@@ -37,7 +37,7 @@ const GalleryPage = () => {
         }
 
         try {
-            const res = await fetch('http://localhost:5091/api/photos', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/photos`, {
                 method: 'POST',
                 body: formData
             });
@@ -90,7 +90,7 @@ const GalleryPage = () => {
                             <div key={photo.id} className="break-inside-avoid bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100 group">
                                 <div className="relative">
                                     <img 
-                                        src={`http://localhost:5091${photo.url}`} 
+                                        src={`${import.meta.env.VITE_API_URL}${photo.url}`} 
                                         alt={photo.description} 
                                         className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-500" 
                                         loading="lazy"

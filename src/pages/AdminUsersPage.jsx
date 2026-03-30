@@ -12,7 +12,7 @@ const AdminUsersPage = () => {
     useEffect(() => {
         const fetchAll = async () => {
             try {
-                const response = await fetch('http://localhost:5091/api/registrations');
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`);
                 if (!response.ok) throw new Error('Error');
                 const data = await response.json();
                 setAttendees(data);
@@ -79,7 +79,7 @@ const AdminUsersPage = () => {
         if(!data.faculty) data.faculty = "Sin Asignar"; // Admin must specify or default
 
         try {
-            const response = await fetch('http://localhost:5091/api/registrations', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)

@@ -42,7 +42,7 @@ const Registration = () => {
         };
 
         // 1. Save to Database via API
-        fetch('http://localhost:5091/api/registrations', {
+        fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

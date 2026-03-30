@@ -19,7 +19,7 @@ const DelegateDashboard = () => {
         setLoading(true);
         try {
             const delegationName = user?.delegationName || 'UTN - Facultad Regional Buenos Aires';
-            const response = await fetch(`http://localhost:5091/api/registrations/delegation?name=${encodeURIComponent(delegationName)}`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/delegation?name=${encodeURIComponent(delegationName)}`);
             if (!response.ok) throw new Error('Error fetching data');
             const data = await response.json();
             setAttendees(data);
@@ -81,7 +81,7 @@ const DelegateDashboard = () => {
            
            try {
                // Assuming DELETE endpoint exists or we mock it for now
-               // await fetch(`http://localhost:5091/api/registrations/${id}`, { method: 'DELETE' });
+               // await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/${id}`, { method: 'DELETE' });
                alert('Función de eliminar simulada (Backend pendiente de DELETE endpoint)');
            } catch (e) {
                alert('Error al eliminar');
@@ -103,7 +103,7 @@ const DelegateDashboard = () => {
         data.status = 'Pending';
 
         try {
-            const response = await fetch('http://localhost:5091/api/registrations', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
