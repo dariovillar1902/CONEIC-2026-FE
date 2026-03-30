@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-title: 'Futura LT Pro', 'Montserrat', sans-serif;
+  --font-subtitle: 'Montserrat', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
+
+  /* Colors - Pending exact codes from Manual, using approximations/existing */
+  --color-institutional: #383A49; 
+  
+  /* Brand Colors from Logo names (Azul, Negro, Blanco) */
+  --color-primary-blue: #005DAA; /* Updated to a standard vibrant blue matching 'Azul' */
+  --color-primary-red: #E30613; /* Updated to standard red if needed, or keep existing */
+  --color-primary-green: #57704D;
+  
+  --color-complementary-gold: #C2A14A;
+  --color-complementary-light: #F5F5F5;
+  --color-complementary-sky: #86C2DE;
+
+  /* Mappings */
+  --color-primary: var(--color-institutional);
+  --color-secondary: var(--color-primary-blue); /* Changed secondary to Blue as per new logo prominence */
+}
+
+@font-face {
+  font-family: 'Futura LT Pro';
+  src: local('Futura LT Pro'), local('FuturaLTPro-Heavy'), url('/assets/fonts/FuturaLTPro-Heavy.otf') format('opentype');
+  /* Note: automatic fallback to Montserrat if not locally installed */
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-complementary-light);
+  color: var(--color-institutional);
+}
