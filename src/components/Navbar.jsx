@@ -22,12 +22,10 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Inicio', href: '/' },
         { name: 'Cronograma', href: '/schedule' },
-        { name: 'Actividades', href: '/activities' }, // Or public info
-        { name: 'Sedes', href: '/venues' },
-        { name: 'Juegos', href: '/games' },
+        { name: 'Sobre Nosotros', href: '/about' },
+        { name: 'Sponsors', href: '/sponsors' },
         { name: 'Galería', href: '/gallery' },
         { name: 'Subcomisiones', href: '/subcomisiones' },
-        { name: 'Sobre Nosotros', href: '/about' },
     ];
 
     return (
@@ -36,12 +34,7 @@ const Navbar = () => {
                 <div className="flex justify-between items-center h-16">
                     <div className="flex-shrink-0 flex items-center">
                          <Link to="/" className="flex items-center gap-3">
-                             <img src="/assets/LOGO_H-CONEIC-FULL-BLANCO.png" className="h-10 w-auto" alt="CONEIC Logo" />
-                             {/* Text hidden on mobile or redundant if logo has text? Logo has text. So maybe hide text span or keep for SEO/Accessibility but visually hidden? 
-                                 The file is LOGO_H... (Horizontal). It likely contains the text 'CONEIC'. 
-                                 Let's keep the text for now but if the logo has text, we might remove the span. 
-                                 Assuming 'FULL' means symbol + text.
-                             */}
+                             <img src="/assets/LOGO_CONEIC-BLANCO.png" className="h-10 w-auto" alt="CONEIC Logo" />
                          </Link>
                     </div>
                     

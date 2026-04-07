@@ -10,11 +10,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminScannerPage from './pages/AdminScannerPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import DelegateDashboard from './pages/DelegateDashboard';
-import AssistantDashboard from './pages/AssistantDashboard'; // My Ticket
+import AssistantDashboard from './pages/AssistantDashboard';
 import GalleryPage from './pages/GalleryPage';
 import GamesPage from './pages/GamesPage';
 import AboutPage from './pages/AboutPage';
-import { SchedulePage, ActivitiesPage, VenuesPage, RegistrationPage } from './pages/Wrappers';
+import { SchedulePage, ActivitiesPage, RegistrationPage, SponsorsPage } from './pages/Wrappers';
 import SubcommitteesPage from './pages/SubcommitteesPage';
 
 const router = createBrowserRouter([
@@ -25,7 +25,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'schedule', element: <SchedulePage /> },
-      { path: 'venues', element: <VenuesPage /> },
+      { path: 'sponsors', element: <SponsorsPage /> },
       { path: 'registration', element: <RegistrationPage /> },
       { path: 'gallery', element: <GalleryPage /> },
       { path: 'games', element: <GamesPage /> },
@@ -52,7 +52,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/my-ticket',
-    element: <DashboardLayout allowedRoles={['assistant', 'admin']} />, 
+    element: <DashboardLayout allowedRoles={['assistant', 'admin']} />,
     children: [
       { index: true, element: <AssistantDashboard /> }
     ]
@@ -66,7 +66,7 @@ const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <div className="min-h-screen flex items-center justify-center text-xl font-bold text-gray-800">404 - Página no encontrada</div>
+    element: <div className="min-h-screen flex items-center justify-center text-xl font-bold text-gray-800">404 — Página no encontrada</div>
   }
 ]);
 

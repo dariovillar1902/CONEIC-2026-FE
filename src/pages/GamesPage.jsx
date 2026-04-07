@@ -1,62 +1,22 @@
 const GamesPage = () => {
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 pt-24">
-            <div className="text-center mb-16">
-                <h2 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-red to-complementary-gold font-title mb-4 animate-pulse">
-                    CONEIC GAMES
-                </h2>
-                <p className="text-gray-600 font-subtitle text-xl">¡Participá y ganá premios increíbles de nuestros sponsors!</p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-12">
-                {/* Raffle Card */}
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:-translate-y-2 transition duration-500 border-4 border-complementary-gold">
-                    <div className="bg-complementary-gold p-8 text-center relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-full bg-white opacity-10 animate-pulse"></div>
-                        <span className="text-6xl mb-4 block">🎟️</span>
-                        <h3 className="text-3xl font-bold text-institutional font-title uppercase tracking-widest relative z-10">Gran Sorteo Final</h3>
-                        <p className="font-bold text-institutional/80 mt-2 relative z-10">Viernes 20 - Cena de Gala</p>
-                    </div>
-                    <div className="p-8 text-center space-y-6">
-                        <p className="text-gray-600 font-body text-lg">
-                            Participás automáticamente con tu entrada. ¡Premios sorpresa incluyendo tablets, becas y kits de ingeniería!
-                        </p>
-                        <div className="bg-gray-100 p-4 rounded-xl inline-block">
-                             <p className="text-xs uppercase text-gray-500 font-bold mb-1">Tu número de sorteo</p>
-                             <p className="text-3xl font-mono font-bold text-institutional tracking-[0.5em]">8492</p>
-                        </div>
-                        <button className="w-full bg-institutional text-white py-4 rounded-xl font-bold uppercase tracking-wider hover:bg-gray-900 transition shadow-lg">
-                            Ver mis chances
-                        </button>
-                    </div>
+        <div className="min-h-screen bg-complementary-light flex items-center justify-center pt-20">
+            <div className="text-center px-4">
+                <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+                    <svg className="w-12 h-12 text-complementary-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
+                    </svg>
                 </div>
-
-                {/* Question Game Card */}
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:-translate-y-2 transition duration-500 border-4 border-primary-blue">
-                    <div className="bg-primary-blue p-8 text-center text-white relative overflow-hidden">
-                         <div className="absolute top-0 left-0 w-full h-full bg-white opacity-10 animate-pulse delay-100"></div>
-                        <span className="text-6xl mb-4 block">🧠</span>
-                        <h3 className="text-3xl font-bold font-title uppercase tracking-widest relative z-10">Trivia Ingeniera</h3>
-                        <p className="font-bold text-white/80 mt-2 relative z-10">Desafía tu conocimiento</p>
-                    </div>
-                    <div className="p-8 text-center space-y-6">
-                        <p className="text-gray-600 font-body text-lg">
-                            Respondé correctamente 5 preguntas de ingeniería civil y ganá merchandising oficial al instante.
-                        </p>
-                        <div className="bg-blue-50 p-4 rounded-xl inline-block w-full">
-                             <div className="flex justify-between text-sm font-bold text-primary-blue mb-2">
-                                <span>Progreso Diario</span>
-                                <span>2/5</span>
-                             </div>
-                             <div className="w-full bg-blue-200 rounded-full h-2.5">
-                                <div className="bg-primary-blue h-2.5 rounded-full" style={{ width: '40%' }}></div>
-                             </div>
-                        </div>
-                        <button className="w-full bg-gradient-to-r from-primary-blue to-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-wider hover:shadow-xl hover:shadow-blue-500/30 transition shadow-lg ring-offset-2 ring-primary-blue">
-                            Jugar Ahora
-                        </button>
-                    </div>
+                <h1 className="text-4xl md:text-5xl font-bold font-title text-institutional mb-4">
+                    CONEIC Games
+                </h1>
+                <div className="inline-flex items-center gap-2 bg-complementary-gold/20 border border-complementary-gold/40 text-institutional px-5 py-2 rounded-full font-bold text-sm uppercase tracking-widest mb-6">
+                    <span className="w-2 h-2 rounded-full bg-complementary-gold animate-pulse"></span>
+                    Próximamente
                 </div>
+                <p className="text-gray-500 font-body text-lg max-w-md mx-auto">
+                    Esta sección estará disponible pronto. ¡Volvé a visitarnos!
+                </p>
             </div>
         </div>
     );

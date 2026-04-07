@@ -7,21 +7,27 @@
   --font-subtitle: 'Montserrat', sans-serif;
   --font-body: 'Montserrat', sans-serif;
 
-  /* Colors - Pending exact codes from Manual, using approximations/existing */
-  --color-institutional: #383A49; 
-  
-  /* Brand Colors from Logo names (Azul, Negro, Blanco) */
-  --color-primary-blue: #005DAA; /* Updated to a standard vibrant blue matching 'Azul' */
-  --color-primary-red: #E30613; /* Updated to standard red if needed, or keep existing */
-  --color-primary-green: #57704D;
-  
+  /* Colors - Official palette from PyD (06/04) */
+  --color-institutional: #002F51;
+  --color-accent: #f7f1e5;
+
+  /* Thematic Axis Colors */
+  --color-estructuras: #870a28;
+  --color-sostenibilidad: #0e4f28;
+  --color-vial: #269bbf;
+
+  /* Brand Colors */
+  --color-primary-blue: #002F51;
+  --color-primary-red: #E30613;
+  --color-primary-green: #0e4f28;
+
   --color-complementary-gold: #C2A14A;
   --color-complementary-light: #F5F5F5;
   --color-complementary-sky: #86C2DE;
 
   /* Mappings */
   --color-primary: var(--color-institutional);
-  --color-secondary: var(--color-primary-blue); /* Changed secondary to Blue as per new logo prominence */
+  --color-secondary: var(--color-primary-blue);
 }
 
 @font-face {

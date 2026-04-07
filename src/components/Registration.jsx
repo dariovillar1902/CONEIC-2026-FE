@@ -20,6 +20,19 @@ const Registration = () => {
     const [file, setFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [dietarySelection, setDietarySelection] = useState('');
+
+    const dietaryOptions = [
+        'Sin restricciones',
+        'Vegetariano/a',
+        'Vegano/a',
+        'Celíaco/a (sin TACC)',
+        'Intolerante a la lactosa',
+        'Alérgico/a a frutos secos',
+        'Kosher',
+        'Halal',
+        'Otro',
+    ];
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -179,10 +192,66 @@ const Registration = () => {
                                 <div className="relative">
                                     <select name="user_faculty" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 appearance-none hover:bg-white cursor-pointer">
                                         <option value="">Seleccionar...</option>
-                                        <option>UTN - Facultad Regional Buenos Aires</option>
-                                        <option>UBA - Facultad de Ingeniería</option>
-                                        <option>UNLP - Universidad Nacional de La Plata</option>
-                                        <option>Otra</option>
+                                        {/* Región Centro */}
+                                        <optgroup label="Región Centro">
+                                            <option>UTN - Facultad Regional de Paraná</option>
+                                            <option>UTN - Facultad Regional de Rafaela</option>
+                                            <option>UTN - Facultad Regional de Rosario</option>
+                                            <option>Universidad Nacional de Rosario</option>
+                                            <option>UTN - Facultad Regional de Santa Fe</option>
+                                            <option>UTN - Facultad Regional de Venado Tuerto</option>
+                                        </optgroup>
+                                        {/* Región Este */}
+                                        <optgroup label="Región Este">
+                                            <option>UTN - Facultad Regional de Avellaneda</option>
+                                            <option>Universidad de Belgrano</option>
+                                            <option>Universidad de Buenos Aires</option>
+                                            <option>Universidad Católica Argentina</option>
+                                            <option>Universidad de la Defensa Nacional</option>
+                                            <option>UTN - Facultad Regional de Buenos Aires</option>
+                                            <option>UTN - Facultad Regional de Concepción del Uruguay</option>
+                                            <option>UTN - Facultad Regional Concordia</option>
+                                            <option>UTN - Facultad Regional de General Pacheco</option>
+                                            <option>Universidad Nacional de la Matanza</option>
+                                            <option>Universidad Nacional de La Plata</option>
+                                            <option>UTN - Facultad Regional de La Plata</option>
+                                            <option>Universidad Nacional de Morón</option>
+                                        </optgroup>
+                                        {/* Región Norte */}
+                                        <optgroup label="Región Norte">
+                                            <option>Universidad Nacional del Nordeste</option>
+                                            <option>Universidad Nacional de Formosa</option>
+                                            <option>Universidad Nacional de Misiones</option>
+                                            <option>Universidad Católica de Salta</option>
+                                            <option>Universidad Nacional de Salta</option>
+                                            <option>Universidad Nacional de Santiago del Estero</option>
+                                            <option>Universidad Nacional de Tucumán</option>
+                                            <option>UTN - Facultad Regional de Tucumán</option>
+                                        </optgroup>
+                                        {/* Región Oeste */}
+                                        <optgroup label="Región Oeste">
+                                            <option>Universidad Católica de Córdoba</option>
+                                            <option>Universidad Nacional de Córdoba</option>
+                                            <option>UTN - Facultad Regional de Córdoba</option>
+                                            <option>UTN - Facultad Regional de La Rioja</option>
+                                            <option>Universidad Nacional de La Rioja</option>
+                                            <option>Universidad Nacional de Cuyo</option>
+                                            <option>UTN - Facultad Regional de Mendoza</option>
+                                            <option>Universidad Nacional de San Juan</option>
+                                            <option>UTN - Facultad Regional de San Rafael</option>
+                                        </optgroup>
+                                        {/* Región Sur */}
+                                        <optgroup label="Región Sur">
+                                            <option>Universidad Nacional del Sur</option>
+                                            <option>UTN - Facultad Regional de Bahía Blanca</option>
+                                            <option>Universidad Nacional de la Patagonia San Juan Bosco - Sede Comodoro Rivadavia</option>
+                                            <option>Universidad Nacional del Comahue</option>
+                                            <option>Universidad Nacional del Centro de la Provincia de Buenos Aires - Sede Olavarría</option>
+                                            <option>Universidad Nacional de la Patagonia San Juan Bosco - Sede Trelew</option>
+                                        </optgroup>
+                                        <optgroup label="Otra">
+                                            <option>Otra</option>
+                                        </optgroup>
                                     </select>
                                     <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -222,8 +291,47 @@ const Registration = () => {
                                 </select>
                             </div>
                             <div className="group">
+                                <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Mano Hábil</label>
+                                <select name="user_dominant_hand" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 hover:bg-white">
+                                    <option value="derecha">Derecha</option>
+                                    <option value="izquierda">Izquierda</option>
+                                    <option value="ambidiestro">Ambidiestro</option>
+                                </select>
+                            </div>
+                            <div className="group">
+                                <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Obra Social / Prepaga</label>
+                                <input name="user_insurance" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Ej. OSDE / Swiss Medical / Ninguna" />
+                            </div>
+                            <div className="group md:col-span-2">
                                 <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Afecciones Médicas / Alergias</label>
-                                <input name="user_medical" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Ninguna / Celíaco / Asma" />
+                                <input name="user_medical" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Asma, alergias, medicación crónica, etc." />
+                            </div>
+                            <div className="group md:col-span-2">
+                                <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Restricciones Alimentarias</label>
+                                <div className="relative mb-2">
+                                    <select
+                                        name="user_dietary"
+                                        value={dietarySelection}
+                                        onChange={(e) => setDietarySelection(e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 appearance-none hover:bg-white cursor-pointer"
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        {dietaryOptions.map((opt) => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                                {dietarySelection === 'Otro' && (
+                                    <input
+                                        name="user_dietary_other"
+                                        type="text"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white"
+                                        placeholder="Especificá tu restricción alimentaria"
+                                    />
+                                )}
                             </div>
                             <div className="group">
                                 <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Nombre Contacto Emergencia</label>
