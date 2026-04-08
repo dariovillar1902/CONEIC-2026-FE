@@ -22,6 +22,7 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Inicio', href: '/' },
         { name: 'Cronograma', href: '/schedule' },
+        { name: 'Sedes', href: '/venues' },
         { name: 'Sobre Nosotros', href: '/about' },
         { name: 'Sponsors', href: '/sponsors' },
         { name: 'Galería', href: '/gallery' },

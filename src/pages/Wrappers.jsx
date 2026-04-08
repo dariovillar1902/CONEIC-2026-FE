@@ -1,28 +1,31 @@
 import Schedule from '../components/Schedule';
-import Venues from '../components/Venues';
 
 export const SchedulePage = () => (
   <div className="pt-24 min-h-screen bg-complementary-light">
-    {/* Hero */}
     <div className="bg-institutional text-white py-12 px-4 mb-8 text-center">
       <h1 className="text-4xl md:text-5xl font-bold font-title mb-2">Cronograma</h1>
       <p className="text-gray-300 font-subtitle max-w-2xl mx-auto">
-        Toda la información sobre horarios, ubicaciones y actividades del XVIII&nbsp;CONEIC.
+        Horarios, ubicaciones y actividades del XVIII&nbsp;CONEIC.
       </p>
     </div>
-
-    {/* Schedule Section */}
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-      <h2 className="text-3xl font-bold text-institutional font-title mb-8 border-l-4 border-complementary-gold pl-4">Cronograma</h2>
       <Schedule />
     </div>
+  </div>
+);
 
-    {/* Venues Section */}
-    <div className="bg-gray-50 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-institutional font-title mb-8 border-l-4 border-complementary-gold pl-4">Sedes</h2>
-        <Venues />
-      </div>
+import Venues from '../components/Venues';
+
+export const VenuesPage = () => (
+  <div className="pt-24 min-h-screen bg-complementary-light">
+    <div className="bg-institutional text-white py-12 px-4 mb-8 text-center">
+      <h1 className="text-4xl md:text-5xl font-bold font-title mb-2">Sedes</h1>
+      <p className="text-gray-300 font-subtitle max-w-2xl mx-auto">
+        Los espacios donde se desarrolla el XVIII&nbsp;CONEIC Buenos&nbsp;Aires&nbsp;2026.
+      </p>
+    </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <Venues />
     </div>
   </div>
 );
@@ -43,7 +46,6 @@ export const SponsorsPage = () => (
       </p>
     </div>
     <Sponsors />
-    {/* CTA */}
     <div className="bg-institutional text-white py-16 px-4 text-center">
       <h3 className="text-3xl font-bold font-title mb-4">¿Su empresa busca talento&nbsp;joven?</h3>
       <p className="text-gray-300 mb-8 font-subtitle text-lg max-w-2xl mx-auto">

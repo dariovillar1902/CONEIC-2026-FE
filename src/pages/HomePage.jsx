@@ -7,11 +7,11 @@ const HomePage = () => {
       {/* Hero Section */}
       <section className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-institutional text-white min-h-[85vh] flex items-center relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-             <div className="absolute inset-0 bg-gradient-to-b from-institutional/70 via-institutional/50 to-institutional/85 z-10"></div>
+             <div className="absolute inset-0 bg-gradient-to-b from-institutional/60 via-institutional/40 to-institutional/80 z-10"></div>
              <img
-                src="https://images.unsplash.com/photo-1589901863506-8dca08f7aa95?q=80&w=2000&auto=format&fit=crop"
-                alt="Buenos Aires Obelisco"
-                className="w-full h-full object-cover object-center opacity-55"
+                src="/assets/hero-buenos-aires.jpg"
+                alt="Buenos Aires"
+                className="w-full h-full object-cover object-center"
              />
         </div>
 

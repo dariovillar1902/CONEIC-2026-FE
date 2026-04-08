@@ -79,10 +79,10 @@ const Sponsors = () => {
                     </p>
                 </div>
 
-                <TierSection title="Sponsors Diamante" sponsors={sponsorsData.diamond} color="text-institutional" size="text-3xl" />
+                <TierSection title="Sponsors Diamante" sponsors={sponsorsData.diamond} color="text-institutional" size="text-2xl" />
                 <TierSection title="Sponsors Oro" sponsors={sponsorsData.gold} color="text-yellow-600" size="text-2xl" />
-                <TierSection title="Sponsors Plata" sponsors={sponsorsData.silver} color="text-gray-500" size="text-xl" />
-                <TierSection title="Sponsors Bronce" sponsors={sponsorsData.bronze} color="text-orange-700 hover:text-orange-800" size="text-lg" />
+                <TierSection title="Sponsors Plata" sponsors={sponsorsData.silver} color="text-gray-500" size="text-2xl" />
+                <TierSection title="Sponsors Bronce" sponsors={sponsorsData.bronze} color="text-orange-700 hover:text-orange-800" size="text-2xl" />
 
             </div>
         </section>
