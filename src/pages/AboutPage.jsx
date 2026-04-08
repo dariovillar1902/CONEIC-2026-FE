@@ -78,7 +78,7 @@ const AboutPage = () => {
                         <h2 className="text-4xl font-bold text-institutional font-title mt-2">Actividades del&nbsp;Congreso</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="flex flex-wrap justify-center gap-8">
                         <ActivityCard
                             icon="🎤"
                             title="Charlas Magistrales"
@@ -152,7 +152,7 @@ const AboutPage = () => {
 };
 
 const ActivityCard = ({ icon, title, description }) => (
-    <div className="bg-accent p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+    <div className="bg-accent p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group w-full md:w-[calc(33.333%-1.5rem)]">
         <div className="text-4xl mb-6 bg-white w-16 h-16 flex items-center justify-center rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm">{icon}</div>
         <h3 className="text-xl font-bold text-institutional font-title mb-3 group-hover:text-primary-blue transition-colors">{title}</h3>
         <p className="text-gray-600 leading-relaxed text-sm">
