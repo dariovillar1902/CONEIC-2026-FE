@@ -9,7 +9,7 @@ const HomePage = () => {
         <div className="absolute inset-0 z-0">
              <div className="absolute inset-0 bg-gradient-to-b from-institutional/60 via-institutional/40 to-institutional/80 z-10"></div>
              <img
-                src="/assets/hero-buenos-aires.jpg"
+                src="/assets/hero-buenos-aires.png"
                 alt="Buenos Aires"
                 className="w-full h-full object-cover object-center"
              />
@@ -51,7 +51,7 @@ const HomePage = () => {
           <div className="bg-accent p-6 rounded-xl shadow-2xl border-b-4 border-estructuras transform hover:-translate-y-2 transition duration-300 group cursor-default overflow-hidden">
               <div className="h-52 flex items-center justify-center mb-4 overflow-hidden rounded-lg bg-estructuras/10 relative">
                   <div className="absolute inset-0 bg-estructuras/15"></div>
-                  <img src="/assets/Miscelaneos-Estructuras.png" alt="Estructuras" className="w-[150%] h-[150%] object-cover object-center opacity-90 group-hover:scale-105 transition-transform duration-500" />
+                  <img src="/assets/Miscelaneos-Estructuras.png" alt="Estructuras" className="w-[300%] h-[300%] object-cover object-center opacity-90 group-hover:scale-105 transition-transform duration-500" />
               </div>
               <h3 className="text-2xl font-bold font-title text-estructuras mb-2">Estructuras</h3>
               <p className="text-gray-600 font-body text-sm leading-relaxed">
@@ -63,7 +63,7 @@ const HomePage = () => {
           <div className="bg-accent p-6 rounded-xl shadow-2xl border-b-4 border-vial transform hover:-translate-y-2 transition duration-300 group cursor-default overflow-hidden">
               <div className="h-52 flex items-center justify-center mb-4 overflow-hidden rounded-lg bg-vial/10 relative">
                   <div className="absolute inset-0 bg-vial/15"></div>
-                  <img src="/assets/Miscelaneos-Vial.png" alt="Vial" className="w-[150%] h-[150%] object-cover object-center opacity-90 group-hover:scale-105 transition-transform duration-500" />
+                  <img src="/assets/Miscelaneos-Vial.png" alt="Vial" className="w-[300%] h-[300%] object-cover object-center opacity-90 group-hover:scale-105 transition-transform duration-500" />
               </div>
               <h3 className="text-2xl font-bold font-title text-vial mb-2">Vial</h3>
               <p className="text-gray-600 font-body text-sm leading-relaxed">
