@@ -163,7 +163,7 @@ const Registration = () => {
     const form = useRef();
     const today = new Date();
     const { stage: currentStage, phase: currentPhase } = getCurrentPhase(today);
-    const isFormOpen = currentPhase === 'preRegistration';
+    const isFormOpen = true; // TODO: remove before launch — bypasses date restriction for demo
 
     const [file, setFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
