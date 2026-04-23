@@ -156,7 +156,7 @@ const SubcommitteesPage = () => {
           </p>
           <Link
             to="/about"
-            className="inline-block bg-complementary-gold text-white font-bold px-8 py-3 rounded-full hover:bg-yellow-600 transition-colors shadow-md uppercase tracking-widest text-sm"
+            className="inline-block bg-primary-red text-white font-bold px-8 py-3 rounded-full hover:bg-red-900 transition-colors shadow-md uppercase tracking-widest text-sm"
           >
             Sobre el Congreso y ANEIC
           </Link>
