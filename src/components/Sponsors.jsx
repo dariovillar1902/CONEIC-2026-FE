@@ -17,27 +17,6 @@ const sponsorsData = {
       logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Logo_de_YPF.svg/400px-Logo_de_YPF.svg.png',
       url: 'https://www.ypf.com',
     },
-    {
-      name: 'CPIC',
-      logoUrl: null, // Pending — site down
-      url: 'https://cpic.org.ar',
-    },
-  ],
-  silver: [
-    {
-      name: 'Camarco',
-      logoUrl: null, // Pending — site certificate issue
-      url: 'https://www.camarco.org.ar',
-    },
-    {
-      name: 'Panedile',
-      logoUrl: null, // Pending — site down
-      url: 'https://www.panedile.com.ar',
-    },
-  ],
-  bronze: [
-    { name: 'Empresa A', logoUrl: null, url: '#' },
-    { name: 'Empresa B', logoUrl: null, url: '#' },
   ],
 };
 
@@ -57,7 +36,7 @@ const Sponsors = () => {
                         className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 w-56 h-32 flex items-center justify-center overflow-hidden group"
                     >
                          <img
-                            src={s.logoUrl || `https://placehold.co/400x200/ffffff/333333?text=${s.name}`}
+                            src={s.logoUrl}
                             alt={s.name}
                             className="max-w-[80%] max-h-[80%] object-contain group-hover:scale-110 transition-transform grayscale hover:grayscale-0 duration-500"
                         />
@@ -81,9 +60,17 @@ const Sponsors = () => {
 
                 <TierSection title="Sponsors Diamante" sponsors={sponsorsData.diamond} color="text-institutional" size="text-2xl" />
                 <TierSection title="Sponsors Oro" sponsors={sponsorsData.gold} color="text-yellow-600" size="text-2xl" />
-                <TierSection title="Sponsors Plata" sponsors={sponsorsData.silver} color="text-gray-500" size="text-2xl" />
-                <TierSection title="Sponsors Bronce" sponsors={sponsorsData.bronze} color="text-orange-700 hover:text-orange-800" size="text-2xl" />
 
+                {/* CTA for potential sponsors */}
+                <div className="text-center mt-8 pt-12 border-t border-gray-100">
+                    <p className="text-gray-400 font-body text-sm mb-4 uppercase tracking-widest">¿Tu empresa quiere aparecer aquí?</p>
+                    <a
+                        href="mailto:patrociniosconeic@gmail.com"
+                        className="inline-block bg-institutional text-white px-8 py-3 rounded-full font-bold hover:bg-complementary-gold transition-colors shadow-md uppercase tracking-widest text-sm"
+                    >
+                        Solicitar Brochure
+                    </a>
+                </div>
             </div>
         </section>
     );

@@ -130,6 +130,56 @@ const AboutPage = () => {
                     </div>
                 </div>
 
+                {/* ANEIC Section */}
+                <div className="grid md:grid-cols-2 gap-16 items-center">
+                    <div className="space-y-6">
+                        <span className="text-primary-red font-bold tracking-widest uppercase text-sm">La asociación detrás del congreso</span>
+                        <h2 className="text-4xl font-bold text-institutional font-title">¿Qué es&nbsp;ANEIC?</h2>
+                        <p className="text-gray-600 text-lg leading-relaxed">
+                            La <strong className="text-institutional">Asociación Nacional de Estudiantes de Ingeniería Civil</strong> es el organismo que agrupa y representa a los estudiantes de la carrera en toda Argentina.
+                            Fundada con el objetivo de unir voces estudiantiles, defender las incumbencias profesionales y promover el intercambio académico entre facultades de todo el&nbsp;país.
+                        </p>
+                        <p className="text-gray-600 leading-relaxed">
+                            El CONEIC es el evento insignia de ANEIC, organizado anualmente en una sede universitaria distinta, rotando entre las instituciones miembro de la&nbsp;asociación.
+                        </p>
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            <a
+                                href="https://www.instagram.com/aneicargentina"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 bg-institutional text-white px-6 py-3 rounded-full font-bold hover:bg-complementary-gold transition-colors shadow-md text-sm uppercase tracking-widest"
+                            >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                                @aneicargentina
+                            </a>
+                            <a
+                                href="/subcomisiones"
+                                className="inline-flex items-center gap-2 border-2 border-institutional text-institutional px-6 py-3 rounded-full font-bold hover:bg-institutional hover:text-white transition-colors text-sm uppercase tracking-widest"
+                            >
+                                Ver Subcomisiones
+                            </a>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-institutional/10 rounded-2xl p-6 text-center border border-institutional/20">
+                            <h4 className="text-3xl font-bold text-institutional font-title">25+</h4>
+                            <p className="text-gray-500 text-sm uppercase mt-1 tracking-wide">Universidades miembro</p>
+                        </div>
+                        <div className="bg-institutional/10 rounded-2xl p-6 text-center border border-institutional/20">
+                            <h4 className="text-3xl font-bold text-institutional font-title">18+</h4>
+                            <p className="text-gray-500 text-sm uppercase mt-1 tracking-wide">Años de historia</p>
+                        </div>
+                        <div className="bg-institutional/10 rounded-2xl p-6 text-center border border-institutional/20">
+                            <h4 className="text-3xl font-bold text-institutional font-title">8</h4>
+                            <p className="text-gray-500 text-sm uppercase mt-1 tracking-wide">Subcomisiones activas</p>
+                        </div>
+                        <div className="bg-complementary-gold/15 rounded-2xl p-6 text-center border border-complementary-gold/30">
+                            <h4 className="text-3xl font-bold text-institutional font-title">1200+</h4>
+                            <p className="text-gray-500 text-sm uppercase mt-1 tracking-wide">Estudiantes representados</p>
+                        </div>
+                    </div>
+                </div>
+
                 {/* CTA Sponsors */}
                 <div className="bg-institutional text-white rounded-3xl p-12 text-center shadow-2xl relative overflow-hidden group">
                      <div className="absolute inset-0 bg-institutional opacity-50 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] group-hover:scale-105 transition duration-1000"></div>

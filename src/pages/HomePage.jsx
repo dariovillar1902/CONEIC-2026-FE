@@ -34,7 +34,7 @@ const HomePage = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up delay-200">
-            <Link to="/registration" className="bg-primary-red hover:bg-red-700 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-1 hover:shadow-red-900/50 hover:shadow-xl uppercase tracking-widest text-sm border-2 border-primary-red">
+            <Link to="/registration" className="bg-complementary-gold hover:bg-yellow-600 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-1 hover:shadow-yellow-900/40 hover:shadow-xl uppercase tracking-widest text-sm border-2 border-complementary-gold">
               Inscribirse
             </Link>
             <Link to="/schedule" className="bg-transparent hover:bg-white/10 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-1 backdrop-blur-sm border-2 border-white uppercase tracking-widest text-sm">
