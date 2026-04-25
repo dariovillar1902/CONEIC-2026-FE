@@ -45,20 +45,12 @@ export const SchedulePage = () => (
 );
 
 /* ─── Sedes ─────────────────────────────────────────────────────────── */
-import Venues from '../components/Venues';
-
 export const VenuesPage = () => (
-  <div className="pt-24 min-h-screen bg-complementary-light">
-    <div className="bg-institutional text-white py-12 px-4 mb-8 text-center">
-      <h1 className="text-4xl md:text-5xl font-bold font-title mb-2">Sedes</h1>
-      <p className="text-gray-300 font-subtitle max-w-2xl mx-auto">
-        Los espacios donde se desarrolla el XVIII&nbsp;CONEIC Buenos&nbsp;Aires&nbsp;2026.
-      </p>
-    </div>
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-      <Venues />
-    </div>
-  </div>
+  <ComingSoon
+    title="Sedes"
+    subtitle="Los espacios donde se desarrolla el XVIII&nbsp;CONEIC Buenos&nbsp;Aires&nbsp;2026."
+    icon="📍"
+  />
 );
 
 /* ─── Actividades ───────────────────────────────────────────────────── */
