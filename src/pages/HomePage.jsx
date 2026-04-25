@@ -17,7 +17,7 @@ const HomePage = () => {
 
         <div className="max-w-7xl mx-auto text-center relative z-20">
           <div className="mb-8 flex justify-center animate-fade-in">
-             <img src="/assets/LOGO_V-CONEIC-FULL-BLANCO.png" alt="CONEIC Logo" className="h-64 md:h-80 object-contain drop-shadow-2xl" />
+             <img src="/assets/LOGO_V-CONEIC-COLOR-BLANCO.png" alt="CONEIC Logo" className="h-64 md:h-80 object-contain drop-shadow-2xl" />
           </div>
           <div className="space-y-2 mb-12 animate-fade-in-up">
               <p className="text-2xl md:text-3xl font-bold font-title tracking-widest text-complementary-gold uppercase">
