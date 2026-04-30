@@ -10,8 +10,8 @@ const STAGES = [
         label: 'Primera Etapa',
         priceFull: 100000,
         priceInstallment: 55000,
-        preRegistration: { start: new Date('2026-05-30'), end: new Date('2026-06-01') },
-        delegatePhase:   { start: new Date('2026-06-02'), end: new Date('2026-06-07') },
+        preRegistration: { start: new Date('2026-05-25'), end: new Date('2026-05-31') },
+        delegatePhase:   { start: new Date('2026-06-01'), end: new Date('2026-06-07') },
         paymentPhase:    { start: new Date('2026-06-08'), end: new Date('2026-06-14') },
     },
     {
@@ -19,9 +19,9 @@ const STAGES = [
         label: 'Segunda Etapa',
         priceFull: 130000,
         priceInstallment: 70000,
-        preRegistration: { start: new Date('2026-06-23'), end: new Date('2026-06-30') },
-        delegatePhase:   { start: new Date('2026-07-01'), end: new Date('2026-07-07') },
-        paymentPhase:    { start: new Date('2026-07-08'), end: new Date('2026-07-13') },
+        preRegistration: { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
+        delegatePhase:   { start: new Date('2026-07-06'), end: new Date('2026-07-12') },
+        paymentPhase:    { start: new Date('2026-07-13'), end: new Date('2026-07-19') },
     },
 ];
 

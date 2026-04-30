@@ -42,15 +42,20 @@ const Navbar = () => {
                     {/* Desktop Menu */}
                     <div className="hidden lg:flex items-center space-x-6">
                         {navLinks.map((link) => (
-                            <Link 
-                                key={link.name} 
-                                to={link.href} 
+                            <Link
+                                key={link.name}
+                                to={link.href}
                                 className={`font-subtitle text-xs font-bold uppercase tracking-widest transition-colors duration-300 hover:text-complementary-gold ${effectiveScrolled ? 'text-gray-300' : 'text-white drop-shadow-sm'}`}
                             >
                                 {link.name}
                             </Link>
                         ))}
-                        {/* Ingresar oculto temporalmente */}
+                        <Link
+                            to="/login"
+                            className="ml-2 font-subtitle text-xs font-bold uppercase tracking-widest bg-complementary-gold text-institutional px-4 py-2 rounded-full hover:bg-white transition-colors shadow-sm"
+                        >
+                            Ingresar
+                        </Link>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -76,8 +81,8 @@ const Navbar = () => {
                 <div className="lg:hidden bg-institutional border-t border-gray-800 absolute w-full shadow-2xl animate-fade-in-down h-screen">
                     <div className="px-4 pt-4 pb-6 space-y-2">
                         {navLinks.map((link) => (
-                            <Link 
-                                key={link.name} 
+                            <Link
+                                key={link.name}
                                 to={link.href}
                                 onClick={() => setIsOpen(false)}
                                 className="block px-4 py-3 rounded-lg text-sm font-bold text-gray-300 hover:text-white hover:bg-white/10 font-subtitle uppercase tracking-widest transition"
@@ -85,7 +90,13 @@ const Navbar = () => {
                                 {link.name}
                             </Link>
                         ))}
-                        {/* Ingresar oculto temporalmente */}
+                        <Link
+                            to="/login"
+                            onClick={() => setIsOpen(false)}
+                            className="block px-4 py-3 rounded-lg text-sm font-bold bg-complementary-gold text-institutional hover:bg-white font-subtitle uppercase tracking-widest transition text-center mt-2"
+                        >
+                            Ingresar
+                        </Link>
                     </div>
                 </div>
             )}
