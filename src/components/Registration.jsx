@@ -327,26 +327,26 @@ const Registration = () => {
                                         <select name="user_faculty" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 appearance-none hover:bg-white cursor-pointer">
                                             <option value="">Seleccionar...</option>
                                             <optgroup label="Región Centro">
-                                                <option>UTN - Facultad Regional de Paraná</option>
-                                                <option>UTN - Facultad Regional de Rafaela</option>
-                                                <option>UTN - Facultad Regional de Rosario</option>
+                                                <option>UTN - Facultad Regional Paraná</option>
+                                                <option>UTN - Facultad Regional Rafaela</option>
+                                                <option>UTN - Facultad Regional Rosario</option>
                                                 <option>Universidad Nacional de Rosario</option>
-                                                <option>UTN - Facultad Regional de Santa Fe</option>
-                                                <option>UTN - Facultad Regional de Venado Tuerto</option>
+                                                <option>UTN - Facultad Regional Santa Fe</option>
+                                                <option>UTN - Facultad Regional Venado Tuerto</option>
                                             </optgroup>
                                             <optgroup label="Región Este">
-                                                <option>UTN - Facultad Regional de Avellaneda</option>
+                                                <option>UTN - Facultad Regional Avellaneda</option>
                                                 <option>Universidad de Belgrano</option>
                                                 <option>Universidad de Buenos Aires</option>
                                                 <option>Universidad Católica Argentina</option>
                                                 <option>Universidad de la Defensa Nacional</option>
-                                                <option>UTN - Facultad Regional de Buenos Aires</option>
-                                                <option>UTN - Facultad Regional de Concepción del Uruguay</option>
+                                                <option>UTN - Facultad Regional Buenos Aires</option>
+                                                <option>UTN - Facultad Regional Concepción del Uruguay</option>
                                                 <option>UTN - Facultad Regional Concordia</option>
-                                                <option>UTN - Facultad Regional de General Pacheco</option>
+                                                <option>UTN - Facultad Regional General Pacheco</option>
                                                 <option>Universidad Nacional de la Matanza</option>
                                                 <option>Universidad Nacional de La Plata</option>
-                                                <option>UTN - Facultad Regional de La Plata</option>
+                                                <option>UTN - Facultad Regional La Plata</option>
                                                 <option>Universidad Nacional de Morón</option>
                                             </optgroup>
                                             <optgroup label="Región Norte">
@@ -357,22 +357,22 @@ const Registration = () => {
                                                 <option>Universidad Nacional de Salta</option>
                                                 <option>Universidad Nacional de Santiago del Estero</option>
                                                 <option>Universidad Nacional de Tucumán</option>
-                                                <option>UTN - Facultad Regional de Tucumán</option>
+                                                <option>UTN - Facultad Regional Tucumán</option>
                                             </optgroup>
                                             <optgroup label="Región Oeste">
                                                 <option>Universidad Católica de Córdoba</option>
                                                 <option>Universidad Nacional de Córdoba</option>
-                                                <option>UTN - Facultad Regional de Córdoba</option>
-                                                <option>UTN - Facultad Regional de La Rioja</option>
+                                                <option>UTN - Facultad Regional Córdoba</option>
+                                                <option>UTN - Facultad Regional La Rioja</option>
                                                 <option>Universidad Nacional de La Rioja</option>
                                                 <option>Universidad Nacional de Cuyo</option>
-                                                <option>UTN - Facultad Regional de Mendoza</option>
+                                                <option>UTN - Facultad Regional Mendoza</option>
                                                 <option>Universidad Nacional de San Juan</option>
-                                                <option>UTN - Facultad Regional de San Rafael</option>
+                                                <option>UTN - Facultad Regional San Rafael</option>
                                             </optgroup>
                                             <optgroup label="Región Sur">
                                                 <option>Universidad Nacional del Sur</option>
-                                                <option>UTN - Facultad Regional de Bahía Blanca</option>
+                                                <option>UTN - Facultad Regional Bahía Blanca</option>
                                                 <option>Universidad Nacional de la Patagonia San Juan Bosco - Sede Comodoro Rivadavia</option>
                                                 <option>Universidad Nacional del Comahue</option>
                                                 <option>Universidad Nacional del Centro de la Provincia de Buenos Aires - Sede Olavarría</option>
