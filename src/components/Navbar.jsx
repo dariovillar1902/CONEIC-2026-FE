@@ -52,7 +52,7 @@ const Navbar = () => {
                         ))}
                         <Link
                             to="/login"
-                            className="ml-2 font-subtitle text-xs font-bold uppercase tracking-widest bg-complementary-gold text-institutional px-4 py-2 rounded-full hover:bg-white transition-colors shadow-sm"
+                            className="ml-2 font-subtitle text-xs font-bold uppercase tracking-widest bg-primary-red text-white px-4 py-2 rounded-full hover:bg-red-800 transition-colors shadow-sm"
                         >
                             Ingresar
                         </Link>
@@ -93,7 +93,7 @@ const Navbar = () => {
                         <Link
                             to="/login"
                             onClick={() => setIsOpen(false)}
-                            className="block px-4 py-3 rounded-lg text-sm font-bold bg-complementary-gold text-institutional hover:bg-white font-subtitle uppercase tracking-widest transition text-center mt-2"
+                            className="block px-4 py-3 rounded-lg text-sm font-bold bg-primary-red text-white hover:bg-red-800 font-subtitle uppercase tracking-widest transition text-center mt-2"
                         >
                             Ingresar
                         </Link>
