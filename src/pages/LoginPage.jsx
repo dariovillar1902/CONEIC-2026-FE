@@ -44,7 +44,7 @@ const LoginPage = () => {
         <div>
           <img
             className="mx-auto h-24 w-auto object-contain"
-            src="/assets/LOGO_V-CONEIC-COLOR-BLANCO.png"
+            src="/assets/LOGO_V-CONEIC-COLOR.png"
             alt="CONEIC 2026"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-institutional font-title">
@@ -95,7 +95,7 @@ const LoginPage = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-institutional bg-complementary-gold hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-complementary-gold uppercase tracking-widest font-subtitle transition transform hover:-translate-y-0.5 shadow-md"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-institutional hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue uppercase tracking-widest font-subtitle transition transform hover:-translate-y-0.5"
             >
               Ingresar
             </button>
