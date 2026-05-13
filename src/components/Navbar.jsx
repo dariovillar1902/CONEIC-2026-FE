@@ -27,6 +27,7 @@ const Navbar = () => {
         { name: 'Sponsors', href: '/sponsors' },
         { name: 'Galería', href: '/gallery' },
         { name: 'Subcomisiones', href: '/subcomisiones' },
+        { name: 'FAQ', href: '/faq' },
     ];
 
     return (

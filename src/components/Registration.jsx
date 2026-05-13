@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
+import { ALL_FACULTIES_BY_REGION, getContactForFaculty } from '../data/filiales.js';
 
 // ─── Stage & Phase Configuration ─────────────────────────────────────────────
 // NOTE: All dates are preliminary pending approval by ANEIC Argentina CD.
@@ -168,6 +169,8 @@ const Registration = () => {
     const [file, setFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [isDuplicate, setIsDuplicate] = useState(false);
+    const [selectedFaculty, setSelectedFaculty] = useState('');
     const [dietarySelection, setDietarySelection] = useState('');
 
     const dietaryOptions = [
@@ -182,45 +185,97 @@ const Registration = () => {
         'Otro',
     ];
 
-    const handleSubmit = (e) => {
+    // Resolved contact (delegate or ANEIC vocal) for the selected faculty
+    const delegateContact = selectedFaculty ? getContactForFaculty(selectedFaculty) : null;
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setIsDuplicate(false);
 
-        const SERVICE_ID  = 'YOUR_SERVICE_ID';
-        const TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-        const PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
-
-        fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name:                  form.current.user_name.value,
-                lastname:              form.current.user_lastname.value,
-                dni:                   form.current.user_dni.value,
-                phone:                 form.current.user_phone.value,
-                email:                 form.current.user_email.value,
-                faculty:               form.current.user_faculty.value,
-                bloodType:             form.current.user_blood.value,
-                medicalConditions:     form.current.user_medical.value,
-                emergencyContactName:  form.current.user_emergency_contact.value,
-                emergencyContactPhone: form.current.user_emergency_phone.value,
-                stageName:             currentStage.label,
-                price:                 currentStage.priceFull,
-            }),
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Error saving registration');
-                return emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current, PUBLIC_KEY);
-            })
-            .then(() => {
-                setIsSubmitting(false);
-                setIsSuccess(true);
-            })
-            .catch(() => {
-                setIsSubmitting(false);
-                setIsSuccess(true);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name:                  form.current.user_name.value,
+                    lastname:              form.current.user_lastname.value,
+                    dni:                   form.current.user_dni.value,
+                    phone:                 form.current.user_phone.value,
+                    email:                 form.current.user_email.value,
+                    faculty:               form.current.user_faculty.value,
+                    bloodType:             form.current.user_blood.value,
+                    medicalConditions:     form.current.user_medical.value,
+                    emergencyContactName:  form.current.user_emergency_contact.value,
+                    emergencyContactPhone: form.current.user_emergency_phone.value,
+                    stageName:             currentStage.label,
+                    price:                 currentStage.priceFull,
+                }),
             });
+
+            if (response.status === 409) {
+                setIsDuplicate(true);
+                return;
+            }
+
+            const data = await response.json();
+            const generatedPassword = data.generatedPassword ?? null;
+
+            // Send confirmation email via EmailJS (non-blocking — ignore failure)
+            try {
+                await emailjs.send(
+                    import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                    import.meta.env.VITE_EMAILJS_TEMPLATE_REGISTRATION,
+                    {
+                        to_name:            form.current.user_name.value,
+                        to_email:           form.current.user_email.value,
+                        faculty:            form.current.user_faculty.value,
+                        delegate_name:      delegateContact?.name ?? 'tu delegado',
+                        delegate_email:     delegateContact?.email ?? 'secretaria@aneic.org.ar',
+                        filial_name:        delegateContact?.filialName ?? 'ANEIC Nacional',
+                        temp_password:      generatedPassword ?? '—',
+                        login_url:          `${window.location.origin}/login`,
+                    },
+                    import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+                );
+            } catch {
+                // email optional — continue regardless
+            }
+
+            setIsSuccess(true);
+        } catch {
+            // Network error still shows success to avoid leaving user in limbo
+            setIsSuccess(true);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    // ── Already registered screen ───────────────────────────────────────────
+    if (isDuplicate) {
+        return (
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-12 border border-gray-100 p-12 text-center">
+                <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-12 h-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    </svg>
+                </div>
+                <h2 className="text-3xl font-bold text-yellow-700 font-title mb-4">Ya estás inscripto</h2>
+                <p className="text-gray-600 font-body text-lg max-w-xl mx-auto mb-8">
+                    El email ingresado ya tiene una pre-inscripción registrada en el sistema.
+                </p>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 max-w-lg mx-auto mb-8">
+                    <p className="text-sm text-yellow-800 font-bold">¿No recordás haberte inscripto?</p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                        Contactá a tu delegado para verificar el estado de tu inscripción.
+                    </p>
+                </div>
+                <button onClick={() => setIsDuplicate(false)} className="text-primary-blue font-bold hover:underline">
+                    Volver al formulario
+                </button>
+            </div>
+        );
+    }
 
     // ── Success Screen ──────────────────────────────────────────────────────
     if (isSuccess) {
@@ -235,19 +290,45 @@ const Registration = () => {
                 <p className="text-gray-600 font-body text-lg max-w-xl mx-auto mb-8">
                     Hemos recibido tu pre-inscripción correctamente.
                 </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-lg mx-auto mb-4">
-                    <p className="text-sm text-blue-800 font-bold">📋 Próximo paso: comunicarse con tu delegado</p>
-                    <p className="text-sm text-blue-700 mt-1">
-                        El pago se gestiona a través de tu delegación. Contactá a tu delegado para coordinar el pago y confirmar tu vacante.
+
+                {/* Per-filial contact info */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-lg mx-auto mb-4 text-left">
+                    <p className="text-sm text-blue-800 font-bold mb-1">
+                        📋 Próximo paso: coordiná con tu{' '}
+                        {delegateContact?.isVocal ? 'vocal ANEIC' : 'delegado/a'}
+                    </p>
+                    {delegateContact ? (
+                        <>
+                            <p className="text-sm text-blue-700">
+                                Filial: <strong>{delegateContact.filialName}</strong>
+                            </p>
+                            <p className="text-sm text-blue-700 mt-1">
+                                Contacto: <strong>{delegateContact.name}</strong> —{' '}
+                                <a href={`mailto:${delegateContact.email}`} className="font-bold underline hover:text-blue-900">
+                                    {delegateContact.email}
+                                </a>
+                            </p>
+                        </>
+                    ) : (
+                        <p className="text-sm text-blue-700">
+                            Contactá a tu delegado para coordinar el pago y confirmar tu vacante.
+                        </p>
+                    )}
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 max-w-lg mx-auto mb-4 text-left">
+                    <p className="text-sm text-green-800 font-bold mb-1">🔑 Tu acceso al portal</p>
+                    <p className="text-sm text-green-700">
+                        Te enviamos un email con una contraseña temporaria. Ingresá con tu email universitario y cambiá la contraseña en tu primer inicio de sesión.
                     </p>
                 </div>
+
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 max-w-lg mx-auto mb-8">
                     <p className="text-sm text-yellow-800 font-bold">⚠️ Importante</p>
                     <p className="text-sm text-yellow-700">
                         Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción y confirme el pago.
                     </p>
                 </div>
-                <button onClick={() => setIsSuccess(false)} className="text-primary-blue font-bold hover:underline">
+                <button onClick={() => { setIsSuccess(false); setSelectedFaculty(''); }} className="text-primary-blue font-bold hover:underline">
                     Volver al formulario
                 </button>
             </div>
@@ -321,71 +402,55 @@ const Registration = () => {
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Email Universitario</label>
                                     <input name="user_email" required type="email" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="juan@utn.edu.ar" />
                                 </div>
-                                <div className="group">
+                                <div className="group md:col-span-2">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Delegación / Facultad</label>
                                     <div className="relative">
-                                        <select name="user_faculty" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 appearance-none hover:bg-white cursor-pointer">
+                                        <select name="user_faculty" required value={selectedFaculty} onChange={e => setSelectedFaculty(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 appearance-none hover:bg-white cursor-pointer">
                                             <option value="">Seleccionar...</option>
-                                            <optgroup label="Región Centro">
-                                                <option>UTN - Facultad Regional Paraná</option>
-                                                <option>UTN - Facultad Regional Rafaela</option>
-                                                <option>UTN - Facultad Regional Rosario</option>
-                                                <option>Universidad Nacional de Rosario</option>
-                                                <option>UTN - Facultad Regional Santa Fe</option>
-                                                <option>UTN - Facultad Regional Venado Tuerto</option>
-                                            </optgroup>
-                                            <optgroup label="Región Este">
-                                                <option>UTN - Facultad Regional Avellaneda</option>
-                                                <option>Universidad de Belgrano</option>
-                                                <option>Universidad de Buenos Aires</option>
-                                                <option>Universidad Católica Argentina</option>
-                                                <option>Universidad de la Defensa Nacional</option>
-                                                <option>UTN - Facultad Regional Buenos Aires</option>
-                                                <option>UTN - Facultad Regional Concepción del Uruguay</option>
-                                                <option>UTN - Facultad Regional Concordia</option>
-                                                <option>UTN - Facultad Regional General Pacheco</option>
-                                                <option>Universidad Nacional de la Matanza</option>
-                                                <option>Universidad Nacional de La Plata</option>
-                                                <option>UTN - Facultad Regional La Plata</option>
-                                                <option>Universidad Nacional de Morón</option>
-                                            </optgroup>
-                                            <optgroup label="Región Norte">
-                                                <option>Universidad Nacional del Nordeste</option>
-                                                <option>Universidad Nacional de Formosa</option>
-                                                <option>Universidad Nacional de Misiones</option>
-                                                <option>Universidad Católica de Salta</option>
-                                                <option>Universidad Nacional de Salta</option>
-                                                <option>Universidad Nacional de Santiago del Estero</option>
-                                                <option>Universidad Nacional de Tucumán</option>
-                                                <option>UTN - Facultad Regional Tucumán</option>
-                                            </optgroup>
-                                            <optgroup label="Región Oeste">
-                                                <option>Universidad Católica de Córdoba</option>
-                                                <option>Universidad Nacional de Córdoba</option>
-                                                <option>UTN - Facultad Regional Córdoba</option>
-                                                <option>UTN - Facultad Regional La Rioja</option>
-                                                <option>Universidad Nacional de La Rioja</option>
-                                                <option>Universidad Nacional de Cuyo</option>
-                                                <option>UTN - Facultad Regional Mendoza</option>
-                                                <option>Universidad Nacional de San Juan</option>
-                                                <option>UTN - Facultad Regional San Rafael</option>
-                                            </optgroup>
-                                            <optgroup label="Región Sur">
-                                                <option>Universidad Nacional del Sur</option>
-                                                <option>UTN - Facultad Regional Bahía Blanca</option>
-                                                <option>Universidad Nacional de la Patagonia San Juan Bosco - Sede Comodoro Rivadavia</option>
-                                                <option>Universidad Nacional del Comahue</option>
-                                                <option>Universidad Nacional del Centro de la Provincia de Buenos Aires - Sede Olavarría</option>
-                                                <option>Universidad Nacional de la Patagonia San Juan Bosco - Sede Trelew</option>
-                                            </optgroup>
+                                            {ALL_FACULTIES_BY_REGION.map(({ region, faculties }) => (
+                                                <optgroup key={region} label={region}>
+                                                    {faculties.map(f => (
+                                                        <option key={f} value={f}>{f}</option>
+                                                    ))}
+                                                </optgroup>
+                                            ))}
                                             <optgroup label="Otra">
-                                                <option>Otra</option>
+                                                <option value="Otra">Otra</option>
                                             </optgroup>
                                         </select>
                                         <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                                         </div>
                                     </div>
+
+                                    {/* ── Conocé tu filial ─────────────────────────────────── */}
+                                    {delegateContact && (
+                                        <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
+                                            <span className="text-2xl leading-none mt-0.5">🏛️</span>
+                                            <div className="text-sm text-blue-800 space-y-0.5">
+                                                <p className="font-bold text-blue-900">
+                                                    Conocé tu filial — {delegateContact.filialName}
+                                                </p>
+                                                {delegateContact.isVocal ? (
+                                                    <p>
+                                                        Tu región no tiene delegado designado aún. Tu contacto de referencia es el/la{' '}
+                                                        <strong>{delegateContact.name}</strong>:{' '}
+                                                        <a href={`mailto:${delegateContact.email}`} className="underline hover:text-blue-900 font-semibold">
+                                                            {delegateContact.email}
+                                                        </a>
+                                                    </p>
+                                                ) : (
+                                                    <p>
+                                                        Tu delegado/a es <strong>{delegateContact.name}</strong>. Podés contactarle en{' '}
+                                                        <a href={`mailto:${delegateContact.email}`} className="underline hover:text-blue-900 font-semibold">
+                                                            {delegateContact.email}
+                                                        </a>{' '}
+                                                        para coordinar el pago y confirmar tu vacante.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="group md:col-span-2">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Certificado de Alumno Regular (PDF)</label>

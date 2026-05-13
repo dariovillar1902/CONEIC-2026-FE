@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 const API = import.meta.env.VITE_API_URL;
 
 const STATUS_LABELS = {
-  pending:  { label: 'Pendiente',  color: 'bg-yellow-100 text-yellow-800' },
-  verified: { label: 'Verificado', color: 'bg-blue-100 text-blue-800' },
-  paid:     { label: 'Pagado',     color: 'bg-green-100 text-green-800' },
-  rejected: { label: 'Rechazado', color: 'bg-red-100 text-red-800' },
+  Pending:   { label: 'Pendiente',  color: 'bg-yellow-100 text-yellow-800' },
+  Validated: { label: 'Verificado', color: 'bg-blue-100 text-blue-800' },
+  Paid:      { label: 'Pagado',     color: 'bg-green-100 text-green-800' },
+  Rejected:  { label: 'Rechazado', color: 'bg-red-100 text-red-800' },
 };
 
 const badge = (status) => {
@@ -19,18 +19,21 @@ const badge = (status) => {
   );
 };
 
-/* ─── Sub-panel: Overview (placeholder stats) ───────────────────────── */
+/* ─── Sub-panel: Overview ───────────────────────────────────────────── */
 const Overview = ({ registrations }) => {
-  const total = registrations.length;
-  const paid = registrations.filter(r => r.status === 'paid').length;
-  const pending = registrations.filter(r => r.status === 'pending').length;
-  const verified = registrations.filter(r => r.status === 'verified').length;
+  const total    = registrations.length;
+  const paid     = registrations.filter(r => r.status === 'Paid').length;
+  const pending  = registrations.filter(r => r.status === 'Pending').length;
+  const verified = registrations.filter(r => r.status === 'Validated').length;
+
+  // Count unique delegations
+  const delegations = new Set(registrations.map(r => r.faculty).filter(Boolean)).size;
 
   const stats = [
-    { label: 'Inscriptos Totales', value: total,   note: 'desde la base de datos' },
-    { label: 'Pagados',            value: paid,    note: `${total ? Math.round(paid / total * 100) : 0}% del total` },
-    { label: 'Pendientes',         value: pending, note: 'sin verificar pago' },
-    { label: 'Verificados',        value: verified, note: 'esperan link de pago' },
+    { label: 'Inscriptos Totales',  value: total,        note: 'en base de datos' },
+    { label: 'Pagados',             value: paid,         note: `${total ? Math.round(paid / total * 100) : 0}% del total` },
+    { label: 'Pendientes',          value: pending,      note: 'sin verificar pago' },
+    { label: 'Delegaciones',        value: delegations,  note: 'filiales con inscriptos' },
   ];
 
   return (
@@ -44,6 +47,36 @@ const Overview = ({ registrations }) => {
           </div>
         ))}
       </div>
+
+      {/* Per-delegation breakdown */}
+      {registrations.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h3 className="font-bold text-lg text-institutional mb-4 font-title">Inscriptos por Delegación</h3>
+          <div className="space-y-2">
+            {Object.entries(
+              registrations.reduce((acc, r) => {
+                const key = r.faculty || 'Sin delegación';
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+              }, {})
+            )
+              .sort((a, b) => b[1] - a[1])
+              .map(([name, count]) => (
+                <div key={name} className="flex items-center gap-3">
+                  <span className="text-sm text-gray-700 w-72 truncate" title={name}>{name}</span>
+                  <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="h-3 bg-institutional rounded-full transition-all"
+                      style={{ width: `${(count / total) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold text-institutional w-6 text-right">{count}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
         <h3 className="font-bold text-xl text-institutional mb-6 font-title">Accesos Rápidos</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -73,6 +106,7 @@ const RegistrationsPanel = () => {
   const [search, setSearch]               = useState('');
   const [filterStatus, setFilterStatus]   = useState('all');
   const [filterStage, setFilterStage]     = useState('all');
+  const [filterDelegation, setFilterDelegation] = useState('all');
   const [updatingId, setUpdatingId]       = useState(null);
   const [exporting, setExporting]         = useState(false);
 
@@ -93,6 +127,12 @@ const RegistrationsPanel = () => {
 
   useEffect(() => { fetchRegistrations(); }, []);
 
+  /* Unique sorted delegations for filter dropdown */
+  const delegations = useMemo(
+    () => [...new Set(registrations.map(r => r.faculty).filter(Boolean))].sort(),
+    [registrations]
+  );
+
   /* Status update */
   const updateStatus = async (id, newStatus) => {
     setUpdatingId(id);
@@ -100,7 +140,7 @@ const RegistrationsPanel = () => {
       const res = await fetch(`${API}/api/registrations/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(newStatus),
       });
       if (!res.ok) throw new Error('No se pudo actualizar el estado');
       setRegistrations(prev =>
@@ -136,10 +176,11 @@ const RegistrationsPanel = () => {
   /* Filtered list */
   const filtered = registrations.filter(r => {
     const matchSearch = search === '' ||
-      `${r.firstName} ${r.lastName} ${r.email} ${r.delegationName}`.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === 'all' || r.status === filterStatus;
-    const matchStage  = filterStage  === 'all' || String(r.stage) === filterStage;
-    return matchSearch && matchStatus && matchStage;
+      `${r.name} ${r.lastname} ${r.email} ${r.faculty}`.toLowerCase().includes(search.toLowerCase());
+    const matchStatus     = filterStatus === 'all'     || r.status === filterStatus;
+    const matchStage      = filterStage  === 'all'     || r.stageName === filterStage;
+    const matchDelegation = filterDelegation === 'all' || r.faculty   === filterDelegation;
+    return matchSearch && matchStatus && matchStage && matchDelegation;
   });
 
   if (loading) return (
@@ -165,8 +206,8 @@ const RegistrationsPanel = () => {
   return (
     <div className="space-y-6">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="flex flex-col sm:flex-row gap-3 flex-grow">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 flex-grow flex-wrap">
           <input
             type="text"
             placeholder="Buscar por nombre, email o delegación…"
@@ -174,6 +215,16 @@ const RegistrationsPanel = () => {
             onChange={e => setSearch(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-institutional/40 w-full sm:w-64"
           />
+          <select
+            value={filterDelegation}
+            onChange={e => setFilterDelegation(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-institutional/40"
+          >
+            <option value="all">Todas las delegaciones</option>
+            {delegations.map(d => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
           <select
             value={filterStatus}
             onChange={e => setFilterStatus(e.target.value)}
@@ -190,33 +241,38 @@ const RegistrationsPanel = () => {
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-institutional/40"
           >
             <option value="all">Ambas etapas</option>
-            <option value="1">Etapa 1</option>
-            <option value="2">Etapa 2</option>
+            <option value="Primera Etapa">Primera Etapa</option>
+            <option value="Segunda Etapa">Segunda Etapa</option>
           </select>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 justify-between">
           <span className="text-sm text-gray-500 font-subtitle">
             {filtered.length} de {registrations.length} inscriptos
-          </span>
-          <button
-            onClick={exportExcel}
-            disabled={exporting}
-            className="flex items-center gap-2 bg-sostenibilidad text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-green-800 transition disabled:opacity-60"
-          >
-            {exporting ? (
-              <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block"></span>
-            ) : (
-              <span>📥</span>
+            {filterDelegation !== 'all' && (
+              <span className="ml-2 bg-institutional/10 text-institutional text-xs px-2 py-0.5 rounded-full font-bold">
+                {filterDelegation.replace('UTN - ', '')}
+              </span>
             )}
-            Exportar Excel
-          </button>
-          <button
-            onClick={fetchRegistrations}
-            className="text-gray-500 hover:text-institutional transition text-lg"
-            title="Actualizar"
-          >
-            🔄
-          </button>
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={exportExcel}
+              disabled={exporting}
+              className="flex items-center gap-2 bg-sostenibilidad text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-green-800 transition disabled:opacity-60"
+            >
+              {exporting
+                ? <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent inline-block"></span>
+                : <span>📥</span>}
+              Exportar Excel
+            </button>
+            <button
+              onClick={fetchRegistrations}
+              className="text-gray-500 hover:text-institutional transition text-lg"
+              title="Actualizar"
+            >
+              🔄
+            </button>
+          </div>
         </div>
       </div>
 
@@ -252,16 +308,16 @@ const RegistrationsPanel = () => {
                   <tr key={r.id} className={`border-t border-gray-100 hover:bg-gray-50 transition ${idx % 2 === 0 ? '' : 'bg-gray-50/40'}`}>
                     <td className="px-4 py-3 text-gray-400 font-mono text-xs">{r.id}</td>
                     <td className="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap">
-                      {r.lastName}, {r.firstName}
+                      {r.lastname}, {r.name}
                     </td>
                     <td className="px-4 py-3 text-gray-600 font-mono">{r.dni}</td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{r.email}</td>
-                    <td className="px-4 py-3 text-gray-700 text-xs max-w-[160px] truncate" title={r.delegationName}>
-                      {r.delegationName}
+                    <td className="px-4 py-3 text-gray-700 text-xs max-w-[180px] truncate" title={r.faculty}>
+                      {r.faculty}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="inline-block bg-institutional/10 text-institutional text-xs font-bold px-2 py-0.5 rounded-full">
-                        Etapa {r.stage}
+                      <span className="inline-block bg-institutional/10 text-institutional text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {r.stageName}
                       </span>
                     </td>
                     <td className="px-4 py-3">{badge(r.status)}</td>
@@ -293,15 +349,14 @@ const RegistrationsPanel = () => {
 
 /* ─── Main component ────────────────────────────────────────────────── */
 const TABS = [
-  { id: 'overview',       label: '🏠 Resumen' },
-  { id: 'registrations',  label: '📋 Inscripciones' },
+  { id: 'overview',      label: '🏠 Resumen' },
+  { id: 'registrations', label: '📋 Inscripciones' },
 ];
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
-
-  // Fetch registrations once for the overview stats
   const [allRegs, setAllRegs] = useState([]);
+
   useEffect(() => {
     fetch(`${API}/api/registrations`)
       .then(r => r.ok ? r.json() : [])
@@ -311,7 +366,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="w-full">
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-8">
         <h2 className="text-3xl font-bold text-institutional font-title">Panel de Administración</h2>
       </div>
 

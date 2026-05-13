@@ -16,6 +16,8 @@ import GamesPage from './pages/GamesPage';
 import AboutPage from './pages/AboutPage';
 import { SchedulePage, VenuesPage, ActivitiesPage, RegistrationPage, SponsorsPage } from './pages/Wrappers';
 import SubcommitteesPage from './pages/SubcommitteesPage';
+import FaqPage from './pages/FaqPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 
 const router = createBrowserRouter([
   {
@@ -32,6 +34,15 @@ const router = createBrowserRouter([
       { path: 'games', element: <GamesPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'subcomisiones', element: <SubcommitteesPage /> },
+      { path: 'faq', element: <FaqPage /> },
+    ]
+  },
+  // Change-password: accessible to any logged-in user
+  {
+    path: '/change-password',
+    element: <DashboardLayout allowedRoles={['assistant', 'delegate', 'admin']} />,
+    children: [
+      { index: true, element: <ChangePasswordPage /> }
     ]
   },
   // Protected Routes

@@ -24,8 +24,10 @@ const LoginPage = () => {
         
         if (result.success) {
             const { user } = result;
-            // Redirect based on role
-            if (user.role === 'admin') navigate('/admin');
+            // First-login: must set a new password before anything else
+            if (user.mustChangePassword) {
+                navigate('/change-password');
+            } else if (user.role === 'admin') navigate('/admin');
             else if (user.role === 'delegate') navigate('/delegate');
             else if (user.role === 'assistant') navigate('/my-ticket');
             else navigate(from);
