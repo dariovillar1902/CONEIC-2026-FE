@@ -21,7 +21,7 @@ const HomePage = () => {
           </div>
           <div className="space-y-2 mb-12 animate-fade-in-up">
               <p className="text-2xl md:text-3xl font-bold font-title tracking-widest text-complementary-gold uppercase">
-                Buenos Aires 2026
+                13 al 16 de octubre de 2026
               </p>
           </div>
 
