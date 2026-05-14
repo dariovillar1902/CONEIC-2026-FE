@@ -209,3 +209,82 @@ export const ALL_FACULTIES_BY_REGION = Object.values(FILIALES).map(f => ({
 }));
 
 export const PAYMENT_AMOUNTS = [100000, 55000];
+
+// ── Province → Filial mapping (for "Otra" faculty path) ──────────────────────
+
+export const ARGENTINIAN_PROVINCES = [
+  'Buenos Aires',
+  'Catamarca',
+  'Chaco',
+  'Chubut',
+  'Ciudad Autónoma de Buenos Aires',
+  'Córdoba',
+  'Corrientes',
+  'Entre Ríos',
+  'Formosa',
+  'Jujuy',
+  'La Pampa',
+  'La Rioja',
+  'Mendoza',
+  'Misiones',
+  'Neuquén',
+  'Río Negro',
+  'Salta',
+  'San Juan',
+  'San Luis',
+  'Santa Cruz',
+  'Santa Fe',
+  'Santiago del Estero',
+  'Tierra del Fuego',
+  'Tucumán',
+];
+
+/** Maps each Argentine province to the ANEIC filial id that covers it. */
+const PROVINCE_TO_FILIAL_ID = {
+  'Buenos Aires':                    'Este',
+  'Ciudad Autónoma de Buenos Aires': 'Este',
+  'Entre Ríos':                      'Centro',
+  'Santa Fe':                        'Centro',
+  'Catamarca':                       'Norte',
+  'Chaco':                           'Norte',
+  'Corrientes':                      'Norte',
+  'Formosa':                         'Norte',
+  'Jujuy':                           'Norte',
+  'Misiones':                        'Norte',
+  'Salta':                           'Norte',
+  'Santiago del Estero':             'Norte',
+  'Tucumán':                         'Norte',
+  'Córdoba':                         'Oeste',
+  'La Rioja':                        'Oeste',
+  'Mendoza':                         'Oeste',
+  'San Juan':                        'Oeste',
+  'San Luis':                        'Oeste',
+  'Chubut':                          'Sur',
+  'La Pampa':                        'Sur',
+  'Neuquén':                         'Sur',
+  'Río Negro':                       'Sur',
+  'Santa Cruz':                      'Sur',
+  'Tierra del Fuego':                'Sur',
+};
+
+/**
+ * Returns the delegate/vocal contact for a given Argentine province.
+ * Follows the same priority chain as getContactForFaculty.
+ */
+export function getContactForProvince(province) {
+  const filialId = PROVINCE_TO_FILIAL_ID[province];
+  if (!filialId) {
+    return {
+      name: 'Secretaría ANEIC Argentina',
+      email: 'secretaria@aneic.org.ar',
+      isVocal: true,
+      filialName: 'ANEIC Nacional',
+    };
+  }
+  const filial = FILIALES[filialId];
+  if (filial.delegates.length > 0) {
+    const fallback = filial.delegates.find(d => d.isRegionalFallback);
+    if (fallback) return { ...fallback, filialName: filial.name, isVocal: false };
+  }
+  return { ...filial.vocal, filialName: filial.name, isVocal: true };
+}

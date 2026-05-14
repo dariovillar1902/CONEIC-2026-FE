@@ -1,6 +1,11 @@
 import { useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
-import { ALL_FACULTIES_BY_REGION, getContactForFaculty } from '../data/filiales.js';
+import {
+    ALL_FACULTIES_BY_REGION,
+    getContactForFaculty,
+    getContactForProvince,
+    ARGENTINIAN_PROVINCES,
+} from '../data/filiales.js';
 
 // ─── Stage & Phase Configuration ─────────────────────────────────────────────
 // NOTE: All dates are preliminary pending approval by ANEIC Argentina CD.
@@ -42,6 +47,34 @@ const getCurrentPhase = (today) => {
     return { stage: null, phase: 'closed' };
 };
 
+// ─── Validation ───────────────────────────────────────────────────────────────
+const validateFields = (data, isOtra, province) => {
+    const errs = {};
+    if (!data.name.trim()) errs.name = 'El nombre es requerido.';
+    if (!data.lastname.trim()) errs.lastname = 'El apellido es requerido.';
+    const dniDigits = data.dni.replace(/\D/g, '');
+    if (!/^\d{7,8}$/.test(dniDigits)) errs.dni = 'El DNI debe tener 7 u 8 dígitos.';
+    if (!data.phone.trim()) errs.phone = 'El celular es requerido.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = 'Ingresá un email válido.';
+    if (!data.faculty) errs.faculty = 'Seleccioná una facultad o delegación.';
+    if (isOtra && !province) errs.province = 'Seleccioná tu provincia.';
+    if (!data.emergencyContactName.trim()) errs.emergencyContactName = 'El nombre del contacto de emergencia es requerido.';
+    if (!data.emergencyContactPhone.trim()) errs.emergencyContactPhone = 'El teléfono de emergencia es requerido.';
+    return errs;
+};
+
+// ─── Small UI helpers ─────────────────────────────────────────────────────────
+/** Red asterisk for required fields */
+const Req = () => <span className="text-red-500 ml-0.5">*</span>;
+
+/** Per-field error message */
+const FieldError = ({ msg }) =>
+    msg ? <p className="text-red-500 text-xs mt-1 font-medium">{msg}</p> : null;
+
+/** Returns the CSS classes for an input, highlighting errors when submitted */
+const fieldCls = (errors, submitted, field, extra = '') =>
+    `w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white ${errors[field] && submitted ? 'border-red-400 bg-red-50' : 'border-gray-200'} ${extra}`;
+
 // ─── Timeline Component ───────────────────────────────────────────────────────
 const PHASE_DEFS = [
     { key: 'preRegistration', label: 'Pre-inscripción' },
@@ -57,14 +90,12 @@ const RegistrationTimeline = ({ today }) => (
         <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-center">
             {STAGES.map((stage, si) => (
                 <div key={stage.id} className="flex items-start md:flex-1">
-                    {/* Stage divider */}
                     {si > 0 && (
                         <div className="hidden md:flex items-center self-stretch px-2">
                             <div className="w-px h-full bg-gray-200" />
                         </div>
                     )}
                     <div className="flex-1 px-2">
-                        {/* Stage label */}
                         <p className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 text-center">
                             {stage.label}
                         </p>
@@ -171,7 +202,10 @@ const Registration = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [isDuplicate, setIsDuplicate] = useState(false);
     const [selectedFaculty, setSelectedFaculty] = useState('');
+    const [selectedProvince, setSelectedProvince] = useState('');
     const [dietarySelection, setDietarySelection] = useState('');
+    const [errors, setErrors] = useState({});
+    const [submitted, setSubmitted] = useState(false);
 
     const dietaryOptions = [
         'Sin restricciones',
@@ -185,31 +219,64 @@ const Registration = () => {
         'Otro',
     ];
 
-    // Resolved contact (delegate or ANEIC vocal) for the selected faculty
-    const delegateContact = selectedFaculty ? getContactForFaculty(selectedFaculty) : null;
+    const isOtra = selectedFaculty === 'Otra';
+
+    // Resolved contact (delegate or ANEIC vocal) for the selected faculty/province
+    const delegateContact = isOtra
+        ? (selectedProvince ? getContactForProvince(selectedProvince) : null)
+        : (selectedFaculty  ? getContactForFaculty(selectedFaculty)   : null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitted(true);
+
+        const name                 = form.current.user_name.value;
+        const lastname             = form.current.user_lastname.value;
+        const dni                  = form.current.user_dni.value;
+        const phone                = form.current.user_phone.value;
+        const email                = form.current.user_email.value;
+        const emergencyContactName = form.current.user_emergency_contact.value;
+        const emergencyContactPhone = form.current.user_emergency_phone.value;
+
+        const errs = validateFields(
+            { name, lastname, dni, phone, email, faculty: selectedFaculty, emergencyContactName, emergencyContactPhone },
+            isOtra,
+            selectedProvince,
+        );
+        setErrors(errs);
+
+        if (Object.keys(errs).length > 0) {
+            // Scroll to the first visible error message
+            setTimeout(() => {
+                const firstErr = document.querySelector('[data-field-error="true"]');
+                if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
+            return;
+        }
+
         setIsSubmitting(true);
         setIsDuplicate(false);
+
+        // Faculty value: "Otra (Provincia)" when isOtra
+        const facultyValue = isOtra ? `Otra (${selectedProvince})` : selectedFaculty;
 
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name:                  form.current.user_name.value,
-                    lastname:              form.current.user_lastname.value,
-                    dni:                   form.current.user_dni.value,
-                    phone:                 form.current.user_phone.value,
-                    email:                 form.current.user_email.value,
-                    faculty:               form.current.user_faculty.value,
+                    name,
+                    lastname,
+                    dni,
+                    phone,
+                    email,
+                    faculty:               facultyValue,
                     bloodType:             form.current.user_blood.value,
                     medicalConditions:     form.current.user_medical.value,
-                    emergencyContactName:  form.current.user_emergency_contact.value,
-                    emergencyContactPhone: form.current.user_emergency_phone.value,
-                    stageName:             currentStage.label,
-                    price:                 currentStage.priceFull,
+                    emergencyContactName,
+                    emergencyContactPhone,
+                    stageName:             currentStage?.label ?? 'Demo',
+                    price:                 currentStage?.priceFull ?? 0,
                 }),
             });
 
@@ -221,25 +288,31 @@ const Registration = () => {
             const data = await response.json();
             const generatedPassword = data.generatedPassword ?? null;
 
-            // Send confirmation email via EmailJS (non-blocking — ignore failure)
-            try {
-                await emailjs.send(
-                    import.meta.env.VITE_EMAILJS_SERVICE_ID,
-                    import.meta.env.VITE_EMAILJS_TEMPLATE_REGISTRATION,
-                    {
-                        to_name:            form.current.user_name.value,
-                        to_email:           form.current.user_email.value,
-                        faculty:            form.current.user_faculty.value,
-                        delegate_name:      delegateContact?.name ?? 'tu delegado',
-                        delegate_email:     delegateContact?.email ?? 'secretaria@aneic.org.ar',
-                        filial_name:        delegateContact?.filialName ?? 'ANEIC Nacional',
-                        temp_password:      generatedPassword ?? '—',
-                        login_url:          `${window.location.origin}/login`,
-                    },
-                    import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
-                );
-            } catch {
-                // email optional — continue regardless
+            // Send confirmation email via EmailJS (non-blocking)
+            const serviceId  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_REGISTRATION;
+            const publicKey  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+            if (serviceId && templateId && publicKey) {
+                try {
+                    await emailjs.send(
+                        serviceId,
+                        templateId,
+                        {
+                            to_name:        name,
+                            to_email:       email,
+                            faculty:        facultyValue,
+                            delegate_name:  delegateContact?.name  ?? 'tu delegado',
+                            delegate_email: delegateContact?.email ?? 'secretaria@aneic.org.ar',
+                            filial_name:    delegateContact?.filialName ?? 'ANEIC Nacional',
+                            temp_password:  generatedPassword ?? '—',
+                            login_url:      `${window.location.origin}/login`,
+                        },
+                        publicKey,
+                    );
+                } catch {
+                    // email optional — continue regardless
+                }
             }
 
             setIsSuccess(true);
@@ -328,7 +401,16 @@ const Registration = () => {
                         Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción y confirme el pago.
                     </p>
                 </div>
-                <button onClick={() => { setIsSuccess(false); setSelectedFaculty(''); }} className="text-primary-blue font-bold hover:underline">
+                <button
+                    onClick={() => {
+                        setIsSuccess(false);
+                        setSelectedFaculty('');
+                        setSelectedProvince('');
+                        setErrors({});
+                        setSubmitted(false);
+                    }}
+                    className="text-primary-blue font-bold hover:underline"
+                >
                     Volver al formulario
                 </button>
             </div>
@@ -344,7 +426,11 @@ const Registration = () => {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
                         <h3 className="text-2xl font-bold text-institutional font-title mb-2">Formulario de Inscripción</h3>
-                        <p className="text-gray-500 font-subtitle">Completa tus datos para reservar tu lugar.</p>
+                        <p className="text-gray-500 font-subtitle">
+                            Completa tus datos para reservar tu lugar.{' '}
+                            <span className="text-red-500 font-bold">*</span>
+                            <span className="text-gray-400 text-xs ml-1">campos obligatorios</span>
+                        </p>
                     </div>
                     {isFormOpen && currentStage && (
                         <div className="bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-200 text-center min-w-[180px]">
@@ -369,27 +455,81 @@ const Registration = () => {
                 {!isFormOpen ? (
                     <PhaseBanner phase={currentPhase} stage={currentStage} />
                 ) : (
-                    <form ref={form} className="space-y-8" onSubmit={handleSubmit}>
+                    <form ref={form} className="space-y-8" onSubmit={handleSubmit} noValidate>
+
+                        {/* Global validation error summary */}
+                        {submitted && Object.keys(errors).length > 0 && (
+                            <div className="bg-red-50 border border-red-300 rounded-xl p-4 flex items-start gap-3">
+                                <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm font-bold text-red-700">Por favor corregí los siguientes campos:</p>
+                                    <ul className="list-disc list-inside mt-1 space-y-0.5">
+                                        {Object.values(errors).map((msg, i) => (
+                                            <li key={i} className="text-sm text-red-600">{msg}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Sección 1: Datos Personales */}
                         <div>
                             <h4 className="text-lg font-bold text-institutional mb-6 border-l-4 border-complementary-gold pl-3 uppercase tracking-wide">1. Datos Personales</h4>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Nombre (Como en DNI)</label>
-                                    <input name="user_name" required type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Juan Ignacio" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Nombre (Como en DNI) <Req />
+                                    </label>
+                                    <input
+                                        name="user_name"
+                                        type="text"
+                                        className={fieldCls(errors, submitted, 'name')}
+                                        placeholder="Juan Ignacio"
+                                        data-field-error={submitted && !!errors.name}
+                                    />
+                                    <FieldError msg={submitted ? errors.name : ''} />
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Apellido (Como en DNI)</label>
-                                    <input name="user_lastname" required type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Pérez" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Apellido (Como en DNI) <Req />
+                                    </label>
+                                    <input
+                                        name="user_lastname"
+                                        type="text"
+                                        className={fieldCls(errors, submitted, 'lastname')}
+                                        placeholder="Pérez"
+                                        data-field-error={submitted && !!errors.lastname}
+                                    />
+                                    <FieldError msg={submitted ? errors.lastname : ''} />
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">DNI (Sin puntos)</label>
-                                    <input name="user_dni" required type="number" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="12345678" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        DNI (Sin puntos) <Req />
+                                    </label>
+                                    <input
+                                        name="user_dni"
+                                        type="text"
+                                        inputMode="numeric"
+                                        className={fieldCls(errors, submitted, 'dni')}
+                                        placeholder="12345678"
+                                        data-field-error={submitted && !!errors.dni}
+                                    />
+                                    <FieldError msg={submitted ? errors.dni : ''} />
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Celular (+54 9...)</label>
-                                    <input name="user_phone" required type="tel" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="+54 9 11 1234 5678" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Celular (+54 9...) <Req />
+                                    </label>
+                                    <input
+                                        name="user_phone"
+                                        type="tel"
+                                        className={fieldCls(errors, submitted, 'phone')}
+                                        placeholder="+54 9 11 1234 5678"
+                                        data-field-error={submitted && !!errors.phone}
+                                    />
+                                    <FieldError msg={submitted ? errors.phone : ''} />
                                 </div>
                             </div>
                         </div>
@@ -399,13 +539,34 @@ const Registration = () => {
                             <h4 className="text-lg font-bold text-institutional mb-6 border-l-4 border-complementary-gold pl-3 uppercase tracking-wide">2. Datos Académicos</h4>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Email Universitario</label>
-                                    <input name="user_email" required type="email" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="juan@utn.edu.ar" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Email Universitario <Req />
+                                    </label>
+                                    <input
+                                        name="user_email"
+                                        type="email"
+                                        className={fieldCls(errors, submitted, 'email')}
+                                        placeholder="juan@utn.edu.ar"
+                                        data-field-error={submitted && !!errors.email}
+                                    />
+                                    <FieldError msg={submitted ? errors.email : ''} />
                                 </div>
+
+                                {/* Faculty selector — full width */}
                                 <div className="group md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Delegación / Facultad</label>
-                                    <div className="relative">
-                                        <select name="user_faculty" required value={selectedFaculty} onChange={e => setSelectedFaculty(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 appearance-none hover:bg-white cursor-pointer">
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Delegación / Facultad <Req />
+                                    </label>
+                                    <div className="relative" data-field-error={submitted && !!errors.faculty}>
+                                        <select
+                                            name="user_faculty"
+                                            value={selectedFaculty}
+                                            onChange={e => {
+                                                setSelectedFaculty(e.target.value);
+                                                setSelectedProvince('');
+                                            }}
+                                            className={fieldCls(errors, submitted, 'faculty', 'appearance-none cursor-pointer')}
+                                        >
                                             <option value="">Seleccionar...</option>
                                             {ALL_FACULTIES_BY_REGION.map(({ region, faculties }) => (
                                                 <optgroup key={region} label={region}>
@@ -415,13 +576,44 @@ const Registration = () => {
                                                 </optgroup>
                                             ))}
                                             <optgroup label="Otra">
-                                                <option value="Otra">Otra</option>
+                                                <option value="Otra">Otra (indicar provincia)</option>
                                             </optgroup>
                                         </select>
                                         <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
                                         </div>
                                     </div>
+                                    <FieldError msg={submitted ? errors.faculty : ''} />
+
+                                    {/* Province selector — appears only when "Otra" is selected */}
+                                    {isOtra && (
+                                        <div className="mt-3" data-field-error={submitted && !!errors.province}>
+                                            <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
+                                                Provincia <Req />
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    name="user_province"
+                                                    value={selectedProvince}
+                                                    onChange={e => setSelectedProvince(e.target.value)}
+                                                    className={fieldCls(errors, submitted, 'province', 'appearance-none cursor-pointer')}
+                                                >
+                                                    <option value="">Seleccionar provincia...</option>
+                                                    {ARGENTINIAN_PROVINCES.map(p => (
+                                                        <option key={p} value={p}>{p}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <FieldError msg={submitted ? errors.province : ''} />
+                                        </div>
+                                    )}
 
                                     {/* ── Conocé tu filial ─────────────────────────────────── */}
                                     {delegateContact && (
@@ -452,8 +644,12 @@ const Registration = () => {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Certificate upload */}
                                 <div className="group md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Certificado de Alumno Regular (PDF)</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Certificado de Alumno Regular (PDF)
+                                    </label>
                                     <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition cursor-pointer relative">
                                         <div className="space-y-1 text-center">
                                             <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
@@ -479,13 +675,17 @@ const Registration = () => {
                             <h4 className="text-lg font-bold text-institutional mb-6 border-l-4 border-complementary-gold pl-3 uppercase tracking-wide">3. Salud y Emergencia</h4>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Grupo Sanguíneo</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Grupo Sanguíneo
+                                    </label>
                                     <select name="user_blood" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800">
                                         <option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>0+</option><option>0-</option>
                                     </select>
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Mano Hábil</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Mano Hábil
+                                    </label>
                                     <select name="user_dominant_hand" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 hover:bg-white">
                                         <option value="derecha">Derecha</option>
                                         <option value="izquierda">Izquierda</option>
@@ -493,15 +693,21 @@ const Registration = () => {
                                     </select>
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Obra Social / Prepaga</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Obra Social / Prepaga
+                                    </label>
                                     <input name="user_insurance" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Ej. OSDE / Swiss Medical / Ninguna" />
                                 </div>
                                 <div className="group md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Afecciones Médicas / Alergias</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Afecciones Médicas / Alergias
+                                    </label>
                                     <input name="user_medical" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Asma, alergias, medicación crónica, etc." />
                                 </div>
                                 <div className="group md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Restricciones Alimentarias</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Restricciones Alimentarias
+                                    </label>
                                     <div className="relative mb-2">
                                         <select
                                             name="user_dietary"
@@ -528,12 +734,30 @@ const Registration = () => {
                                     )}
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Nombre Contacto Emergencia</label>
-                                    <input name="user_emergency_contact" required type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="María Pérez" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Nombre Contacto Emergencia <Req />
+                                    </label>
+                                    <input
+                                        name="user_emergency_contact"
+                                        type="text"
+                                        className={fieldCls(errors, submitted, 'emergencyContactName')}
+                                        placeholder="María Pérez"
+                                        data-field-error={submitted && !!errors.emergencyContactName}
+                                    />
+                                    <FieldError msg={submitted ? errors.emergencyContactName : ''} />
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Teléfono Emergencia</label>
-                                    <input name="user_emergency_phone" required type="tel" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="+54 9 11 1234 5678" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Teléfono Emergencia <Req />
+                                    </label>
+                                    <input
+                                        name="user_emergency_phone"
+                                        type="tel"
+                                        className={fieldCls(errors, submitted, 'emergencyContactPhone')}
+                                        placeholder="+54 9 11 1234 5678"
+                                        data-field-error={submitted && !!errors.emergencyContactPhone}
+                                    />
+                                    <FieldError msg={submitted ? errors.emergencyContactPhone : ''} />
                                 </div>
                             </div>
                         </div>
