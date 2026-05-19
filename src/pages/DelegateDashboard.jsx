@@ -1,8 +1,36 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { PAYMENT_AMOUNTS } from '../data/filiales.js';
+import emailjs from '@emailjs/browser';
 
 const API = import.meta.env.VITE_API_URL;
+
+const EJS_SERVICE       = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EJS_KEY           = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+const TPL_FIRST_PAYMENT = import.meta.env.VITE_EMAILJS_TEMPLATE_FIRST_PAYMENT;
+
+/**
+ * Sends the "Primera cuota recibida" email (template 04) for each assignment
+ * with paymentType === 'Pagó 1° Cuota', looking up the registration email
+ * from the provided registrations list.
+ */
+async function sendFirstPaymentEmails(assignments, registrations) {
+  if (!EJS_SERVICE || !TPL_FIRST_PAYMENT || !EJS_KEY) return;
+  const firstCuota = assignments.filter(a => a.paymentType === 'Pagó 1° Cuota');
+  for (const a of firstCuota) {
+    const reg = registrations.find(r => r.id === a.registrationId);
+    if (!reg) continue;
+    try {
+      await emailjs.send(EJS_SERVICE, TPL_FIRST_PAYMENT, {
+        to_name:  a.personName || `${reg.name} ${reg.lastname}`,
+        to_email: reg.email,
+        due_date: 'a confirmar con tu delegado/a',
+      }, EJS_KEY);
+    } catch {
+      // non-critical — continue with next
+    }
+  }
+}
 
 // New simplified payment conditions (items 7)
 const PAYMENT_CONDITIONS = [
@@ -325,6 +353,11 @@ const DelegateDashboard = () => {
                 ? prev.map(b => b.id === editingBatchId ? saved : b)
                 : [saved, ...prev]);
             setIsBatchModalOpen(false);
+
+            // Send "primera cuota recibida" emails for new batches only
+            if (!editingBatchId) {
+                sendFirstPaymentEmails(batchAssignments, registrations);
+            }
         } catch {
             alert('Error al guardar el comprobante');
         }

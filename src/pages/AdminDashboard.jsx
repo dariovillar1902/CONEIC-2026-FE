@@ -1,7 +1,46 @@
 import { useState, useEffect, useMemo } from 'react';
+import emailjs from '@emailjs/browser';
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 const API = import.meta.env.VITE_API_URL;
+
+const EJS_SERVICE   = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EJS_KEY       = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+const TPL_VALIDATED = import.meta.env.VITE_EMAILJS_TEMPLATE_VALIDATED;
+const TPL_CONFIRMED = import.meta.env.VITE_EMAILJS_TEMPLATE_CONFIRMED;
+
+/** Sends the "Inscripción habilitada" email (template 02). */
+async function sendValidatedEmail(reg) {
+  if (!EJS_SERVICE || !TPL_VALIDATED || !EJS_KEY) return;
+  try {
+    await emailjs.send(EJS_SERVICE, TPL_VALIDATED, {
+      to_name:  `${reg.name} ${reg.lastname}`,
+      to_email: reg.email,
+    }, EJS_KEY);
+  } catch {
+    // email is non-critical — swallow silently
+  }
+}
+
+/** Sends the "Inscripción confirmada" email (template 03), for Pago Completo or 2da Cuota. */
+async function sendConfirmedEmail(reg) {
+  if (!EJS_SERVICE || !TPL_CONFIRMED || !EJS_KEY) return;
+  const detail =
+    reg.paymentCondition === 'SegundaCuota'
+      ? 'tu pago correspondiente a la segunda cuota de tu inscripción'
+      : 'tu pago correspondiente al pago completo de tu inscripción';
+  try {
+    await emailjs.send(EJS_SERVICE, TPL_CONFIRMED, {
+      to_name:        `${reg.name} ${reg.lastname}`,
+      to_email:       reg.email,
+      payment_detail: detail,
+      temp_password:  '(ver email anterior)', // password set at pre-registration
+      login_url:      `${window.location.origin}/login`,
+    }, EJS_KEY);
+  } catch {
+    // email is non-critical — swallow silently
+  }
+}
 
 const STATUS_LABELS = {
   Pending:   { label: 'Pendiente',  color: 'bg-yellow-100 text-yellow-800' },
@@ -143,9 +182,17 @@ const RegistrationsPanel = () => {
         body: JSON.stringify(newStatus),
       });
       if (!res.ok) throw new Error('No se pudo actualizar el estado');
+
+      const reg = registrations.find(r => r.id === id);
       setRegistrations(prev =>
         prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
       );
+
+      // Send notification email on key status transitions
+      if (reg) {
+        if (newStatus === 'Validated') sendValidatedEmail(reg);
+        if (newStatus === 'Paid')      sendConfirmedEmail(reg);
+      }
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
