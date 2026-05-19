@@ -18,6 +18,8 @@ import { SchedulePage, VenuesPage, ActivitiesPage, RegistrationPage, SponsorsPag
 import SubcommitteesPage from './pages/SubcommitteesPage';
 import FaqPage from './pages/FaqPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
+import EndorsementsPage from './pages/EndorsementsPage';
+import CommitteePage from './pages/CommitteePage';
 
 const router = createBrowserRouter([
   {
@@ -35,6 +37,8 @@ const router = createBrowserRouter([
       { path: 'about', element: <AboutPage /> },
       { path: 'subcomisiones', element: <SubcommitteesPage /> },
       { path: 'faq', element: <FaqPage /> },
+      { path: 'endorsements', element: <EndorsementsPage /> },
+      { path: 'committee', element: <CommitteePage /> },
     ]
   },
   // Change-password: accessible to any logged-in user

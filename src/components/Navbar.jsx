@@ -24,6 +24,8 @@ const Navbar = () => {
         { name: 'Cronograma', href: '/schedule' },
         { name: 'Sedes', href: '/venues' },
         { name: 'Sobre Nosotros', href: '/about' },
+        { name: 'Comité', href: '/committee' },
+        { name: 'Avales', href: '/endorsements' },
         { name: 'Sponsors', href: '/sponsors' },
         { name: 'Galería', href: '/gallery' },
         { name: 'Subcomisiones', href: '/subcomisiones' },
