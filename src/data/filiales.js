@@ -22,7 +22,47 @@ export const FILIALES = {
       name: 'Vocal Región Centro — ANEIC',
       email: 'region.centro@aneic.org.ar', // pendiente de confirmar
     },
-    delegates: [],  // pendiente de designación
+    delegates: [
+      {
+        // Cubre también UTN Santa Fe (sin delegado designado en el Excel)
+        name: 'Francisco Coppari',
+        faculty: 'UTN - Facultad Regional Rosario',
+        email: 'delegacion.utn-rosario@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: true,
+        managedFaculties: [
+          'UTN - Facultad Regional Rosario',
+          'UTN - Facultad Regional Santa Fe', // sin delegado designado en Excel
+        ],
+      },
+      {
+        name: 'Tomás Daniel Stipanovich',
+        faculty: 'UTN - Facultad Regional Venado Tuerto',
+        email: 'delegacion.utn-venado@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['UTN - Facultad Regional Venado Tuerto'],
+      },
+      {
+        name: 'Tamara Ghirardotti',
+        faculty: 'UTN - Facultad Regional Rafaela',
+        email: 'delegacion.utn-rafaela@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['UTN - Facultad Regional Rafaela'],
+      },
+      {
+        name: 'Valentín Córdoba',
+        faculty: 'Universidad Nacional de Rosario',
+        email: 'delegacion.un-rosario@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de Rosario'],
+      },
+      {
+        name: 'Ramiro Nicolás Acosta',
+        faculty: 'UTN - Facultad Regional Paraná',
+        email: 'delegacion.utn-parana@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['UTN - Facultad Regional Paraná'],
+      },
+    ],
     faculties: [
       'UTN - Facultad Regional Paraná',
       'UTN - Facultad Regional Rafaela',
@@ -42,34 +82,51 @@ export const FILIALES = {
     },
     delegates: [
       {
-        name: 'Delegado/a UTN FRBA',
+        // Cubre todas las facultades de la región sin delegado propio
+        name: 'Leandro David Díaz',
         faculty: 'UTN - Facultad Regional Buenos Aires',
-        email: 'delegate@frba.utn.edu.ar',
-        // Gestiona todas las facultades de la región que no tienen delegado propio
+        email: 'delegacion.utn-frba@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: true,
         managedFaculties: [
           'UTN - Facultad Regional Buenos Aires',
           'UTN - Facultad Regional Avellaneda',
           'Universidad de Buenos Aires',
           'Universidad de Belgrano',
-          'Universidad Católica Argentina',
           'Universidad de la Defensa Nacional',
           'UTN - Facultad Regional Concepción del Uruguay',
           'UTN - Facultad Regional Concordia',
-          'Universidad Nacional de la Matanza',
-          'Universidad Nacional de La Plata',
           'UTN - Facultad Regional La Plata',
           'Universidad Nacional de Morón',
         ],
       },
       {
-        name: 'Delegado/a UTN FRGP',
+        name: 'Santiago Sánchez Díaz',
         faculty: 'UTN - Facultad Regional General Pacheco',
-        email: 'delegate@frgp.utn.edu.ar',
+        email: 'delegacion.utn-gral-pacheco@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
-        managedFaculties: [
-          'UTN - Facultad Regional General Pacheco',
-        ],
+        managedFaculties: ['UTN - Facultad Regional General Pacheco'],
+      },
+      {
+        name: 'Facundo Salomón',
+        faculty: 'Universidad Nacional de La Plata',
+        email: 'delegacion.unlp@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de La Plata'],
+      },
+      {
+        name: 'Marisol Rojas Cabañas',
+        faculty: 'Universidad Nacional de la Matanza',
+        email: 'delegacion.unlam@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de la Matanza'],
+      },
+      {
+        // Sin representación designada — asignada provisionalmente
+        name: 'Sofía Ricciardi',
+        faculty: 'Universidad Católica Argentina',
+        email: 'delegacion.uca@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Católica Argentina'],
       },
     ],
     faculties: [
@@ -96,7 +153,65 @@ export const FILIALES = {
       name: 'Vocal Región Norte — ANEIC',
       email: 'region.norte@aneic.org.ar', // pendiente de confirmar
     },
-    delegates: [],  // pendiente de designación
+    delegates: [
+      {
+        // Delegado principal de la región
+        name: 'Cristian Ledesma',
+        faculty: 'Universidad Nacional del Nordeste',
+        email: 'delegacion.unne@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: true,
+        managedFaculties: ['Universidad Nacional del Nordeste'],
+      },
+      {
+        name: 'Álvaro Brodersen',
+        faculty: 'Universidad Nacional de Tucumán',
+        email: 'delegacion.unt@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de Tucumán'],
+      },
+      {
+        name: 'Lara Chauque',
+        faculty: 'UTN - Facultad Regional Tucumán',
+        email: 'delegacion.utn-tucuman@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['UTN - Facultad Regional Tucumán'],
+      },
+      {
+        name: 'Nicolás Sarubi',
+        faculty: 'Universidad Nacional de Santiago del Estero',
+        email: 'delegacion.unse@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de Santiago del Estero'],
+      },
+      {
+        name: 'Estefanía Hundt',
+        faculty: 'Universidad Nacional de Misiones',
+        email: 'delegacion.unam@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de Misiones'],
+      },
+      {
+        name: 'Luis Barrios',
+        faculty: 'Universidad Nacional de Salta',
+        email: 'delegacion.unsa@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de Salta'],
+      },
+      {
+        name: 'Joaquín Rolón',
+        faculty: 'Universidad Nacional de Formosa',
+        email: 'delegacion.unf@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de Formosa'],
+      },
+      {
+        name: 'Daniel Martínez',
+        faculty: 'Universidad Católica de Salta',
+        email: 'delegacion.ucasal@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Católica de Salta'],
+      },
+    ],
     faculties: [
       'Universidad Nacional del Nordeste',
       'Universidad Nacional de Formosa',
@@ -116,7 +231,62 @@ export const FILIALES = {
       name: 'Vocal Región Oeste — ANEIC',
       email: 'region.oeste@aneic.org.ar', // pendiente de confirmar
     },
-    delegates: [],  // pendiente de designación
+    delegates: [
+      {
+        // Cubre UCA Córdoba y UTN Mendoza (sin delegados designados en Excel)
+        name: 'Julieta Listello',
+        faculty: 'UTN - Facultad Regional Córdoba',
+        email: 'delegacion.utn-cordoba@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: true,
+        managedFaculties: [
+          'UTN - Facultad Regional Córdoba',
+          'Universidad Católica de Córdoba', // sin delegado designado en Excel
+          'UTN - Facultad Regional Mendoza',  // sin delegado designado en Excel
+        ],
+      },
+      {
+        name: 'Sofía Bima León',
+        faculty: 'Universidad Nacional de Córdoba',
+        email: 'delegacion.unc@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de Córdoba'],
+      },
+      {
+        name: 'Julián Arévalo',
+        faculty: 'Universidad Nacional de San Juan',
+        email: 'delegacion.unsj@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de San Juan'],
+      },
+      {
+        name: 'Franco Ávila',
+        faculty: 'Universidad Nacional de La Rioja',
+        email: 'delegacion.unlar@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de La Rioja'],
+      },
+      {
+        name: 'Pablo Carrizo',
+        faculty: 'UTN - Facultad Regional La Rioja',
+        email: 'delegacion.utn-la-rioja@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['UTN - Facultad Regional La Rioja'],
+      },
+      {
+        name: 'Martina Almirón Tittarelli',
+        faculty: 'Universidad Nacional de Cuyo',
+        email: 'delegacion.uncuyo@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional de Cuyo'],
+      },
+      {
+        name: 'Pablo Pérez',
+        faculty: 'UTN - Facultad Regional San Rafael',
+        email: 'delegacion.utn-san-rafael@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['UTN - Facultad Regional San Rafael'],
+      },
+    ],
     faculties: [
       'Universidad Católica de Córdoba',
       'Universidad Nacional de Córdoba',
@@ -137,7 +307,56 @@ export const FILIALES = {
       name: 'Vocal Región Sur — ANEIC',
       email: 'region.sur@aneic.org.ar', // pendiente de confirmar
     },
-    delegates: [],  // pendiente de designación
+    delegates: [
+      {
+        name: 'Jerónimo Ferro Perea',
+        faculty: 'Universidad Nacional de la Patagonia San Juan Bosco - Sede Comodoro Rivadavia',
+        email: 'delegacion.unpsjb-comodoro@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: true,
+        managedFaculties: [
+          'Universidad Nacional de la Patagonia San Juan Bosco - Sede Comodoro Rivadavia',
+        ],
+      },
+      {
+        name: 'Cristian Schlund Cari',
+        faculty: 'Universidad Nacional de la Patagonia San Juan Bosco - Sede Trelew',
+        email: 'delegacion.unpsjb-trelew@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: [
+          'Universidad Nacional de la Patagonia San Juan Bosco - Sede Trelew',
+        ],
+      },
+      {
+        name: 'Santiago Rodríguez Bilej',
+        faculty: 'Universidad Nacional del Comahue',
+        email: 'delegacion.uncomahue@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional del Comahue'],
+      },
+      {
+        name: 'Brian Niz',
+        faculty: 'Universidad Nacional del Centro de la Provincia de Buenos Aires - Sede Olavarría',
+        email: 'delegacion.unicen@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: [
+          'Universidad Nacional del Centro de la Provincia de Buenos Aires - Sede Olavarría',
+        ],
+      },
+      {
+        name: 'Emiliano Herrera',
+        faculty: 'Universidad Nacional del Sur',
+        email: 'delegacion.uns@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['Universidad Nacional del Sur'],
+      },
+      {
+        name: 'Ángel de León',
+        faculty: 'UTN - Facultad Regional Bahía Blanca',
+        email: 'delegacion.utn-bahia-blanca@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: false,
+        managedFaculties: ['UTN - Facultad Regional Bahía Blanca'],
+      },
+    ],
     faculties: [
       'Universidad Nacional del Sur',
       'UTN - Facultad Regional Bahía Blanca',
