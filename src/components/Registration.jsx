@@ -4,7 +4,9 @@ import {
     ALL_FACULTIES_BY_REGION,
     getContactForFaculty,
     getContactForProvince,
+    getContactForInternational,
     ARGENTINIAN_PROVINCES,
+    INTERNATIONAL_COUNTRIES,
 } from '../data/filiales.js';
 
 // ─── Stage & Phase Configuration ─────────────────────────────────────────────
@@ -48,7 +50,7 @@ const getCurrentPhase = (today) => {
 };
 
 // ─── Validation ───────────────────────────────────────────────────────────────
-const validateFields = (data, isOtra, province) => {
+const validateFields = (data, isOtra, province, isInternacional, selectedCountry) => {
     const errs = {};
     if (!data.name.trim()) errs.name = 'El nombre es requerido.';
     if (!data.lastname.trim()) errs.lastname = 'El apellido es requerido.';
@@ -58,6 +60,7 @@ const validateFields = (data, isOtra, province) => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = 'Ingresá un email válido.';
     if (!data.faculty) errs.faculty = 'Seleccioná una facultad o delegación.';
     if (isOtra && !province) errs.province = 'Seleccioná tu provincia.';
+    if (isInternacional && !selectedCountry) errs.country = 'Seleccioná tu país.';
     if (!data.emergencyContactName.trim()) errs.emergencyContactName = 'El nombre del contacto de emergencia es requerido.';
     if (!data.emergencyContactPhone.trim()) errs.emergencyContactPhone = 'El teléfono de emergencia es requerido.';
     return errs;
@@ -203,9 +206,11 @@ const Registration = () => {
     const [isDuplicate, setIsDuplicate] = useState(false);
     const [selectedFaculty, setSelectedFaculty] = useState('');
     const [selectedProvince, setSelectedProvince] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState('');
     const [dietarySelection, setDietarySelection] = useState('');
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
+    const [participatedInJoreic, setParticipatedInJoreic] = useState(false);
 
     const dietaryOptions = [
         'Sin restricciones',
@@ -220,9 +225,15 @@ const Registration = () => {
     ];
 
     const isOtra = selectedFaculty === 'Otra';
+    const isInternacional = selectedFaculty === 'Internacional';
+
+    // Effective stage: JOREIC Norte participants in stage 2 pay stage 1 prices
+    const effectiveStage = (participatedInJoreic && currentStage?.id === 2) ? STAGES[0] : currentStage;
 
     // Resolved contact (delegate or ANEIC vocal) for the selected faculty/province
-    const delegateContact = isOtra
+    const delegateContact = isInternacional
+        ? getContactForInternational()
+        : isOtra
         ? (selectedProvince ? getContactForProvince(selectedProvince) : null)
         : (selectedFaculty  ? getContactForFaculty(selectedFaculty)   : null);
 
@@ -242,6 +253,8 @@ const Registration = () => {
             { name, lastname, dni, phone, email, faculty: selectedFaculty, emergencyContactName, emergencyContactPhone },
             isOtra,
             selectedProvince,
+            isInternacional,
+            selectedCountry,
         );
         setErrors(errs);
 
@@ -257,8 +270,8 @@ const Registration = () => {
         setIsSubmitting(true);
         setIsDuplicate(false);
 
-        // Faculty value: "Otra (Provincia)" when isOtra
-        const facultyValue = isOtra ? `Otra (${selectedProvince})` : selectedFaculty;
+        // Faculty value: "Otra (Provincia)" when isOtra, always 'Internacional' when international
+        const facultyValue = isInternacional ? 'Internacional' : isOtra ? `Otra (${selectedProvince})` : selectedFaculty;
 
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
@@ -276,7 +289,8 @@ const Registration = () => {
                     emergencyContactName,
                     emergencyContactPhone,
                     stageName:             currentStage?.label ?? 'Demo',
-                    price:                 currentStage?.priceFull ?? 0,
+                    price:                 effectiveStage?.priceFull ?? 0,
+                    participatedInJoreic,
                 }),
             });
 
@@ -365,8 +379,8 @@ const Registration = () => {
                 {/* Per-filial contact info */}
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-lg mx-auto mb-4 text-left">
                     <p className="text-sm text-blue-800 font-bold mb-1">
-                        📋 Próximo paso: coordiná con tu{' '}
-                        {delegateContact?.isVocal ? 'vocal ANEIC' : 'delegado/a'}
+                        📋 Próximo paso: <strong>contactate directamente</strong> con tu{' '}
+                        {delegateContact?.isVocal ? 'vocal ANEIC' : 'delegado/vocal asignado'}
                     </p>
                     {delegateContact ? (
                         <>
@@ -379,24 +393,35 @@ const Registration = () => {
                                     {delegateContact.email}
                                 </a>
                             </p>
+                            {delegateContact.phone && (
+                                <p className="text-sm text-blue-700 mt-1">
+                                    WhatsApp: <a href={`https://wa.me/54${delegateContact.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">+54 {delegateContact.phone}</a>
+                                </p>
+                            )}
                         </>
                     ) : (
                         <p className="text-sm text-blue-700">
-                            Contactá a tu delegado para coordinar el pago y confirmar tu vacante.
+                            Contactate con tu delegado para coordinar el pago y confirmar tu vacante.
                         </p>
                     )}
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4 max-w-lg mx-auto mb-4 text-left">
                     <p className="text-sm text-green-800 font-bold mb-1">🔑 Tu acceso al portal</p>
                     <p className="text-sm text-green-700">
-                        Te enviamos un email con una contraseña temporaria. Ingresá con tu email universitario y cambiá la contraseña en tu primer inicio de sesión.
+                        Te enviamos un email con una contraseña temporaria. Ingresá con tu email y cambiá la contraseña en tu primer inicio de sesión.
                     </p>
                 </div>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 max-w-lg mx-auto mb-8">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 max-w-lg mx-auto mb-4">
                     <p className="text-sm text-yellow-800 font-bold">⚠️ Importante</p>
                     <p className="text-sm text-yellow-700">
-                        Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción y confirme el pago.
+                        Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción. Contactate con tu delegado/vocal para coordinar el pago.
+                    </p>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-lg mx-auto mb-8 text-left">
+                    <p className="text-sm text-blue-800 font-bold">¿Próximo paso?</p>
+                    <p className="text-sm text-blue-700">
+                        Ahora <strong>contactate directamente</strong> con tu delegado/vocal para coordinar el pago y confirmar tu vacante.
                     </p>
                 </div>
                 <button
@@ -404,6 +429,8 @@ const Registration = () => {
                         setIsSuccess(false);
                         setSelectedFaculty('');
                         setSelectedProvince('');
+                        setSelectedCountry('');
+                        setParticipatedInJoreic(false);
                         setErrors({});
                         setSubmitted(false);
                     }}
@@ -433,9 +460,12 @@ const Registration = () => {
                     {isFormOpen && currentStage && (
                         <div className="bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-200 text-center min-w-[180px]">
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{currentStage.label}</p>
-                            <p className="text-3xl font-bold text-primary-red">${currentStage.priceFull.toLocaleString('es-AR')}</p>
+                            {participatedInJoreic && currentStage?.id === 2 && (
+                                <p className="text-xs font-bold text-green-700 bg-green-50 rounded px-2 py-0.5 mb-1">PRECIO ESPECIAL JOREIC NORTE</p>
+                            )}
+                            <p className="text-3xl font-bold text-primary-red">${effectiveStage.priceFull.toLocaleString('es-AR')}</p>
                             <p className="text-xs text-gray-400 mt-1">
-                                o 2 cuotas de ${currentStage.priceInstallment.toLocaleString('es-AR')}
+                                o 2 cuotas de ${effectiveStage.priceInstallment.toLocaleString('es-AR')}
                             </p>
                             <p className="text-xs text-green-600 font-bold mt-1">
                                 Cierra el {fmt(currentStage.preRegistration.end)}
@@ -538,13 +568,13 @@ const Registration = () => {
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="group">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
-                                        Email Universitario <Req />
+                                        Email <Req />
                                     </label>
                                     <input
                                         name="user_email"
                                         type="email"
                                         className={fieldCls(errors, submitted, 'email')}
-                                        placeholder="juan@utn.edu.ar"
+                                        placeholder="juan@email.com"
                                         data-field-error={submitted && !!errors.email}
                                     />
                                     <FieldError msg={submitted ? errors.email : ''} />
@@ -562,6 +592,7 @@ const Registration = () => {
                                             onChange={e => {
                                                 setSelectedFaculty(e.target.value);
                                                 setSelectedProvince('');
+                                                setSelectedCountry('');
                                             }}
                                             className={fieldCls(errors, submitted, 'faculty', 'appearance-none cursor-pointer')}
                                         >
@@ -575,6 +606,9 @@ const Registration = () => {
                                             ))}
                                             <optgroup label="Otra">
                                                 <option value="Otra">Otra (indicar provincia)</option>
+                                            </optgroup>
+                                            <optgroup label="Internacional">
+                                                <option value="Internacional">Estudiante internacional</option>
                                             </optgroup>
                                         </select>
                                         <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
@@ -613,6 +647,34 @@ const Registration = () => {
                                         </div>
                                     )}
 
+                                    {/* Country selector — appears only when "Internacional" is selected */}
+                                    {isInternacional && (
+                                        <div className="mt-3" data-field-error={submitted && !!errors.country}>
+                                            <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
+                                                País <Req />
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    name="user_country"
+                                                    value={selectedCountry}
+                                                    onChange={e => setSelectedCountry(e.target.value)}
+                                                    className={fieldCls(errors, submitted, 'country', 'appearance-none cursor-pointer')}
+                                                >
+                                                    <option value="">Seleccionar país...</option>
+                                                    {INTERNATIONAL_COUNTRIES.map(c => (
+                                                        <option key={c} value={c}>{c}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <FieldError msg={submitted ? errors.country : ''} />
+                                        </div>
+                                    )}
+
                                     {/* ── Conocé tu filial ─────────────────────────────────── */}
                                     {delegateContact && (
                                         <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
@@ -638,9 +700,30 @@ const Registration = () => {
                                                         para coordinar el pago y confirmar tu vacante.
                                                     </p>
                                                 )}
+                                                {delegateContact.phone && (
+                                                    <p className="text-sm text-blue-700 mt-1">
+                                                        WhatsApp: <a href={`https://wa.me/54${delegateContact.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">+54 {delegateContact.phone}</a>
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     )}
+                                </div>
+
+                                {/* JOREIC Norte checkbox */}
+                                <div className="md:col-span-2">
+                                    <label className="flex items-center gap-3 cursor-pointer group select-none">
+                                        <input
+                                            type="checkbox"
+                                            checked={participatedInJoreic}
+                                            onChange={e => setParticipatedInJoreic(e.target.checked)}
+                                            className="w-4 h-4 accent-primary-blue"
+                                        />
+                                        <span className="text-sm text-gray-700">
+                                            Participé en el <strong>JOREIC Norte</strong>{' '}
+                                            <span className="text-xs text-green-700 font-bold">(precio especial: pagás tarifa de 1ª etapa)</span>
+                                        </span>
+                                    </label>
                                 </div>
 
                                 {/* Certificate upload */}

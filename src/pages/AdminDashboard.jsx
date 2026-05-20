@@ -137,6 +137,95 @@ const Overview = ({ registrations }) => {
   );
 };
 
+/* ─── Edit Registration Modal ───────────────────────────────────────── */
+const EditRegModal = ({ reg, onClose, onSave }) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const updated = {
+      ...reg,
+      name:                  fd.get('name'),
+      lastname:              fd.get('lastname'),
+      dni:                   fd.get('dni'),
+      phone:                 fd.get('phone'),
+      email:                 fd.get('email'),
+      faculty:               fd.get('faculty'),
+      bloodType:             fd.get('bloodType') || null,
+      medicalConditions:     fd.get('medicalConditions') || null,
+      emergencyContactName:  fd.get('emergencyContactName'),
+      emergencyContactPhone: fd.get('emergencyContactPhone'),
+      observations:          fd.get('observations') || null,
+    };
+    await onSave(updated);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-institutional">Editar — {reg.name} {reg.lastname}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4 max-h-[65vh] overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Nombre</label>
+              <input name="name" defaultValue={reg.name} className="border p-2 rounded w-full text-sm" required />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Apellido</label>
+              <input name="lastname" defaultValue={reg.lastname} className="border p-2 rounded w-full text-sm" required />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">DNI</label>
+              <input name="dni" defaultValue={reg.dni} className="border p-2 rounded w-full text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Celular</label>
+              <input name="phone" defaultValue={reg.phone} className="border p-2 rounded w-full text-sm" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
+              <input name="email" type="email" defaultValue={reg.email} className="border p-2 rounded w-full text-sm" required />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Facultad</label>
+              <input name="faculty" defaultValue={reg.faculty} className="border p-2 rounded w-full text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Grupo sanguíneo</label>
+              <select name="bloodType" defaultValue={reg.bloodType ?? ''} className="border p-2 rounded w-full text-sm bg-white">
+                <option value="">—</option>
+                {['A+','A-','B+','B-','AB+','AB-','0+','0-'].map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Afecciones</label>
+              <input name="medicalConditions" defaultValue={reg.medicalConditions ?? ''} className="border p-2 rounded w-full text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Contacto emergencia</label>
+              <input name="emergencyContactName" defaultValue={reg.emergencyContactName} className="border p-2 rounded w-full text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Tel. emergencia</label>
+              <input name="emergencyContactPhone" defaultValue={reg.emergencyContactPhone} className="border p-2 rounded w-full text-sm" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Observaciones</label>
+              <textarea name="observations" defaultValue={reg.observations ?? ''} rows={2} className="border p-2 rounded w-full text-sm resize-none" />
+            </div>
+          </div>
+          <div className="flex gap-3 pt-3 border-t border-gray-100">
+            <button type="button" onClick={onClose} className="flex-1 text-gray-500 font-bold hover:bg-gray-100 p-2 rounded">Cancelar</button>
+            <button type="submit" className="flex-1 bg-institutional text-white font-bold p-2 rounded hover:bg-primary-red">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 /* ─── Sub-panel: Inscripciones ──────────────────────────────────────── */
 const RegistrationsPanel = () => {
   const [registrations, setRegistrations] = useState([]);
@@ -148,6 +237,7 @@ const RegistrationsPanel = () => {
   const [filterDelegation, setFilterDelegation] = useState('all');
   const [updatingId, setUpdatingId]       = useState(null);
   const [exporting, setExporting]         = useState(false);
+  const [editingReg, setEditingReg]       = useState(null);
 
   const fetchRegistrations = async () => {
     setLoading(true);
@@ -197,6 +287,23 @@ const RegistrationsPanel = () => {
       alert(`Error: ${err.message}`);
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  /* Edit registration */
+  const handleEditSave = async (updated) => {
+    try {
+      const res = await fetch(`${API}/api/registrations/${updated.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      if (!res.ok) throw new Error();
+      const saved = await res.json();
+      setRegistrations(prev => prev.map(r => r.id === saved.id ? saved : r));
+      setEditingReg(null);
+    } catch {
+      alert('Error al guardar los cambios');
     }
   };
 
@@ -372,16 +479,24 @@ const RegistrationsPanel = () => {
                       {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-AR') : '—'}
                     </td>
                     <td className="px-4 py-3">
-                      <select
-                        value={r.status}
-                        disabled={updatingId === r.id}
-                        onChange={e => updateStatus(r.id, e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-institutional/40 disabled:opacity-50 cursor-pointer"
-                      >
-                        {Object.entries(STATUS_LABELS).map(([v, { label }]) => (
-                          <option key={v} value={v}>{label}</option>
-                        ))}
-                      </select>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={r.status}
+                          disabled={updatingId === r.id}
+                          onChange={e => updateStatus(r.id, e.target.value)}
+                          className="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-institutional/40 disabled:opacity-50 cursor-pointer"
+                        >
+                          {Object.entries(STATUS_LABELS).map(([v, { label }]) => (
+                            <option key={v} value={v}>{label}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => setEditingReg(r)}
+                          className="text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition font-bold whitespace-nowrap"
+                        >
+                          Editar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -389,6 +504,15 @@ const RegistrationsPanel = () => {
             </table>
           </div>
         </div>
+      )}
+
+      {/* Edit registration modal */}
+      {editingReg && (
+        <EditRegModal
+          reg={editingReg}
+          onClose={() => setEditingReg(null)}
+          onSave={handleEditSave}
+        />
       )}
     </div>
   );

@@ -27,6 +27,7 @@ export const FILIALES = {
         // Cubre también UTN Santa Fe (sin delegado designado en el Excel)
         name: 'Francisco Coppari',
         faculty: 'UTN - Facultad Regional Rosario',
+        phone: '3413208022',
         email: 'delegacion.utn-rosario@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: true,
         managedFaculties: [
@@ -37,6 +38,7 @@ export const FILIALES = {
       {
         name: 'Tomás Daniel Stipanovich',
         faculty: 'UTN - Facultad Regional Venado Tuerto',
+        phone: '3462638309',
         email: 'delegacion.utn-venado@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['UTN - Facultad Regional Venado Tuerto'],
@@ -44,6 +46,7 @@ export const FILIALES = {
       {
         name: 'Tamara Ghirardotti',
         faculty: 'UTN - Facultad Regional Rafaela',
+        phone: '3492610096',
         email: 'delegacion.utn-rafaela@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['UTN - Facultad Regional Rafaela'],
@@ -51,6 +54,7 @@ export const FILIALES = {
       {
         name: 'Valentín Córdoba',
         faculty: 'Universidad Nacional de Rosario',
+        phone: '3382672049',
         email: 'delegacion.un-rosario@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de Rosario'],
@@ -58,6 +62,7 @@ export const FILIALES = {
       {
         name: 'Ramiro Nicolás Acosta',
         faculty: 'UTN - Facultad Regional Paraná',
+        phone: '3435339453',
         email: 'delegacion.utn-parana@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['UTN - Facultad Regional Paraná'],
@@ -85,6 +90,7 @@ export const FILIALES = {
         // Cubre todas las facultades de la región sin delegado propio
         name: 'Leandro David Díaz',
         faculty: 'UTN - Facultad Regional Buenos Aires',
+        phone: '1134987525',
         email: 'delegacion.utn-frba@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: true,
         managedFaculties: [
@@ -102,6 +108,7 @@ export const FILIALES = {
       {
         name: 'Santiago Sánchez Díaz',
         faculty: 'UTN - Facultad Regional General Pacheco',
+        phone: '1168576041',
         email: 'delegacion.utn-gral-pacheco@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['UTN - Facultad Regional General Pacheco'],
@@ -109,6 +116,7 @@ export const FILIALES = {
       {
         name: 'Facundo Salomón',
         faculty: 'Universidad Nacional de La Plata',
+        phone: '2344410495',
         email: 'delegacion.unlp@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de La Plata'],
@@ -116,6 +124,7 @@ export const FILIALES = {
       {
         name: 'Marisol Rojas Cabañas',
         faculty: 'Universidad Nacional de la Matanza',
+        phone: '1125763197',
         email: 'delegacion.unlam@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de la Matanza'],
@@ -124,6 +133,7 @@ export const FILIALES = {
         // Sin representación designada — asignada provisionalmente
         name: 'Sofía Ricciardi',
         faculty: 'Universidad Católica Argentina',
+        phone: null, // N/A
         email: 'delegacion.uca@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Católica Argentina'],
@@ -158,6 +168,7 @@ export const FILIALES = {
         // Delegado principal de la región
         name: 'Cristian Ledesma',
         faculty: 'Universidad Nacional del Nordeste',
+        phone: '3794707691',
         email: 'delegacion.unne@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: true,
         managedFaculties: ['Universidad Nacional del Nordeste'],
@@ -165,6 +176,7 @@ export const FILIALES = {
       {
         name: 'Álvaro Brodersen',
         faculty: 'Universidad Nacional de Tucumán',
+        phone: '3815294542',
         email: 'delegacion.unt@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de Tucumán'],
@@ -172,6 +184,7 @@ export const FILIALES = {
       {
         name: 'Lara Chauque',
         faculty: 'UTN - Facultad Regional Tucumán',
+        phone: '3813396300',
         email: 'delegacion.utn-tucuman@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['UTN - Facultad Regional Tucumán'],
@@ -179,6 +192,7 @@ export const FILIALES = {
       {
         name: 'Nicolás Sarubi',
         faculty: 'Universidad Nacional de Santiago del Estero',
+        phone: '2213104696',
         email: 'delegacion.unse@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de Santiago del Estero'],
@@ -186,6 +200,7 @@ export const FILIALES = {
       {
         name: 'Estefanía Hundt',
         faculty: 'Universidad Nacional de Misiones',
+        phone: '3751592942',
         email: 'delegacion.unam@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de Misiones'],
@@ -193,6 +208,7 @@ export const FILIALES = {
       {
         name: 'Luis Barrios',
         faculty: 'Universidad Nacional de Salta',
+        phone: '3874464850',
         email: 'delegacion.unsa@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de Salta'],
@@ -200,6 +216,7 @@ export const FILIALES = {
       {
         name: 'Joaquín Rolón',
         faculty: 'Universidad Nacional de Formosa',
+        phone: '3718443595',
         email: 'delegacion.unf@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de Formosa'],
@@ -207,6 +224,7 @@ export const FILIALES = {
       {
         name: 'Daniel Martínez',
         faculty: 'Universidad Católica de Salta',
+        phone: '3875518269',
         email: 'delegacion.ucasal@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Católica de Salta'],
@@ -236,6 +254,7 @@ export const FILIALES = {
         // Cubre UCA Córdoba y UTN Mendoza (sin delegados designados en Excel)
         name: 'Julieta Listello',
         faculty: 'UTN - Facultad Regional Córdoba',
+        phone: '3573430566',
         email: 'delegacion.utn-cordoba@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: true,
         managedFaculties: [
@@ -247,6 +266,7 @@ export const FILIALES = {
       {
         name: 'Sofía Bima León',
         faculty: 'Universidad Nacional de Córdoba',
+        phone: '3516402001',
         email: 'delegacion.unc@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de Córdoba'],
@@ -254,6 +274,7 @@ export const FILIALES = {
       {
         name: 'Julián Arévalo',
         faculty: 'Universidad Nacional de San Juan',
+        phone: '2644697830',
         email: 'delegacion.unsj@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de San Juan'],
@@ -261,6 +282,7 @@ export const FILIALES = {
       {
         name: 'Franco Ávila',
         faculty: 'Universidad Nacional de La Rioja',
+        phone: '3804618170',
         email: 'delegacion.unlar@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de La Rioja'],
@@ -268,6 +290,7 @@ export const FILIALES = {
       {
         name: 'Pablo Carrizo',
         faculty: 'UTN - Facultad Regional La Rioja',
+        phone: '3837691881',
         email: 'delegacion.utn-la-rioja@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['UTN - Facultad Regional La Rioja'],
@@ -275,6 +298,7 @@ export const FILIALES = {
       {
         name: 'Martina Almirón Tittarelli',
         faculty: 'Universidad Nacional de Cuyo',
+        phone: '2613622661',
         email: 'delegacion.uncuyo@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional de Cuyo'],
@@ -282,6 +306,7 @@ export const FILIALES = {
       {
         name: 'Pablo Pérez',
         faculty: 'UTN - Facultad Regional San Rafael',
+        phone: '2604356041',
         email: 'delegacion.utn-san-rafael@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['UTN - Facultad Regional San Rafael'],
@@ -311,6 +336,7 @@ export const FILIALES = {
       {
         name: 'Jerónimo Ferro Perea',
         faculty: 'Universidad Nacional de la Patagonia San Juan Bosco - Sede Comodoro Rivadavia',
+        phone: '2974293820',
         email: 'delegacion.unpsjb-comodoro@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: true,
         managedFaculties: [
@@ -320,6 +346,7 @@ export const FILIALES = {
       {
         name: 'Cristian Schlund Cari',
         faculty: 'Universidad Nacional de la Patagonia San Juan Bosco - Sede Trelew',
+        phone: '2804005635',
         email: 'delegacion.unpsjb-trelew@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: [
@@ -329,6 +356,7 @@ export const FILIALES = {
       {
         name: 'Santiago Rodríguez Bilej',
         faculty: 'Universidad Nacional del Comahue',
+        phone: '3516456091',
         email: 'delegacion.uncomahue@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional del Comahue'],
@@ -336,6 +364,7 @@ export const FILIALES = {
       {
         name: 'Brian Niz',
         faculty: 'Universidad Nacional del Centro de la Provincia de Buenos Aires - Sede Olavarría',
+        phone: '2284516065',
         email: 'delegacion.unicen@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: [
@@ -345,6 +374,7 @@ export const FILIALES = {
       {
         name: 'Emiliano Herrera',
         faculty: 'Universidad Nacional del Sur',
+        phone: '2932417721',
         email: 'delegacion.uns@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['Universidad Nacional del Sur'],
@@ -352,6 +382,7 @@ export const FILIALES = {
       {
         name: 'Ángel de León',
         faculty: 'UTN - Facultad Regional Bahía Blanca',
+        phone: '2914992004',
         email: 'delegacion.utn-bahia-blanca@coneic2026.com.ar', // pendiente de confirmar
         isRegionalFallback: false,
         managedFaculties: ['UTN - Facultad Regional Bahía Blanca'],
@@ -366,6 +397,27 @@ export const FILIALES = {
       'Universidad Nacional de la Patagonia San Juan Bosco - Sede Trelew',
     ],
   },
+
+  Internacional: {
+    id: 'Internacional',
+    name: 'Internacional',
+    vocal: {
+      name: 'Sebastián Burgos',
+      phone: null, // pendiente de confirmar
+      email: 'internacional@coneic2026.com.ar', // pendiente de confirmar
+    },
+    delegates: [
+      {
+        name: 'Sebastián Burgos',
+        faculty: 'Internacional',
+        phone: null, // pendiente de confirmar
+        email: 'internacional@coneic2026.com.ar', // pendiente de confirmar
+        isRegionalFallback: true,
+        managedFaculties: ['Internacional'],
+      },
+    ],
+    faculties: ['Internacional'],
+  },
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -379,10 +431,21 @@ export function getFilialForFaculty(faculty) {
 }
 
 /**
+ * Returns the contact for international students.
+ */
+export function getContactForInternational() {
+  const filial = FILIALES['Internacional'];
+  const delegate = filial.delegates[0];
+  return { ...delegate, filialName: filial.name, isVocal: false };
+}
+
+/**
  * Returns the delegate or vocal contact responsible for a given faculty.
  * Priority: specific delegate → regional fallback delegate → vocal.
  */
 export function getContactForFaculty(faculty) {
+  if (faculty === 'Internacional') return getContactForInternational();
+
   const filial = getFilialForFaculty(faculty);
 
   if (!filial) {
@@ -485,6 +548,12 @@ const PROVINCE_TO_FILIAL_ID = {
   'Santa Cruz':                      'Sur',
   'Tierra del Fuego':                'Sur',
 };
+
+export const INTERNATIONAL_COUNTRIES = [
+  'Bolivia', 'Brasil', 'Chile', 'Colombia', 'Ecuador', 'Paraguay', 'Perú', 'Uruguay', 'Venezuela',
+  'México', 'Costa Rica', 'Cuba', 'El Salvador', 'Guatemala', 'Honduras', 'Nicaragua', 'Panamá', 'República Dominicana',
+  'España', 'Otro país',
+];
 
 /**
  * Returns the delegate/vocal contact for a given Argentine province.

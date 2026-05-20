@@ -133,8 +133,12 @@ const DelegateDashboard = () => {
     const [editingBatchId, setEditingBatchId] = useState(null);
     const [batchReceiptUrl, setBatchReceiptUrl] = useState('');
     const [batchDescription, setBatchDescription] = useState('');
-    // Per-person assignments: [{registrationId, personName, amount, paymentType}]
+    const [batchNeedsInvoice, setBatchNeedsInvoice] = useState(false);
+    // Per-person assignments: [{registrationId, personName, amount}]
     const [batchAssignments, setBatchAssignments] = useState([]);
+
+    // Edit registration modal
+    const [editingReg, setEditingReg] = useState(null);
 
     const delegateEmail = user?.email ?? '';
     const managedFaculties = user?.managedFaculties ?? [];
@@ -287,11 +291,13 @@ const DelegateDashboard = () => {
             setBatchReceiptUrl(batch.receiptUrl || '');
             setBatchDescription(batch.description || '');
             setBatchAssignments(batch.assignments ?? []);
+            setBatchNeedsInvoice(batch.needsInvoice ?? false);
             setEditingBatchId(batch.id);
         } else {
             setBatchReceiptUrl('');
             setBatchDescription('');
             setBatchAssignments([]);
+            setBatchNeedsInvoice(false);
             setEditingBatchId(null);
         }
         setBatchFile(null);
@@ -325,11 +331,23 @@ const DelegateDashboard = () => {
             receiptUrl = uploaded;
         }
 
+        const enrichedAssignments = batchAssignments.map(a => {
+            const reg = attendees.find(r => r.id === Number(a.registrationId));
+            const fullPrice = reg?.price ?? 100000;
+            const paymentType = a.amount >= fullPrice
+                ? 'Pagó Completo'
+                : a.amount > 0
+                ? 'Pagó 1° Cuota'
+                : 'No Pagó';
+            return { ...a, paymentType };
+        });
+
         const payload = {
             delegateEmail,
             receiptUrl,
             description: batchDescription,
-            assignments: batchAssignments,
+            needsInvoice: batchNeedsInvoice,
+            assignments: enrichedAssignments,
         };
 
         try {
@@ -356,10 +374,42 @@ const DelegateDashboard = () => {
 
             // Send "primera cuota recibida" emails for new batches only
             if (!editingBatchId) {
-                sendFirstPaymentEmails(batchAssignments, registrations);
+                sendFirstPaymentEmails(enrichedAssignments, attendees);
             }
         } catch {
             alert('Error al guardar el comprobante');
+        }
+    };
+
+    const handleEditSave = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const updated = {
+            ...editingReg,
+            name:                  fd.get('name'),
+            lastname:              fd.get('lastname'),
+            dni:                   fd.get('dni'),
+            phone:                 fd.get('phone'),
+            email:                 fd.get('email'),
+            faculty:               fd.get('faculty'),
+            bloodType:             fd.get('bloodType') || null,
+            medicalConditions:     fd.get('medicalConditions') || null,
+            emergencyContactName:  fd.get('emergencyContactName'),
+            emergencyContactPhone: fd.get('emergencyContactPhone'),
+            observations:          fd.get('observations') || null,
+        };
+        try {
+            const res = await fetch(`${API}/api/registrations/${editingReg.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updated),
+            });
+            if (!res.ok) throw new Error();
+            const saved = await res.json();
+            setAttendees(prev => prev.map(r => r.id === saved.id ? saved : r));
+            setEditingReg(null);
+        } catch {
+            alert('Error al guardar los cambios');
         }
     };
 
@@ -376,7 +426,7 @@ const DelegateDashboard = () => {
     // Assignment row helpers
     const addAssignmentRow = () => setBatchAssignments(prev => [
         ...prev,
-        { registrationId: '', personName: '', amount: PAYMENT_AMOUNTS[0], paymentType: 'Pagó Completo' },
+        { registrationId: '', personName: '', amount: PAYMENT_AMOUNTS[0] },
     ]);
 
     const updateAssignmentRow = (idx, field, value) => {
@@ -529,12 +579,20 @@ const DelegateDashboard = () => {
                                     />
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-right">
-                                    <button
-                                        onClick={() => handleDelete(person.id)}
-                                        className="text-red-500 hover:text-red-700 font-bold text-xs border border-red-200 px-2 py-1 rounded hover:bg-red-50 transition"
-                                    >
-                                        Eliminar
-                                    </button>
+                                    <div className="flex gap-2 justify-end">
+                                        <button
+                                            onClick={() => setEditingReg(person)}
+                                            className="text-blue-500 hover:text-blue-700 font-bold text-xs border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition"
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(person.id)}
+                                            className="text-red-500 hover:text-red-700 font-bold text-xs border border-red-200 px-2 py-1 rounded hover:bg-red-50 transition"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -625,7 +683,7 @@ const DelegateDashboard = () => {
                         <section>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Datos Académicos</p>
                             <div className="grid grid-cols-1 gap-3">
-                                <input name="email" type="email" placeholder="Email universitario *" required className="border p-2 rounded w-full text-sm" />
+                                <input name="email" type="email" placeholder="Email *" required className="border p-2 rounded w-full text-sm" />
                                 <div className="relative">
                                     <select name="faculty" required defaultValue="" className="border p-2 rounded w-full text-sm appearance-none bg-white">
                                         <option value="" disabled>Facultad / Delegación *</option>
@@ -656,6 +714,67 @@ const DelegateDashboard = () => {
                         <div className="flex gap-4 pt-4 border-t border-gray-100">
                             <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 text-gray-500 font-bold hover:bg-gray-100 p-2 rounded transition">Cancelar</button>
                             <button type="submit" className="flex-1 bg-primary-blue text-white font-bold p-2 rounded hover:bg-blue-700 transition">Guardar</button>
+                        </div>
+                    </form>
+                </Modal>
+            )}
+
+            {/* Edit Registration Modal */}
+            {editingReg && (
+                <Modal title={`Editar — ${editingReg.name} ${editingReg.lastname}`} onClose={() => setEditingReg(null)}>
+                    <form onSubmit={handleEditSave} className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Nombre</label>
+                                <input name="name" defaultValue={editingReg.name} className="border p-2 rounded w-full text-sm" required />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Apellido</label>
+                                <input name="lastname" defaultValue={editingReg.lastname} className="border p-2 rounded w-full text-sm" required />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">DNI</label>
+                                <input name="dni" defaultValue={editingReg.dni} className="border p-2 rounded w-full text-sm" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Celular</label>
+                                <input name="phone" defaultValue={editingReg.phone} className="border p-2 rounded w-full text-sm" />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
+                                <input name="email" type="email" defaultValue={editingReg.email} className="border p-2 rounded w-full text-sm" required />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Facultad</label>
+                                <input name="faculty" defaultValue={editingReg.faculty} className="border p-2 rounded w-full text-sm" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Grupo sanguíneo</label>
+                                <select name="bloodType" defaultValue={editingReg.bloodType ?? ''} className="border p-2 rounded w-full text-sm bg-white">
+                                    <option value="">—</option>
+                                    {['A+','A-','B+','B-','AB+','AB-','0+','0-'].map(t => <option key={t}>{t}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Afecciones</label>
+                                <input name="medicalConditions" defaultValue={editingReg.medicalConditions ?? ''} className="border p-2 rounded w-full text-sm" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Contacto emergencia</label>
+                                <input name="emergencyContactName" defaultValue={editingReg.emergencyContactName} className="border p-2 rounded w-full text-sm" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Tel. emergencia</label>
+                                <input name="emergencyContactPhone" defaultValue={editingReg.emergencyContactPhone} className="border p-2 rounded w-full text-sm" />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Observaciones</label>
+                                <textarea name="observations" defaultValue={editingReg.observations ?? ''} rows={2} className="border p-2 rounded w-full text-sm resize-none" />
+                            </div>
+                        </div>
+                        <div className="flex gap-3 pt-3 border-t border-gray-100">
+                            <button type="button" onClick={() => setEditingReg(null)} className="flex-1 text-gray-500 font-bold hover:bg-gray-100 p-2 rounded">Cancelar</button>
+                            <button type="submit" className="flex-1 bg-primary-blue text-white font-bold p-2 rounded hover:bg-blue-700">Guardar cambios</button>
                         </div>
                     </form>
                 </Modal>
@@ -743,17 +862,6 @@ const DelegateDashboard = () => {
                                             ))}
                                         </select>
 
-                                        {/* Payment type select */}
-                                        <select
-                                            value={row.paymentType}
-                                            onChange={e => updateAssignmentRow(idx, 'paymentType', e.target.value)}
-                                            className="border rounded px-2 py-1.5 text-xs w-36 bg-white"
-                                        >
-                                            <option value="Pagó Completo">Pagó Completo</option>
-                                            <option value="Pagó 1° Cuota">Pagó 1° Cuota</option>
-                                            <option value="No Pagó">No Pagó</option>
-                                        </select>
-
                                         <button type="button" onClick={() => removeAssignmentRow(idx)} className="text-red-400 hover:text-red-600 text-sm leading-none px-1">✕</button>
                                     </div>
                                 ))}
@@ -771,6 +879,17 @@ const DelegateDashboard = () => {
                                 className="border p-2 rounded w-full text-sm resize-none"
                             />
                         </div>
+
+                        {/* Invoice checkbox */}
+                        <label className="flex items-center gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={batchNeedsInvoice}
+                                onChange={e => setBatchNeedsInvoice(e.target.checked)}
+                                className="w-4 h-4 accent-primary-blue"
+                            />
+                            <span className="text-sm text-gray-700 font-medium">Solicitar factura para este comprobante</span>
+                        </label>
 
                         <div className="flex gap-4 pt-2 border-t border-gray-100">
                             <button type="button" onClick={() => setIsBatchModalOpen(false)} className="flex-1 text-gray-500 font-bold hover:bg-gray-100 p-2 rounded transition">Cancelar</button>
