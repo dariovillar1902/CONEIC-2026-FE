@@ -5,10 +5,10 @@
  */
 
 const DAYS = [
-  { label: 'MARTES',    date: '4 ago' },
-  { label: 'MIÉRCOLES', date: '5 ago' },
-  { label: 'JUEVES',    date: '6 ago' },
-  { label: 'VIERNES',   date: '7 ago' },
+  { label: 'MARTES',    date: '13 oct' },
+  { label: 'MIÉRCOLES', date: '14 oct' },
+  { label: 'JUEVES',    date: '15 oct' },
+  { label: 'VIERNES',   date: '16 oct' },
 ];
 
 /**
@@ -18,23 +18,33 @@ const DAYS = [
  *   null                      → celda omitida porque la anterior tiene span > 1
  */
 const SCHEDULE = [
+  // Bloque mañana
   [
-    { name: 'Acreditaciones y Apertura', location: 'Auditorio' },
-    { name: 'Talleres',                  location: 'Universidad' },
-    { name: 'Visitas técnicas',          location: 'Obra / Empresa', span: 2 },
-    { name: 'Charlas Magistrales',       location: 'Auditorio' },
+    { name: 'Acreditaciones y Apertura',  location: 'Auditorio Belgrano' },
+    { name: 'Talleres y Simultáneas',     location: 'UTN FRBA – Medrano' },
+    { name: 'Visitas Técnicas',           location: 'Campus UTN FRBA', span: 2 },
+    { name: 'Magistrales 7–12',           location: 'Auditorio Belgrano' },
   ],
+  // Bloque tarde temprano
   [
-    { name: 'Ponencias Estudiantiles',            location: 'Auditorio' },
-    { name: 'Solidarias y Charlas en simultáneo', location: 'Universidad' },
-    null,  // ocupado por "Visitas técnicas" de la fila anterior
-    { name: 'Charlas Magistrales', location: 'Auditorio' },
+    { name: 'Ponencias Estudiantiles',         location: 'Auditorio Belgrano' },
+    { name: 'Solidarias – Compromiso Social',  location: 'UTN FRBA – Medrano' },
+    null,   // ocupado por "Visitas Técnicas" de la fila anterior
+    { name: 'Magistrales 13–19',               location: 'Auditorio Belgrano' },
   ],
+  // Bloque tarde
   [
-    { name: 'Charlas Magistrales',                location: 'Auditorio' },
-    { name: 'Solidarias y Charlas en simultáneo', location: 'Universidad' },
-    { name: 'Recreativa',                         location: 'Universidad' },
-    { name: 'Acto de cierre',                     location: 'Auditorio' },
+    { name: 'Magistrales 1–6',                 location: 'Auditorio Belgrano' },
+    { name: 'Solidarias – Compromiso Social',  location: 'UTN FRBA – Campus' },
+    { name: 'Asamblea ANEIC + Recreativa',     location: 'Campus UTN FRBA' },
+    { name: 'Acto de Cierre',                  location: 'Auditorio Belgrano' },
+  ],
+  // Noche
+  [
+    { name: 'Fiesta de Bienvenida 🚧',         location: '' },
+    { name: 'Fiesta',                          location: '' },
+    { name: '–',                               location: '' },
+    { name: 'Fiesta de Cierre – Gala',         location: '' },
   ],
 ];
 

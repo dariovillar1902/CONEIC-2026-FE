@@ -23,9 +23,8 @@ const AREAS = [
             { name: 'Giuliana Ietto' },
             { name: 'Joel Choque García' },
             { name: 'Stick Guevara' },
-            { name: 'Julieta Listello' },
         ],
-        advisor: { name: 'Josefina Yarke Ariet', role: 'Asesora' },
+        advisor: null,
     },
     {
         area: 'Gestión y Protocolo',
@@ -33,9 +32,9 @@ const AREAS = [
         accentClass: 'border-teal-500',
         headerClass: 'bg-teal-700 text-white',
         members: [
-            { name: 'Alvaro Carmona' },
+            { name: 'Julieta Listello' },
         ],
-        advisor: { name: 'Wilson Choque García', role: 'Asesor' },
+        advisor: { name: 'Josefina Yarke Ariet', role: 'Asesora' },
     },
     {
         area: 'Tesorería y Finanzas',
@@ -43,9 +42,9 @@ const AREAS = [
         accentClass: 'border-emerald-500',
         headerClass: 'bg-emerald-700 text-white',
         members: [
-            { name: 'Carol Lombardino Petrocinio' },
+            { name: 'Alvaro Carmona' },
         ],
-        advisor: { name: 'Victoria Ortiz', role: 'Asesora' },
+        advisor: { name: 'Wilson Choque García', role: 'Asesor' },
     },
     {
         area: 'Prensa y Difusión',
@@ -53,17 +52,19 @@ const AREAS = [
         accentClass: 'border-violet-500',
         headerClass: 'bg-violet-700 text-white',
         members: [
-            { name: 'Gian Luca De Caro' },
+            { name: 'Carol Lombardino Petrocinio' },
         ],
-        advisor: { name: 'Nerea Oliveras', role: 'Asesora' },
+        advisor: { name: 'Victoria Ortiz', role: 'Asesora' },
     },
     {
         area: 'Auspicios y Patrocinios',
         icon: '🤝',
         accentClass: 'border-amber-500',
         headerClass: 'bg-amber-700 text-white',
-        members: [],           // pendiente de confirmar
-        advisor: null,
+        members: [
+            { name: 'Gian Luca De Caro' },
+        ],
+        advisor: { name: 'Nerea Oliveras', role: 'Asesora' },
     },
     {
         area: 'Web e Infraestructura',

@@ -43,7 +43,7 @@ export const SchedulePage = () => (
     <div className="bg-institutional text-white py-12 px-4 text-center">
       <h1 className="text-4xl md:text-5xl font-bold font-title mb-2">Cronograma</h1>
       <p className="text-gray-300 font-subtitle max-w-2xl mx-auto">
-        Actividades del XVIII&nbsp;CONEIC · Buenos Aires · 4 al 7 de agosto&nbsp;2026.
+        Actividades del XVIII&nbsp;CONEIC · Buenos Aires · 13 al 16 de octubre&nbsp;2026.
       </p>
     </div>
 
