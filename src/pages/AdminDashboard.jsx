@@ -23,7 +23,7 @@ async function sendValidatedEmail(reg) {
 }
 
 /** Sends the "Inscripción confirmada" email (template 03), for Pago Completo or 2da Cuota. */
-async function sendConfirmedEmail(reg) {
+async function sendConfirmedEmail(reg, password) {
   if (!EJS_SERVICE || !TPL_CONFIRMED || !EJS_KEY) return;
   const detail =
     reg.paymentCondition === 'SegundaCuota'
@@ -34,12 +34,10 @@ async function sendConfirmedEmail(reg) {
       to_name:        `${reg.name} ${reg.lastname}`,
       to_email:       reg.email,
       payment_detail: detail,
-      temp_password:  '(ver email anterior)', // password set at pre-registration
+      temp_password:  password ?? '(ver con tu delegado)',
       login_url:      `${window.location.origin}/login`,
     }, EJS_KEY);
-  } catch {
-    // email is non-critical — swallow silently
-  }
+  } catch { /* non-critical */ }
 }
 
 const STATUS_LABELS = {
@@ -272,17 +270,18 @@ const RegistrationsPanel = () => {
         body: JSON.stringify(newStatus),
       });
       if (!res.ok) throw new Error('No se pudo actualizar el estado');
+      const data = await res.json();
 
-      const reg = registrations.find(r => r.id === id);
+      // API returns { registration, generatedPassword } when status is Paid, plain reg otherwise
+      const updatedReg = data.registration ?? data;
+      const generatedPassword = data.generatedPassword ?? null;
+
       setRegistrations(prev =>
-        prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
+        prev.map(r => r.id === id ? updatedReg : r)
       );
 
-      // Send notification email on key status transitions
-      if (reg) {
-        if (newStatus === 'Validated') sendValidatedEmail(reg);
-        if (newStatus === 'Paid')      sendConfirmedEmail(reg);
-      }
+      if (newStatus === 'Validated') sendValidatedEmail(updatedReg);
+      if (newStatus === 'Paid')      sendConfirmedEmail(updatedReg, generatedPassword);
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {

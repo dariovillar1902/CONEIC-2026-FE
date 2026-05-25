@@ -10,26 +10,33 @@ import {
 } from '../data/filiales.js';
 
 // ─── Stage & Phase Configuration ─────────────────────────────────────────────
-// NOTE: All dates are preliminary pending approval by ANEIC Argentina CD.
-// Prices are assumed and must be confirmed before launch.
 const STAGES = [
     {
         id: 1,
-        label: 'Primera Etapa',
+        label: '1ª Etapa',
         priceFull: 100000,
         priceInstallment: 55000,
-        preRegistration: { start: new Date('2026-05-25'), end: new Date('2026-05-31') },
-        delegatePhase:   { start: new Date('2026-06-01'), end: new Date('2026-06-07') },
-        paymentPhase:    { start: new Date('2026-06-08'), end: new Date('2026-06-14') },
+        preRegistration: { start: new Date('2026-06-22'), end: new Date('2026-06-28') },
+        delegatePhase:   { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
+        paymentPhase:    { start: new Date('2026-07-06'), end: new Date('2026-07-12') },
     },
     {
         id: 2,
-        label: 'Segunda Etapa',
+        label: '2ª Etapa',
         priceFull: 130000,
         priceInstallment: 70000,
-        preRegistration: { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
-        delegatePhase:   { start: new Date('2026-07-06'), end: new Date('2026-07-12') },
-        paymentPhase:    { start: new Date('2026-07-13'), end: new Date('2026-07-19') },
+        preRegistration: { start: new Date('2026-07-27'), end: new Date('2026-08-02') },
+        delegatePhase:   { start: new Date('2026-08-03'), end: new Date('2026-08-09') },
+        paymentPhase:    { start: new Date('2026-08-10'), end: new Date('2026-08-16') },
+    },
+    {
+        id: 3,
+        label: '3ª Etapa',
+        priceFull: 160000,
+        priceInstallment: 85000,
+        preRegistration: { start: new Date('2026-08-31'), end: new Date('2026-09-06') },
+        delegatePhase:   { start: new Date('2026-09-07'), end: new Date('2026-09-13') },
+        paymentPhase:    { start: new Date('2026-09-14'), end: new Date('2026-09-20') },
     },
 ];
 
@@ -44,8 +51,10 @@ const getCurrentPhase = (today) => {
     }
     if (today < STAGES[0].preRegistration.start)
         return { stage: STAGES[0], phase: 'upcoming' };
-    if (today > STAGES[0].paymentPhase.end && today < STAGES[1].preRegistration.start)
-        return { stage: STAGES[1], phase: 'between' };
+    for (let i = 0; i < STAGES.length - 1; i++) {
+        if (today > STAGES[i].paymentPhase.end && today < STAGES[i + 1].preRegistration.start)
+            return { stage: STAGES[i + 1], phase: 'between' };
+    }
     return { stage: null, phase: 'closed' };
 };
 
@@ -171,7 +180,7 @@ const PhaseBanner = ({ phase, stage }) => {
             bg: 'bg-gray-50 border-gray-200',
             icon: '⏳',
             title: 'Entre etapas',
-            text: `La pre-inscripción para la Segunda Etapa abre el ${fmt(STAGES[1].preRegistration.start)}.`,
+            text: `La pre-inscripción para la ${stage?.label} abre el ${stage ? fmt(stage.preRegistration.start) : '—'}.`,
         },
         closed: {
             bg: 'bg-gray-50 border-gray-200',
@@ -198,9 +207,10 @@ const Registration = () => {
     const form = useRef();
     const today = new Date();
     const { stage: currentStage, phase: currentPhase } = getCurrentPhase(today);
-    const isFormOpen = true; // TODO: remove before launch — bypasses date restriction for demo
+    const [isFormOpen, setIsFormOpen] = useState(false);
 
     const [file, setFile] = useState(null);
+    const [certificateFile, setCertificateFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isDuplicate, setIsDuplicate] = useState(false);
@@ -211,6 +221,8 @@ const Registration = () => {
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [participatedInJoreic, setParticipatedInJoreic] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     const dietaryOptions = [
         'Sin restricciones',
@@ -227,8 +239,8 @@ const Registration = () => {
     const isOtra = selectedFaculty === 'Otra';
     const isInternacional = selectedFaculty === 'Internacional';
 
-    // Effective stage: JOREIC Norte participants in stage 2 pay stage 1 prices
-    const effectiveStage = (participatedInJoreic && currentStage?.id === 2) ? STAGES[0] : currentStage;
+    // Effective stage: JOREIC Norte participants in stages 2+ pay stage 1 prices
+    const effectiveStage = (participatedInJoreic && currentStage?.id >= 2) ? STAGES[0] : currentStage;
 
     // Resolved contact (delegate or ANEIC vocal) for the selected faculty/province
     const delegateContact = isInternacional
@@ -274,6 +286,18 @@ const Registration = () => {
         const facultyValue = isInternacional ? 'Internacional' : isOtra ? `Otra (${selectedProvince})` : selectedFaculty;
 
         try {
+            // Upload certificate if provided
+            let certificateFileName = null;
+            if (certificateFile) {
+                const fd = new FormData();
+                fd.append('file', certificateFile);
+                const upRes = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/upload`, { method: 'POST', body: fd });
+                if (upRes.ok) {
+                    const upData = await upRes.json();
+                    certificateFileName = upData.url;
+                }
+            }
+
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -291,6 +315,7 @@ const Registration = () => {
                     stageName:             currentStage?.label ?? 'Demo',
                     price:                 effectiveStage?.priceFull ?? 0,
                     participatedInJoreic,
+                    certificateFileName,
                 }),
             });
 
@@ -298,9 +323,6 @@ const Registration = () => {
                 setIsDuplicate(true);
                 return;
             }
-
-            const data = await response.json();
-            const generatedPassword = data.generatedPassword ?? null;
 
             // Send confirmation email via EmailJS (non-blocking)
             const serviceId  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -313,12 +335,13 @@ const Registration = () => {
                         serviceId,
                         templateId,
                         {
-                            to_name:       name,
-                            to_email:      email,
-                            faculty:       facultyValue,
-                            delegate_name: delegateContact?.name     ?? 'tu delegado',
-                            filial_name:   delegateContact?.filialName ?? 'ANEIC Nacional',
-                            web_url:       window.location.origin,
+                            to_name:        name,
+                            to_email:       email,
+                            faculty:        facultyValue,
+                            delegate_name:  delegateContact?.name      ?? 'tu delegado',
+                            filial_name:    delegateContact?.filialName ?? 'ANEIC Nacional',
+                            web_url:        window.location.origin,
+                            delegate_phone: delegateContact?.phone     ?? '',
                         },
                         publicKey,
                     );
@@ -405,12 +428,9 @@ const Registration = () => {
                         </p>
                     )}
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 max-w-lg mx-auto mb-4 text-left">
-                    <p className="text-sm text-green-800 font-bold mb-1">🔑 Tu acceso al portal</p>
-                    <p className="text-sm text-green-700">
-                        Te enviamos un email con una contraseña temporaria. Ingresá con tu email y cambiá la contraseña en tu primer inicio de sesión.
-                    </p>
-                </div>
+                <p className="text-sm text-gray-500 font-body max-w-lg mx-auto mb-4">
+                    Recibirás tus credenciales de acceso al portal una vez que se confirme el pago.
+                </p>
 
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 max-w-lg mx-auto mb-4">
                     <p className="text-sm text-yellow-800 font-bold">⚠️ Importante</p>
@@ -427,12 +447,15 @@ const Registration = () => {
                 <button
                     onClick={() => {
                         setIsSuccess(false);
+                        setIsFormOpen(false);
                         setSelectedFaculty('');
                         setSelectedProvince('');
                         setSelectedCountry('');
                         setParticipatedInJoreic(false);
+                        setCertificateFile(null);
                         setErrors({});
                         setSubmitted(false);
+                        setTermsAccepted(false);
                     }}
                     className="text-primary-blue font-bold hover:underline"
                 >
@@ -460,7 +483,7 @@ const Registration = () => {
                     {isFormOpen && currentStage && (
                         <div className="bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-200 text-center min-w-[180px]">
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{currentStage.label}</p>
-                            {participatedInJoreic && currentStage?.id === 2 && (
+                            {participatedInJoreic && currentStage?.id >= 2 && (
                                 <p className="text-xs font-bold text-green-700 bg-green-50 rounded px-2 py-0.5 mb-1">PRECIO ESPECIAL JOREIC NORTE</p>
                             )}
                             <p className="text-3xl font-bold text-primary-red">${effectiveStage.priceFull.toLocaleString('es-AR')}</p>
@@ -478,10 +501,92 @@ const Registration = () => {
             {/* Timeline */}
             <RegistrationTimeline today={today} />
 
+            {/* Terms & Conditions Modal */}
+            {showTermsModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full flex flex-col max-h-[90vh]">
+                        <div className="p-6 border-b border-gray-100">
+                            <h3 className="text-xl font-bold text-institutional font-title">Términos y Condiciones</h3>
+                        </div>
+                        <div className="overflow-y-auto max-h-[70vh] p-6 space-y-4 text-sm text-gray-700 font-body leading-relaxed">
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Confirmación de inscripción</p>
+                                <p>La inscripción no se considerará confirmada hasta que: el/la participante haya sido habilitado/a por su delegado/a correspondiente, y se haya acreditado el pago total de la inscripción, ya sea mediante un único pago o mediante el esquema de dos cuotas habilitado por el Comité Organizador.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Pagos</p>
+                                <p>Los pagos deberán realizarse dentro de las fechas y modalidades establecidas por el Comité Organizador, coordinando los mismos con el/la delegado/a correspondiente.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Política de reembolso</p>
+                                <p>Los importes abonados en concepto de inscripción no son reembolsables bajo ninguna circunstancia. Esto aplica tanto para pagos parciales como para pagos totales.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Transferencia de inscripción</p>
+                                <p>En caso de que un/a participante decida no asistir al Congreso, podrá transferir su inscripción a otra persona. La nueva persona participante deberá ser previamente habilitada por el/la delegado/a correspondiente, a fin de garantizar el cumplimiento de los criterios de prioridad y cupos establecidos para cada delegación.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Prohibición de reventa</p>
+                                <p>Queda prohibida la reventa de cupos de inscripción. El Comité Organizador podrá anular cualquier inscripción transferida o comercializada de manera indebida.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Acreditación de pagos</p>
+                                <p>Los pagos realizados pueden demorar algunos días hábiles en verse reflejados en el sistema de inscripción.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Modificaciones</p>
+                                <p>El Comité Organizador se reserva el derecho de modificar fechas, modalidades de pago o condiciones administrativas vinculadas al proceso de inscripción, informando dichos cambios por los canales oficiales correspondientes.</p>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-gray-100 space-y-4">
+                            <label className="flex items-center gap-3 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={termsAccepted}
+                                    onChange={e => setTermsAccepted(e.target.checked)}
+                                    className="w-4 h-4 accent-primary-blue"
+                                />
+                                <span className="text-sm text-gray-700 font-body">Leí y acepto los Términos y Condiciones</span>
+                            </label>
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => { setShowTermsModal(false); setTermsAccepted(false); }}
+                                    className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-600 font-bold hover:bg-gray-50 transition"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={!termsAccepted}
+                                    onClick={() => { setShowTermsModal(false); setIsFormOpen(true); }}
+                                    className={`flex-1 py-2 rounded-lg font-bold transition ${termsAccepted ? 'bg-primary-blue text-white hover:bg-blue-800' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                                >
+                                    Continuar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Content: form or phase banner */}
             <div className="p-10">
                 {!isFormOpen ? (
-                    <PhaseBanner phase={currentPhase} stage={currentStage} />
+                    <div>
+                        <PhaseBanner phase={currentPhase} stage={currentStage} />
+                        {currentPhase === 'preRegistration' && (
+                            <div className="mt-6 text-center">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTermsModal(true)}
+                                    className="bg-gradient-to-r from-primary-red to-red-700 text-white px-10 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all transform hover:-translate-y-1 font-title tracking-wider uppercase"
+                                >
+                                    Inscribirse
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <form ref={form} className="space-y-8" onSubmit={handleSubmit} noValidate>
 
@@ -578,6 +683,29 @@ const Registration = () => {
                                         data-field-error={submitted && !!errors.email}
                                     />
                                     <FieldError msg={submitted ? errors.email : ''} />
+                                </div>
+
+                                {/* Certificate upload */}
+                                <div className="group md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
+                                        Certificado de Alumno Regular <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 border-2 border-dashed border-gray-300 rounded-xl px-4 py-3 cursor-pointer hover:bg-gray-50 transition group-focus-within:border-primary-blue">
+                                        <span className="text-xl">📄</span>
+                                        <span className="text-sm text-gray-500">
+                                            {certificateFile ? certificateFile.name : 'Seleccionar PDF o imagen…'}
+                                        </span>
+                                        <input
+                                            type="file"
+                                            accept="image/*,application/pdf"
+                                            className="hidden"
+                                            onChange={e => setCertificateFile(e.target.files[0] || null)}
+                                        />
+                                    </label>
+                                    {certificateFile && (
+                                        <button type="button" onClick={() => setCertificateFile(null)} className="text-xs text-red-400 hover:text-red-600 mt-1">✕ Quitar archivo</button>
+                                    )}
+                                    <p className="text-xs text-gray-400 mt-1">PDF o imagen, máx. 10 MB.</p>
                                 </div>
 
                                 {/* Faculty selector — full width */}
@@ -724,29 +852,6 @@ const Registration = () => {
                                             <span className="text-xs text-green-700 font-bold">(precio especial: pagás tarifa de 1ª etapa)</span>
                                         </span>
                                     </label>
-                                </div>
-
-                                {/* Certificate upload */}
-                                <div className="group md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
-                                        Certificado de Alumno Regular (PDF)
-                                    </label>
-                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition cursor-pointer relative">
-                                        <div className="space-y-1 text-center">
-                                            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
-                                            <div className="flex text-sm text-gray-600 justify-center">
-                                                <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary-blue hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-blue">
-                                                    <span>Subir un archivo</span>
-                                                    <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={(e) => setFile(e.target.files[0])} />
-                                                </label>
-                                                <p className="pl-1">o arrastrar y soltar</p>
-                                            </div>
-                                            <p className="text-xs text-gray-500">PDF hasta 5MB</p>
-                                            {file && <p className="text-sm font-bold text-green-600 mt-2">Archivo seleccionado: {file.name}</p>}
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -11,11 +11,12 @@
   Env var: VITE_EMAILJS_TEMPLATE_REGISTRATION (ya existente: template_zb369sl)
 
   Variables:
-    {{to_name}}       — Nombre del inscripto
-    {{to_email}}      — Email (configurar en campo "To Email" del template)
-    {{delegate_name}} — Nombre del delegado/vocal responsable
-    {{filial_name}}   — Nombre de la región ANEIC (ej. "Región Este")
-    {{web_url}}       — URL de la página del congreso
+    {{to_name}}        — Nombre del inscripto
+    {{to_email}}       — Email (configurar en campo "To Email" del template)
+    {{delegate_name}}  — Nombre del delegado/vocal responsable
+    {{delegate_phone}} — Teléfono/WhatsApp del delegado (sin +54)
+    {{filial_name}}    — Nombre de la región ANEIC (ej. "Región Este")
+    {{web_url}}        — URL de la página del congreso
 -->
 <body style="margin:0;padding:0;background-color:#F5F5F5;font-family:Arial,Helvetica,sans-serif;">
 
@@ -67,14 +68,16 @@
                 <tr>
                   <td style="padding:16px 20px;">
                     <p style="margin:0 0 6px;font-size:13px;font-weight:bold;color:#002F51;">
-                      ¿Próximo paso?
+                      Tu contacto asignado
+                    </p>
+                    <p style="margin:0 0 4px;font-size:13px;color:#555555;line-height:1.6;">
+                      Delegado/a: <strong>{{delegate_name}}</strong>
+                    </p>
+                    <p style="margin:0 0 4px;font-size:13px;color:#555555;line-height:1.6;">
+                      WhatsApp: <a href="https://wa.me/54{{delegate_phone}}" style="color:#002F51;font-weight:bold;text-decoration:underline;">+54 {{delegate_phone}}</a>
                     </p>
                     <p style="margin:0;font-size:13px;color:#555555;line-height:1.6;">
-                      Comunicarte cuanto antes con tu delegado/vocal de la <strong>{{filial_name}}</strong> es el próximo paso. Encontrá los datos de contacto en:<br />
-                      <a href="{{web_url}}"
-                         style="color:#002F51;font-weight:bold;text-decoration:underline;">
-                        {{web_url}}
-                      </a>
+                      Región: <strong>{{filial_name}}</strong> · <a href="{{web_url}}" style="color:#002F51;font-weight:bold;text-decoration:underline;">Ver página del congreso</a>
                     </p>
                   </td>
                 </tr>
