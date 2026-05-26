@@ -504,7 +504,7 @@ const Registration = () => {
             {/* Terms & Conditions Modal */}
             {showTermsModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full flex flex-col max-h-[90vh]">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full flex flex-col max-h-[90vh]">
                         <div className="p-6 border-b border-gray-100">
                             <h3 className="text-xl font-bold text-institutional font-title">Términos y Condiciones</h3>
                         </div>
@@ -725,7 +725,7 @@ const Registration = () => {
                                             className={fieldCls(errors, submitted, 'faculty', 'appearance-none cursor-pointer')}
                                         >
                                             <option value="">Seleccionar...</option>
-                                            {ALL_FACULTIES_BY_REGION.map(({ region, faculties }) => (
+                                            {ALL_FACULTIES_BY_REGION.filter(r => r.region !== 'Internacional').map(({ region, faculties }) => (
                                                 <optgroup key={region} label={region}>
                                                     {faculties.map(f => (
                                                         <option key={f} value={f}>{f}</option>
@@ -945,18 +945,6 @@ const Registration = () => {
                                     />
                                     <FieldError msg={submitted ? errors.emergencyContactPhone : ''} />
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Terms */}
-                        <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100 flex items-start gap-4 hover:bg-blue-50 transition-colors cursor-pointer">
-                            <input required type="checkbox" className="mt-1 h-5 w-5 text-primary-blue rounded border-gray-300 focus:ring-primary-blue cursor-pointer" />
-                            <div className="space-y-1">
-                                <p className="font-bold text-institutional text-sm">Términos y Condiciones</p>
-                                <p className="text-sm text-gray-600 font-body leading-relaxed">
-                                    Acepto los términos. Entiendo que esta es una <strong>pre-inscripción</strong> sujeta a validación por mi delegado.
-                                    El pago se realizará posteriormente siguiendo las instrucciones de mi delegación.
-                                </p>
                             </div>
                         </div>
 

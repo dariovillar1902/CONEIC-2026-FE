@@ -20,16 +20,13 @@ const Navbar = () => {
     const effectiveScrolled = scrolled || !isHome;
 
     const navLinks = [
-        { name: 'Inicio', href: '/' },
-        { name: 'Cronograma', href: '/schedule' },
-        { name: 'Sedes', href: '/venues' },
-        { name: 'Sobre Nosotros', href: '/about' },
-        { name: 'Comité', href: '/committee' },
-        { name: 'Avales', href: '/endorsements' },
-        { name: 'Sponsors', href: '/sponsors' },
-        { name: 'Galería', href: '/gallery' },
-        { name: 'Subcomisiones', href: '/subcomisiones' },
-        { name: 'FAQ', href: '/faq' },
+        { name: 'Inicio',              href: '/' },
+        { name: 'Cronograma y Sedes',  href: '/schedule' },
+        { name: 'Sobre Nosotros',      href: '/about' },
+        { name: 'Avales',              href: '/endorsements' },
+        { name: 'Sponsors',            href: '/sponsors' },
+        { name: 'Galería',             href: '/gallery' },
+        { name: 'FAQ',                 href: '/faq' },
     ];
 
     return (

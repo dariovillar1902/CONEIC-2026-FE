@@ -206,6 +206,15 @@ const AreaCard = ({ area }) => (
     </div>
 );
 
+// ─── Exported section content (used by AboutPage tabs) ────────────────────────
+export const CommitteeSectionContent = () => (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+        {AREAS.map((area) => (
+            <AreaCard key={area.area} area={area} />
+        ))}
+    </div>
+);
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const CommitteePage = () => (
     <div className="pt-24 min-h-screen bg-complementary-light font-body">
