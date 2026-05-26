@@ -16,7 +16,7 @@ const STAGES = [
         label: '1ª Etapa',
         priceFull: 100000,
         priceInstallment: 55000,
-        preRegistration: { start: new Date('2026-06-22'), end: new Date('2026-06-28') },
+        preRegistration: { start: new Date('2026-05-26'), end: new Date('2026-06-28') },
         delegatePhase:   { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
         paymentPhase:    { start: new Date('2026-07-06'), end: new Date('2026-07-12') },
     },
