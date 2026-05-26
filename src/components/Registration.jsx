@@ -14,8 +14,8 @@ const STAGES = [
     {
         id: 1,
         label: '1ª Etapa',
-        priceFull: 100000,
-        priceInstallment: 55000,
+        priceFull: 80000,
+        priceInstallment: 45000,
         preRegistration: { start: new Date('2026-05-26'), end: new Date('2026-06-28') },
         delegatePhase:   { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
         paymentPhase:    { start: new Date('2026-07-06'), end: new Date('2026-07-12') },
@@ -239,8 +239,7 @@ const Registration = () => {
     const isOtra = selectedFaculty === 'Otra';
     const isInternacional = selectedFaculty === 'Internacional';
 
-    // Effective stage: JOREIC Norte participants in stages 2+ pay stage 1 prices
-    const effectiveStage = (participatedInJoreic && currentStage?.id >= 2) ? STAGES[0] : currentStage;
+    const effectiveStage = currentStage;
 
     // Resolved contact (delegate or ANEIC vocal) for the selected faculty/province
     const delegateContact = isInternacional
@@ -483,9 +482,6 @@ const Registration = () => {
                     {isFormOpen && currentStage && (
                         <div className="bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-200 text-center min-w-[180px]">
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{currentStage.label}</p>
-                            {participatedInJoreic && currentStage?.id >= 2 && (
-                                <p className="text-xs font-bold text-green-700 bg-green-50 rounded px-2 py-0.5 mb-1">PRECIO ESPECIAL JOREIC NORTE</p>
-                            )}
                             <p className="text-3xl font-bold text-primary-red">${effectiveStage.priceFull.toLocaleString('es-AR')}</p>
                             <p className="text-xs text-gray-400 mt-1">
                                 o 2 cuotas de ${effectiveStage.priceInstallment.toLocaleString('es-AR')}
@@ -838,7 +834,7 @@ const Registration = () => {
                                     )}
                                 </div>
 
-                                {/* JOREIC Norte checkbox */}
+                                {/* JOREIC checkbox */}
                                 <div className="md:col-span-2">
                                     <label className="flex items-center gap-3 cursor-pointer group select-none">
                                         <input
@@ -848,8 +844,7 @@ const Registration = () => {
                                             className="w-4 h-4 accent-primary-blue"
                                         />
                                         <span className="text-sm text-gray-700">
-                                            Participé en el <strong>JOREIC Norte</strong>{' '}
-                                            <span className="text-xs text-green-700 font-bold">(precio especial: pagás tarifa de 1ª etapa)</span>
+                                            Participé en la <strong>JOREIC de mi región</strong>
                                         </span>
                                     </label>
                                 </div>
@@ -964,9 +959,6 @@ const Registration = () => {
                             </span>
                         </button>
 
-                        <p className="text-center text-xs text-gray-400">
-                            Una vez enviada, contactá a tu delegado para agilizar la validación.
-                        </p>
                     </form>
                 )}
             </div>

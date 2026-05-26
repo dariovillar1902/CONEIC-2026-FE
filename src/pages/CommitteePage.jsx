@@ -15,6 +15,17 @@ const AREAS = [
         advisor: { name: 'María Emilia Bezmalinovich', role: 'Asesora de Directorio' },
     },
     {
+        area: 'Tesorería y Finanzas',
+        icon: '💰',
+        accentClass: 'border-emerald-500',
+        headerClass: 'bg-emerald-700 text-white',
+        members: [
+            { name: 'Alvaro Carmona',      role: 'Tesorero' },
+            { name: 'Wilson Choque García', role: 'Miembro' },
+        ],
+        advisor: null,
+    },
+    {
         area: 'Académica',
         icon: '🎓',
         accentClass: 'border-primary-blue',
@@ -35,16 +46,6 @@ const AREAS = [
             { name: 'Julieta Listello' },
         ],
         advisor: { name: 'Josefina Yarke Ariet', role: 'Asesora' },
-    },
-    {
-        area: 'Tesorería y Finanzas',
-        icon: '💰',
-        accentClass: 'border-emerald-500',
-        headerClass: 'bg-emerald-700 text-white',
-        members: [
-            { name: 'Alvaro Carmona' },
-        ],
-        advisor: { name: 'Wilson Choque García', role: 'Asesor' },
     },
     {
         area: 'Prensa y Difusión',

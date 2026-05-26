@@ -92,6 +92,21 @@ const GalleryPage = () => {
             </div>
           ))}
         </div>
+
+        {/* Link to ANEIC archive */}
+        <div className="mt-10 text-center">
+          <a
+            href="https://sites.google.com/view/aneicarg/eventos/congreso-nacional"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-institutional text-white font-bold px-8 py-3 rounded-full hover:bg-primary-red transition-colors shadow-md uppercase tracking-widest text-sm"
+          >
+            Ver todas las ediciones en ANEIC Argentina
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
       </div>
 
     </div>

@@ -21,30 +21,30 @@ const SCHEDULE = [
   // Bloque mañana
   [
     { name: 'Acreditaciones y Apertura',  location: 'Auditorio Belgrano' },
-    { name: 'Talleres y Simultáneas',     location: 'UTN FRBA – Medrano' },
-    { name: 'Visitas Técnicas',           location: 'Campus UTN FRBA', span: 2 },
-    { name: 'Magistrales 7–12',           location: 'Auditorio Belgrano' },
+    { name: 'Talleres y Simultáneas',     location: '' },
+    { name: 'Visitas Técnicas',           location: '', span: 2 },
+    { name: 'Charlas Magistrales',        location: 'Auditorio Belgrano' },
   ],
   // Bloque tarde temprano
   [
     { name: 'Ponencias Estudiantiles',         location: 'Auditorio Belgrano' },
-    { name: 'Solidarias – Compromiso Social',  location: 'UTN FRBA – Medrano' },
-    null,   // ocupado por "Visitas Técnicas" de la fila anterior
-    { name: 'Magistrales 13–19',               location: 'Auditorio Belgrano' },
+    { name: 'Solidarias – Compromiso Social',  location: '' },
+    null,
+    { name: 'Charlas Magistrales',             location: 'Auditorio Belgrano' },
   ],
   // Bloque tarde
   [
-    { name: 'Magistrales 1–6',                 location: 'Auditorio Belgrano' },
-    { name: 'Solidarias – Compromiso Social',  location: 'UTN FRBA – Campus' },
-    { name: 'Asamblea ANEIC + Recreativa',     location: 'Campus UTN FRBA' },
+    { name: 'Charlas Magistrales',             location: 'Auditorio Belgrano' },
+    { name: 'Solidarias – Compromiso Social',  location: '' },
+    { name: 'Asamblea ANEIC + Recreativa',     location: '' },
     { name: 'Acto de Cierre',                  location: 'Auditorio Belgrano' },
   ],
   // Noche
   [
-    { name: 'Fiesta de Bienvenida 🚧',         location: '' },
-    { name: 'Fiesta',                          location: '' },
-    { name: '–',                               location: '' },
-    { name: 'Fiesta de Cierre – Gala',         location: '' },
+    { name: 'Evento de Bienvenida',  location: '' },
+    { name: 'Evento',                location: '' },
+    { name: '–',                     location: '' },
+    { name: 'Evento de Cierre',      location: '' },
   ],
 ];
 
