@@ -23,8 +23,7 @@ const Navbar = () => {
         { name: 'Inicio',              href: '/' },
         { name: 'Cronograma y Sedes',  href: '/schedule' },
         { name: 'Sobre Nosotros',      href: '/about' },
-        { name: 'Avales',              href: '/endorsements' },
-        { name: 'Sponsors',            href: '/sponsors' },
+        { name: 'Sponsors & Avales',   href: '/sponsors' },
         { name: 'Galería',             href: '/gallery' },
         { name: 'FAQ',                 href: '/faq' },
     ];
