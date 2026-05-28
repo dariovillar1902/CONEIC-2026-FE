@@ -2,24 +2,25 @@ import { useState } from 'react';
 
 const ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII'];
 
+// Ordered most-recent → oldest for display
 const PREV_EDITIONS = [
-  { edition: 1,  year: 2008, city: 'Rosario' },
-  { edition: 2,  year: 2009, city: null },
-  { edition: 3,  year: 2010, city: null },
-  { edition: 4,  year: 2011, city: null },
-  { edition: 5,  year: 2012, city: null },
-  { edition: 6,  year: 2013, city: null },
-  { edition: 7,  year: 2014, city: null },
-  { edition: 8,  year: 2015, city: null },
-  { edition: 9,  year: 2016, city: null },
-  { edition: 10, year: 2017, city: 'Neuquén' },
-  { edition: 11, year: 2018, city: 'La Plata' },
-  { edition: 12, year: 2019, city: 'Tucumán' },
-  { edition: 13, year: 2021, city: null },
-  { edition: 14, year: 2022, city: null },
-  { edition: 15, year: 2023, city: null },
-  { edition: 16, year: 2024, city: null },
   { edition: 17, year: 2025, city: 'San Rafael' },
+  { edition: 16, year: 2024, city: 'Córdoba' },
+  { edition: 15, year: 2023, city: 'Corrientes' },
+  { edition: 14, year: 2022, city: 'Rosario' },
+  { edition: 13, year: 2021, city: 'La Plata' },
+  { edition: 12, year: 2019, city: 'Tucumán' },
+  { edition: 11, year: 2018, city: 'La Plata' },
+  { edition: 10, year: 2017, city: 'Neuquén' },
+  { edition: 9,  year: 2016, city: 'Mendoza' },
+  { edition: 8,  year: 2015, city: 'San Juan' },
+  { edition: 7,  year: 2014, city: 'Córdoba' },
+  { edition: 6,  year: 2013, city: 'Tucumán' },
+  { edition: 5,  year: 2012, city: 'Rosario' },
+  { edition: 4,  year: 2011, city: 'Buenos Aires' },
+  { edition: 3,  year: 2010, city: 'Mendoza' },
+  { edition: 2,  year: 2009, city: 'Santa Fe' },
+  { edition: 1,  year: 2008, city: 'Rosario' },
 ];
 
 // Rotate through a set of elegant palette backgrounds

@@ -33,7 +33,7 @@ const AREAS = [
         members: [
             { name: 'Giuliana Ietto' },
             { name: 'Joel Choque García' },
-            { name: 'Stick Guevara' },
+            { name: 'Stick Mosquera' },
         ],
         advisor: null,
     },

@@ -14,6 +14,12 @@ const SPONSORS = [
         url: 'https://www.maccaferri.com/ar/',
         cardBg: 'bg-[#1a6b6b]',
     },
+    {
+        name: 'MCH Estructuras Metálicas',
+        logoUrl: '/assets/sponsors/logo-mch.png',
+        url: 'https://mch.com.ar',
+        cardBg: 'bg-[#1a1a2e]',
+    },
 ];
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -24,7 +30,7 @@ const ENDORSERS = [
         shortName: 'UTN.BA',
         fullName: 'Universidad Tecnológica Nacional — Facultad Regional Buenos Aires',
         url: 'https://www.frba.utn.edu.ar',
-        logoUrl: '/assets/avales/logo-utnba.png',
+        logoUrl: '/assets/avales/logo-utnba.jpg',
         logoBg: 'bg-white',
         description: 'Una de las facultades de ingeniería más grandes y prestigiosas del país. Se destaca por su excelencia académica en la formación de profesionales, su fuerte impulso a la investigación científica, la transferencia tecnológica al sistema productivo y un profundo compromiso con el desarrollo social y sostenible de la región.',
     },
@@ -563,10 +569,10 @@ const DelegadosTab = () => {
 /* ══════════════════════════════════════════════════════════════════════════════
    MAIN PAGE
 ══════════════════════════════════════════════════════════════════════════════ */
+// Delegados tab hidden for privacy (phone numbers). Re-enable by restoring the entry.
 const TABS = [
     { id: 'sponsors',   label: 'Sponsors' },
     { id: 'avales',     label: 'Avales Institucionales' },
-    { id: 'delegados',  label: 'Delegados' },
 ];
 
 const HERO_CONTENT = {
