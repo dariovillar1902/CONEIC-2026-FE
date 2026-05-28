@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import emailjs from '@emailjs/browser';
+import { getContactForFaculty } from '../data/filiales.js';
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 const API = import.meta.env.VITE_API_URL;
@@ -12,10 +13,17 @@ const TPL_CONFIRMED = import.meta.env.VITE_EMAILJS_TEMPLATE_CONFIRMED;
 /** Sends the "Inscripción habilitada" email (template 02). */
 async function sendValidatedEmail(reg) {
   if (!EJS_SERVICE || !TPL_VALIDATED || !EJS_KEY) return;
+  const delegateContact = getContactForFaculty(reg.faculty);
   try {
     await emailjs.send(EJS_SERVICE, TPL_VALIDATED, {
-      to_name:  `${reg.name} ${reg.lastname}`,
-      to_email: reg.email,
+      to_name:        `${reg.name} ${reg.lastname}`,
+      to_email:       reg.email,
+      faculty:        reg.faculty ?? '',
+      delegate_name:  delegateContact?.name      ?? 'tu delegado/a',
+      filial_name:    delegateContact?.filialName ?? 'ANEIC Nacional',
+      delegate_phone: delegateContact?.phone     ?? '',
+      delegate_email: delegateContact?.email     ?? '',
+      web_url:        window.location.origin,
     }, EJS_KEY);
   } catch {
     // email is non-critical — swallow silently

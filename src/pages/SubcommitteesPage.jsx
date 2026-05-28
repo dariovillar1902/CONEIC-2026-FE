@@ -7,6 +7,7 @@ const SUBCOMMITTEES = [
       description: 'Gestión de alianzas estratégicas con empresas, instituciones y organismos que apoyan el congreso a través de convenios y patrocinios.',
       icon: '🤝',
       color: 'bg-blue-100 text-blue-600',
+      logoUrl: '/assets/subcomisiones/subco-cyp.png',
       whatsapp: 'https://chat.whatsapp.com/Ki0szaMJDFoG1e6IgpFivW'
     },
     {
@@ -15,6 +16,7 @@ const SUBCOMMITTEES = [
       description: 'Desarrollo y mantenimiento de la plataforma web, aplicación móvil y contenidos multimedia del evento.',
       icon: '💻',
       color: 'bg-purple-100 text-purple-600',
+      logoUrl: '/assets/subcomisiones/subco-wym.png',
       whatsapp: 'https://chat.whatsapp.com/GvDnknoRIcZBnMWzIe2bPp'
     },
     {
@@ -23,6 +25,7 @@ const SUBCOMMITTEES = [
       description: 'Promoción de la equidad de género y la diversidad dentro del ámbito de la ingeniería civil y el congreso.',
       icon: '🏳️‍🌈',
       color: 'bg-pink-100 text-pink-600',
+      logoUrl: '/assets/subcomisiones/subco-gyd.png',
       whatsapp: 'https://chat.whatsapp.com/EJvn7xNDL8KBXGosLjEupx'
     },
     {
@@ -31,6 +34,7 @@ const SUBCOMMITTEES = [
       description: 'Administración de los recursos económicos, presupuesto y gestión financiera de ANEIC Argentina.',
       icon: '💰',
       color: 'bg-green-100 text-green-600',
+      logoUrl: '/assets/subcomisiones/subco-finanzas.png',
       whatsapp: 'https://chat.whatsapp.com/BGwiTkpdevbG3h8B3tnnOm'
     },
     {
@@ -39,6 +43,7 @@ const SUBCOMMITTEES = [
       description: 'Elaboración, actualización y control del cumplimiento de los reglamentos internos de la asociación.',
       icon: '📜',
       color: 'bg-yellow-100 text-yellow-600',
+      logoUrl: '/assets/subcomisiones/subco-reglamentos.png',
       whatsapp: 'https://chat.whatsapp.com/E50toKQOL274cgvQfqhUPG'
     },
     {
@@ -47,6 +52,7 @@ const SUBCOMMITTEES = [
       description: 'Defensa y difusión de las incumbencias profesionales del ingeniero civil ante organismos y la sociedad.',
       icon: '⚖️',
       color: 'bg-orange-100 text-orange-600',
+      logoUrl: '/assets/subcomisiones/subco-incumbencias.png',
       whatsapp: 'https://chat.whatsapp.com/GeVhWnpWvzZCcud4BPuK5c'
     },
     {
@@ -55,6 +61,7 @@ const SUBCOMMITTEES = [
       description: 'Organización de charlas, talleres, visitas técnicas y actividades de formación académica y profesional.',
       icon: '📚',
       color: 'bg-indigo-100 text-indigo-600',
+      logoUrl: '/assets/subcomisiones/subco-acad%C3%A9micas.png',
       whatsapp: 'https://chat.whatsapp.com/BiiQHFEiWeS81ZPkvgB3pz'
     },
     {
@@ -63,6 +70,7 @@ const SUBCOMMITTEES = [
       description: 'Acciones orientadas a la responsabilidad social y la sostenibilidad ambiental dentro y fuera del congreso.',
       icon: '🌱',
       color: 'bg-teal-100 text-teal-600',
+      logoUrl: '/assets/subcomisiones/subco-csyma.png',
       whatsapp: 'https://chat.whatsapp.com/LYQihBvUv3h4cWOLkUHPcS'
     }
 ];
@@ -71,8 +79,11 @@ const SUBCOMMITTEES = [
 const SubCard = ({ sub }) => (
   <div className="bg-accent rounded-2xl shadow-sm overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1 group border border-gray-200">
     <div className="p-6">
-      <div className={`w-14 h-14 rounded-xl ${sub.color} flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform`}>
-        {sub.icon}
+      <div className={`w-14 h-14 rounded-xl ${sub.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform overflow-hidden`}>
+        {sub.logoUrl
+          ? <img src={sub.logoUrl} alt={sub.title} className="w-full h-full object-contain p-1" />
+          : <span className="text-2xl">{sub.icon}</span>
+        }
       </div>
       <h3 className="text-lg font-bold text-institutional font-title mb-3">{sub.title}</h3>
       <p className="text-gray-600 leading-relaxed text-sm mb-4">{sub.description}</p>

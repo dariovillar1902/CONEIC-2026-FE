@@ -341,6 +341,7 @@ const Registration = () => {
                             filial_name:    delegateContact?.filialName ?? 'ANEIC Nacional',
                             web_url:        window.location.origin,
                             delegate_phone: delegateContact?.phone     ?? '',
+                            delegate_email: delegateContact?.email     ?? '',
                         },
                         publicKey,
                     );
