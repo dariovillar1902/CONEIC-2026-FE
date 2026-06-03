@@ -260,8 +260,9 @@ const Registration = () => {
         const dni                  = form.current.user_dni.value;
         const phone                = form.current.user_phone.value;
         const email                = form.current.user_email.value;
-        const emergencyContactName = form.current.user_emergency_contact.value;
-        const emergencyContactPhone = form.current.user_emergency_phone.value;
+        const emergencyContactName         = form.current.user_emergency_contact.value;
+        const emergencyContactRelationship = form.current.user_emergency_relationship.value;
+        const emergencyContactPhone        = form.current.user_emergency_phone.value;
 
         const errs = validateFields(
             { name, lastname, dni, phone, email, faculty: selectedFaculty, emergencyContactName, emergencyContactPhone },
@@ -313,6 +314,7 @@ const Registration = () => {
                     bloodType:             form.current.user_blood.value,
                     medicalConditions:     form.current.user_medical.value,
                     emergencyContactName,
+                    emergencyContactRelationship,
                     emergencyContactPhone,
                     stageName:             currentStage?.label ?? 'Demo',
                     price:                 effectiveStage?.priceFull ?? 0,
@@ -389,81 +391,92 @@ const Registration = () => {
     }
 
     // ── Success Screen ──────────────────────────────────────────────────────
+    const resetForm = () => {
+        setIsSuccess(false);
+        setIsFormOpen(false);
+        setSelectedFaculty('');
+        setSelectedProvince('');
+        setSelectedCountry('');
+        setParticipatedInJoreic(false);
+        setCertificateFile(null);
+        setErrors({});
+        setSubmitted(false);
+        setTermsAccepted(false);
+    };
+
     if (isSuccess) {
         return (
-            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-12 border border-gray-100 p-12 text-center">
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <h2 className="text-3xl font-bold text-institutional font-title mb-4">¡Solicitud Enviada!</h2>
-                <p className="text-gray-600 font-body text-lg max-w-xl mx-auto mb-8">
-                    Hemos recibido tu pre-inscripción correctamente.
-                </p>
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-12 border border-gray-100 p-8 md:p-12 max-w-lg mx-auto">
 
-                {/* Per-filial contact info */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-lg mx-auto mb-4 text-left">
-                    <p className="text-sm text-blue-800 font-bold mb-1">
-                        📋 Próximo paso: <strong>contactate directamente</strong> con tu{' '}
-                        {delegateContact?.isVocal ? 'vocal ANEIC' : 'delegado/vocal asignado'}
+                {/* Back button — top */}
+                <div className="text-center mb-8">
+                    <button onClick={resetForm} className="inline-flex items-center gap-2 text-primary-blue font-bold hover:underline text-sm">
+                        ← Volver al formulario
+                    </button>
+                </div>
+
+                {/* Check + title */}
+                <div className="text-center mb-6">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                        <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h2 className="text-3xl font-bold text-institutional font-title mb-2">¡Solicitud Enviada!</h2>
+                    <p className="text-gray-600 font-body text-base">
+                        Hemos recibido tu pre-inscripción correctamente.
+                    </p>
+                </div>
+
+                {/* Important warning */}
+                <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 mb-4">
+                    <p className="text-sm font-bold text-yellow-800 mb-1">⚠️ Importante</p>
+                    <p className="text-sm text-yellow-700 leading-relaxed">
+                        Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción.
+                        Contactate con tu delegado/vocal para coordinar el pago.
+                    </p>
+                </div>
+
+                {/* Next step */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left">
+                    <p className="text-sm font-bold text-blue-900 mb-1">¿Próximo paso?</p>
+                    <p className="text-sm text-blue-800 leading-relaxed">
+                        Espera a recibir el mail que indica que tu inscripción ha sido{' '}
+                        <strong>habilitada</strong>, y cuáles son los pasos a seguir.
+                    </p>
+                </div>
+
+                {/* Delegate contact — bottom */}
+                <div className="border border-gray-200 rounded-xl p-4 text-left">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
+                        En caso de tener dudas, podés contactarte con tu delegado/a
                     </p>
                     {delegateContact ? (
-                        <>
-                            <p className="text-sm text-blue-700">
-                                Filial: <strong>{delegateContact.filialName}</strong>
+                        <div className="space-y-1.5">
+                            <p className="text-sm text-gray-700">
+                                Filial: <strong className="text-institutional">{delegateContact.filialName}</strong>
                             </p>
-                            <p className="text-sm text-blue-700 mt-1">
-                                Contacto: <strong>{delegateContact.name}</strong> —{' '}
-                                <a href={`mailto:${delegateContact.email}`} className="font-bold underline hover:text-blue-900">
-                                    {delegateContact.email}
-                                </a>
+                            <p className="text-sm text-gray-700">
+                                Contacto: <strong>{delegateContact.name}</strong>
+                                {delegateContact.email && (
+                                    <> — <a href={`mailto:${delegateContact.email}`} className="text-primary-blue font-bold underline hover:text-blue-900 break-all">{delegateContact.email}</a></>
+                                )}
                             </p>
                             {delegateContact.phone && (
-                                <p className="text-sm text-blue-700 mt-1">
-                                    WhatsApp: <a href={`https://wa.me/54${delegateContact.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">+54 {delegateContact.phone}</a>
+                                <p className="text-sm text-gray-700">
+                                    WhatsApp:{' '}
+                                    <a href={`https://wa.me/54${delegateContact.phone}`} className="text-primary-blue font-bold underline" target="_blank" rel="noreferrer">
+                                        +54 {delegateContact.phone}
+                                    </a>
                                 </p>
                             )}
-                        </>
+                        </div>
                     ) : (
-                        <p className="text-sm text-blue-700">
+                        <p className="text-sm text-gray-600">
                             Contactate con tu delegado para coordinar el pago y confirmar tu vacante.
                         </p>
                     )}
                 </div>
-                <p className="text-sm text-gray-500 font-body max-w-lg mx-auto mb-4">
-                    Recibirás tus credenciales de acceso al portal una vez que se confirme el pago.
-                </p>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 max-w-lg mx-auto mb-4">
-                    <p className="text-sm text-yellow-800 font-bold">⚠️ Importante</p>
-                    <p className="text-sm text-yellow-700">
-                        Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción. Contactate con tu delegado/vocal para coordinar el pago.
-                    </p>
-                </div>
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-lg mx-auto mb-8 text-left">
-                    <p className="text-sm text-blue-800 font-bold">¿Próximo paso?</p>
-                    <p className="text-sm text-blue-700">
-                        Ahora <strong>contactate directamente</strong> con tu delegado/vocal para coordinar el pago y confirmar tu vacante.
-                    </p>
-                </div>
-                <button
-                    onClick={() => {
-                        setIsSuccess(false);
-                        setIsFormOpen(false);
-                        setSelectedFaculty('');
-                        setSelectedProvince('');
-                        setSelectedCountry('');
-                        setParticipatedInJoreic(false);
-                        setCertificateFile(null);
-                        setErrors({});
-                        setSubmitted(false);
-                        setTermsAccepted(false);
-                    }}
-                    className="text-primary-blue font-bold hover:underline"
-                >
-                    Volver al formulario
-                </button>
             </div>
         );
     }
@@ -735,9 +748,6 @@ const Registration = () => {
                                             <optgroup label="Otra">
                                                 <option value="Otra">Otra (indicar provincia)</option>
                                             </optgroup>
-                                            <optgroup label="Internacional">
-                                                <option value="Internacional">Estudiante internacional</option>
-                                            </optgroup>
                                         </select>
                                         <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -946,6 +956,26 @@ const Registration = () => {
                                         data-field-error={submitted && !!errors.emergencyContactName}
                                     />
                                     <FieldError msg={submitted ? errors.emergencyContactName : ''} />
+                                </div>
+                                <div className="group">
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Parentesco
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            name="user_emergency_relationship"
+                                            defaultValue=""
+                                            className={`${fieldCls(errors, submitted, '')} appearance-none cursor-pointer`}
+                                        >
+                                            <option value="">Seleccionar...</option>
+                                            {['Madre', 'Padre', 'Hermano/a', 'Pareja', 'Cónyuge', 'Familiar', 'Amigo/a', 'Otro'].map(r => (
+                                                <option key={r} value={r}>{r}</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="group">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
