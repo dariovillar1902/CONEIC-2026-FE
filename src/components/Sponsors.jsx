@@ -2,8 +2,14 @@ const SPONSORS = [
     {
         name: 'Maccaferri',
         logoUrl: 'https://www.maccaferri.com/wp-content/themes/maccaferri/src/images/header/logo-maccaferri.png',
-        url: 'https://www.maccaferri.com/ar/',
+        url: 'https://www.maccaferri.com/latam',
         cardBg: 'bg-[#1a6b6b]',
+    },
+    {
+        name: 'MCH Estructuras Metálicas',
+        logoUrl: '/assets/sponsors/logo-mch.png',
+        url: 'https://mch-srl.com.ar/',
+        cardBg: 'bg-[#1a1a2e]',
     },
 ];
 

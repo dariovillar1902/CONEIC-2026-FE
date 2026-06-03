@@ -250,10 +250,10 @@ const REGIONS = [
                 ],
             },
             {
-                university: 'UCASAL',
+                university: 'UN Salta',
                 contacts: [
-                    { name: 'Daniel Martínez',  role: 'Titular', phone: '3875518269' },
-                    { name: 'Alejandra Sulca',  role: 'Titular', phone: '3874812466' },
+                    { name: 'Luis Barrios',            role: 'Titular', phone: '3874464850' },
+                    { name: 'Gimena Álvarez Matthews', role: 'Titular', phone: '3875142818' },
                 ],
             },
             {
@@ -264,10 +264,10 @@ const REGIONS = [
                 ],
             },
             {
-                university: 'UN Salta',
+                university: 'UCASAL',
                 contacts: [
-                    { name: 'Luis Barrios',          role: 'Titular', phone: '3874464850' },
-                    { name: 'Gimena Álvarez Matthews', role: 'Titular', phone: '3875142818' },
+                    { name: 'Daniel Martínez',  role: 'Titular', phone: '3875518269' },
+                    { name: 'Alejandra Sulca',  role: 'Titular', phone: '3874812466' },
                 ],
             },
         ],
@@ -286,6 +286,7 @@ const REGIONS = [
                 university: 'UNPSJB Trelew',
                 contacts: [
                     { name: 'Cristian Schlund Cari', role: 'Titular', phone: '2804005635' },
+                    { name: 'Diego Gabriel Torres',  role: 'Titular', phone: null },
                 ],
             },
             {

@@ -239,6 +239,9 @@ const Registration = () => {
     const isOtra = selectedFaculty === 'Otra';
     const isInternacional = selectedFaculty === 'Internacional';
 
+    // International registrations are disabled until stage 3
+    const INTERNATIONAL_DISABLED = true;
+
     const effectiveStage = currentStage;
 
     // Resolved contact (delegate or ANEIC vocal) for the selected faculty/province
@@ -772,8 +775,24 @@ const Registration = () => {
                                         </div>
                                     )}
 
+                                    {/* Alert shown when international is selected and registrations are disabled */}
+                                    {isInternacional && INTERNATIONAL_DISABLED && (
+                                        <div className="mt-3 bg-amber-50 border border-amber-300 rounded-xl p-4 flex gap-3">
+                                            <span className="text-amber-500 text-xl shrink-0">⚠️</span>
+                                            <div>
+                                                <p className="text-sm font-bold text-amber-800 font-subtitle mb-1">
+                                                    Inscripciones internacionales aún no habilitadas
+                                                </p>
+                                                <p className="text-xs text-amber-700 leading-relaxed">
+                                                    Los estudiantes internacionales se inscriben en la <strong>última etapa</strong>, con prioridad para los estudiantes nacionales.
+                                                    Por el momento, la pre-inscripción internacional está suspendida. ¡Volvé a consultar próximamente!
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Country selector — appears only when "Internacional" is selected */}
-                                    {isInternacional && (
+                                    {isInternacional && !INTERNATIONAL_DISABLED && (
                                         <div className="mt-3" data-field-error={submitted && !!errors.country}>
                                             <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
                                                 País <Req />
@@ -946,8 +965,8 @@ const Registration = () => {
 
                         <button
                             type="submit"
-                            disabled={isSubmitting}
-                            className={`group w-full bg-gradient-to-r from-primary-red to-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all transform hover:-translate-y-1 font-title tracking-wider uppercase relative overflow-hidden ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+                            disabled={isSubmitting || (isInternacional && INTERNATIONAL_DISABLED)}
+                            className={`group w-full bg-gradient-to-r from-primary-red to-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all transform hover:-translate-y-1 font-title tracking-wider uppercase relative overflow-hidden ${isSubmitting || (isInternacional && INTERNATIONAL_DISABLED) ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                             <span className="relative z-10 flex items-center justify-center gap-2">

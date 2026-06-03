@@ -8,6 +8,24 @@ const API = import.meta.env.VITE_API_URL;
 const EJS_SERVICE       = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 const EJS_KEY           = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 const TPL_FIRST_PAYMENT = import.meta.env.VITE_EMAILJS_TEMPLATE_FIRST_PAYMENT;
+const TPL_VALIDATED     = import.meta.env.VITE_EMAILJS_TEMPLATE_VALIDATED;
+
+/** Sends the "Inscripción habilitada" email when a delegate enables a student. */
+async function sendValidatedEmailFromDelegate(reg, delegateUser) {
+  if (!EJS_SERVICE || !TPL_VALIDATED || !EJS_KEY) return;
+  try {
+    await emailjs.send(EJS_SERVICE, TPL_VALIDATED, {
+      to_name:        `${reg.name} ${reg.lastname}`,
+      to_email:       reg.email,
+      faculty:        reg.faculty ?? '',
+      delegate_name:  delegateUser?.displayName ?? delegateUser?.email ?? 'tu delegado/a',
+      filial_name:    delegateUser?.filial ?? 'ANEIC',
+      delegate_phone: delegateUser?.phone  ?? '',
+      delegate_email: delegateUser?.email  ?? '',
+      web_url:        window.location.origin,
+    }, EJS_KEY);
+  } catch { /* non-critical */ }
+}
 
 /**
  * Sends the "Primera cuota recibida" email (template 04) for each assignment
@@ -125,6 +143,10 @@ const DelegateDashboard = () => {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+    // Pending payment changes (checkbox / select edits not yet saved)
+    // Shape: { [id]: { isEnabled, paymentCondition, _origEnabled } }
+    const [pendingPaymentChanges, setPendingPaymentChanges] = useState({});
+
     // PaymentBatch state
     const [batches, setBatches] = useState([]);
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
@@ -196,9 +218,10 @@ const DelegateDashboard = () => {
     }, [attendees, searchTerm, sortConfig]);
 
     // ── Handlers ──────────────────────────────────────────────────────
+    // Direct (immediate) payment update — kept for backward-compat but no longer wired to UI
     const handlePaymentUpdate = async (id, isEnabled, paymentCondition) => {
         const original = [...attendees];
-        setAttendees(attendees.map(a => a.id === id ? { ...a, isEnabled, paymentCondition } : a));
+        setAttendees(prev => prev.map(a => a.id === id ? { ...a, isEnabled, paymentCondition } : a));
         try {
             const res = await fetch(`${API}/api/registrations/${id}/payment`, {
                 method: 'PATCH',
@@ -208,6 +231,54 @@ const DelegateDashboard = () => {
             if (!res.ok) throw new Error();
         } catch {
             alert('Error al actualizar');
+            setAttendees(original);
+        }
+    };
+
+    /** Marks a change as pending (checkbox / select). Does NOT hit the API. */
+    const queuePaymentChange = (id, isEnabled, paymentCondition) => {
+        setPendingPaymentChanges(prev => ({
+            ...prev,
+            [id]: {
+                isEnabled,
+                paymentCondition,
+                // Preserve the original isEnabled so we know if it was newly enabled
+                _origEnabled: prev[id]?._origEnabled ?? (attendees.find(a => a.id === id)?.isEnabled ?? false),
+            },
+        }));
+    };
+
+    /** Saves all pending changes to the API and sends emails for newly-enabled students. */
+    const handleSavePendingChanges = async () => {
+        const entries = Object.entries(pendingPaymentChanges);
+        if (entries.length === 0) return;
+
+        const original = [...attendees];
+        // Optimistic UI update
+        setAttendees(prev => prev.map(a => {
+            const ch = pendingPaymentChanges[a.id];
+            return ch ? { ...a, isEnabled: ch.isEnabled, paymentCondition: ch.paymentCondition } : a;
+        }));
+
+        try {
+            await Promise.all(entries.map(([id, ch]) =>
+                fetch(`${API}/api/registrations/${id}/payment`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isEnabled: ch.isEnabled, paymentCondition: ch.paymentCondition }),
+                })
+            ));
+
+            // Send "Inscripción habilitada" email for every newly-enabled student
+            const newlyEnabled = entries.filter(([, ch]) => ch.isEnabled && !ch._origEnabled);
+            for (const [id] of newlyEnabled) {
+                const reg = original.find(a => a.id === Number(id));
+                if (reg) sendValidatedEmailFromDelegate(reg, user);
+            }
+
+            setPendingPaymentChanges({});
+        } catch {
+            alert('Error al guardar los cambios');
             setAttendees(original);
         }
     };
@@ -519,7 +590,7 @@ const DelegateDashboard = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {filteredAttendees.map(person => (
-                            <tr key={person.id} className="hover:bg-gray-50 transition-colors">
+                            <tr key={person.id} className={`transition-colors ${pendingPaymentChanges[person.id] ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'}`}>
                                 <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                     {new Date(person.createdAt).toLocaleDateString('es-AR')}
                                 </td>
@@ -538,16 +609,24 @@ const DelegateDashboard = () => {
                                 <td className="px-4 py-3 text-center">
                                     <input
                                         type="checkbox"
-                                        checked={person.isEnabled ?? false}
-                                        onChange={e => handlePaymentUpdate(person.id, e.target.checked, person.paymentCondition ?? '')}
+                                        checked={pendingPaymentChanges[person.id]?.isEnabled ?? person.isEnabled ?? false}
+                                        onChange={e => queuePaymentChange(
+                                            person.id,
+                                            e.target.checked,
+                                            pendingPaymentChanges[person.id]?.paymentCondition ?? person.paymentCondition ?? ''
+                                        )}
                                         className="h-5 w-5 text-green-600 rounded border-gray-300 focus:ring-green-500 cursor-pointer"
                                     />
                                 </td>
                                 {/* Forma de pago */}
                                 <td className="px-4 py-3">
                                     <select
-                                        value={person.paymentCondition ?? ''}
-                                        onChange={e => handlePaymentUpdate(person.id, person.isEnabled ?? false, e.target.value)}
+                                        value={pendingPaymentChanges[person.id]?.paymentCondition ?? person.paymentCondition ?? ''}
+                                        onChange={e => queuePaymentChange(
+                                            person.id,
+                                            pendingPaymentChanges[person.id]?.isEnabled ?? person.isEnabled ?? false,
+                                            e.target.value
+                                        )}
                                         className={`text-xs border rounded px-2 py-1 outline-none focus:ring-2 focus:ring-primary-blue cursor-pointer ${
                                             person.paymentCondition === 'Pagó Completo' ? 'bg-green-50 border-green-300 text-green-800' :
                                             person.paymentCondition === 'Pagó 1° Cuota' ? 'bg-blue-50 border-blue-300 text-blue-800' :
@@ -778,6 +857,28 @@ const DelegateDashboard = () => {
                         </div>
                     </form>
                 </Modal>
+            )}
+
+            {/* Floating save bar — shown when there are unsaved payment changes */}
+            {Object.keys(pendingPaymentChanges).length > 0 && (
+                <div className="fixed bottom-6 right-6 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 flex items-center gap-4 animate-fade-in-up">
+                    <p className="text-sm text-gray-700 font-medium">
+                        <span className="font-bold text-institutional">{Object.keys(pendingPaymentChanges).length}</span>
+                        {' '}cambio{Object.keys(pendingPaymentChanges).length !== 1 ? 's' : ''} sin guardar
+                    </p>
+                    <button
+                        onClick={() => setPendingPaymentChanges({})}
+                        className="text-xs text-gray-400 hover:text-gray-600 transition font-medium"
+                    >
+                        Descartar
+                    </button>
+                    <button
+                        onClick={handleSavePendingChanges}
+                        className="bg-institutional text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-red transition shadow-sm"
+                    >
+                        Guardar cambios
+                    </button>
+                </div>
             )}
 
             {/* Payment Batch Modal */}

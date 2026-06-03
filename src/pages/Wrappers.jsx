@@ -46,7 +46,7 @@ const VENUES = [
     color: 'border-vial',
     badge: 'bg-vial/10 text-vial',
     activities: ['Acreditaciones', 'Apertura y Cierre', 'Charlas Magistrales', 'Ponencias Estudiantiles', 'Eventos nocturnos'],
-    days: 'Martes al Viernes',
+    days: 'Martes y Viernes',
     mapsUrl: 'https://maps.google.com/?q=Av.+Belgrano+954+Buenos+Aires',
   },
 ];
