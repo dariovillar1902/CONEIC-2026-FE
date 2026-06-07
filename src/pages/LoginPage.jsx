@@ -24,8 +24,10 @@ const LoginPage = () => {
         
         if (result.success) {
             const { user } = result;
-            // Redirect based on role
-            if (user.role === 'admin') navigate('/admin');
+            // First-login: must set a new password before anything else
+            if (user.mustChangePassword) {
+                navigate('/change-password');
+            } else if (user.role === 'admin') navigate('/admin');
             else if (user.role === 'delegate') navigate('/delegate');
             else if (user.role === 'assistant') navigate('/my-ticket');
             else navigate(from);
@@ -44,7 +46,7 @@ const LoginPage = () => {
         <div>
           <img
             className="mx-auto h-24 w-auto object-contain"
-            src="/assets/CONEIC-logo.png"
+            src="/assets/LOGO_V-CONEIC-COLOR.png"
             alt="CONEIC 2026"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-institutional font-title">
@@ -103,8 +105,8 @@ const LoginPage = () => {
           
           <div className="text-xs text-gray-400 text-center mt-4">
                <p className="font-mono text-[10px]">Admin: dvillar@frba.utn.edu.ar (Pass: admin)</p>
-               <p className="font-mono text-[10px]">Delegado: delegate@utn.edu.ar (Pass: demo)</p>
-               <p className="font-mono text-[10px]">Asistente: test@visitor.com (Pass: demo)</p>
+               <p className="font-mono text-[10px]">Delegado FRBA: delegate@frba.utn.edu.ar (Pass: demo)</p>
+               <p className="font-mono text-[10px]">Delegado FRGP: delegate@frgp.utn.edu.ar (Pass: demo)</p>
           </div>
         </form>
       </div>

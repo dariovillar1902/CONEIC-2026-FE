@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pre-Inscripción recibida — CONEIC XVIII</title>
+</head>
+<!--
+  EMAILJS TEMPLATE: 01 — Pre-Inscripción
+  Asunto: ¡Pre-Inscripción recibida! 🎉 CONEIC XVIII
+  Env var: VITE_EMAILJS_TEMPLATE_REGISTRATION (ya existente: template_zb369sl)
+
+  Variables:
+    {{to_name}}        — Nombre del inscripto
+    {{to_email}}       — Email (configurar en campo "To Email" del template)
+    {{delegate_name}}  — Nombre del delegado/vocal responsable
+    {{delegate_phone}} — Teléfono/WhatsApp del delegado (sin +54)
+    {{filial_name}}    — Nombre de la región ANEIC (ej. "Región Este")
+    {{web_url}}        — URL de la página del congreso
+-->
+<body style="margin:0;padding:0;background-color:#F5F5F5;font-family:Arial,Helvetica,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+         style="background-color:#F5F5F5;padding:32px 16px;">
+    <tr>
+      <td align="center">
+
+        <table width="600" cellpadding="0" cellspacing="0" role="presentation"
+               style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background-color:#002F51;padding:36px 40px;text-align:center;">
+              <p style="margin:0 0 6px;color:#C2A14A;font-size:11px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;">
+                Congreso Nacional de Estudiantes de Ingeniería Civil
+              </p>
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:bold;letter-spacing:4px;">
+                CONEIC XVIII
+              </h1>
+              <p style="margin:10px 0 0;color:#86C2DE;font-size:12px;letter-spacing:1px;">
+                Buenos Aires · Agosto 2026
+              </p>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="padding:40px 48px;">
+
+              <p style="margin:0 0 20px;font-size:16px;color:#002F51;">
+                Hola, <strong>{{to_name}}</strong> 👋
+              </p>
+
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.75;color:#333333;">
+                <strong>¡Muchas gracias por inscribirte al CONEIC XVIII!</strong>
+              </p>
+
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.75;color:#333333;">
+                Recibimos correctamente la información enviada a través del formulario de inscripción.
+                <strong>Ahora, el siguiente paso es que vos te comuniques directamente</strong> con el/la delegado/a
+                o vocal correspondiente a tu universidad para continuar con el proceso, coordinar el pago
+                y resolver cualquier duda.
+              </p>
+
+              <!-- Callout: delegado -->
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+                     style="margin:24px 0;border-left:4px solid #C2A14A;background-color:#F9F7F2;border-radius:0 6px 6px 0;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 6px;font-size:13px;font-weight:bold;color:#002F51;">
+                      Tu contacto asignado
+                    </p>
+                    <p style="margin:0 0 4px;font-size:13px;color:#555555;line-height:1.6;">
+                      Delegado/a: <strong>{{delegate_name}}</strong>
+                    </p>
+                    <p style="margin:0 0 4px;font-size:13px;color:#555555;line-height:1.6;">
+                      WhatsApp: <a href="https://wa.me/54{{delegate_phone}}" style="color:#002F51;font-weight:bold;text-decoration:underline;">+54 {{delegate_phone}}</a>
+                    </p>
+                    <p style="margin:0;font-size:13px;color:#555555;line-height:1.6;">
+                      Región: <strong>{{filial_name}}</strong> · <a href="{{web_url}}" style="color:#002F51;font-weight:bold;text-decoration:underline;">Ver página del congreso</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.75;color:#333333;">
+                Mientras tanto, podés seguir las novedades del congreso a través de nuestras
+                redes sociales y canales oficiales.
+              </p>
+
+              <p style="margin:0;font-size:15px;line-height:1.75;color:#002F51;font-weight:bold;">
+                ¡Estamos muy felices de que formes parte de esta edición!
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- DIVIDER -->
+          <tr>
+            <td style="padding:0 48px;">
+              <hr style="border:none;border-top:1px solid #e8e8e8;margin:0;" />
+            </td>
+          </tr>
+
+          <!-- SIGNATURE -->
+          <tr>
+            <td style="padding:28px 48px;">
+              <p style="margin:0 0 4px;font-size:14px;color:#002F51;font-weight:bold;">Saludos,</p>
+              <p style="margin:0 0 2px;font-size:14px;color:#002F51;">Comité Organizador</p>
+              <p style="margin:0;font-size:14px;color:#002F51;font-weight:bold;">CONEIC XVIII</p>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color:#002F51;padding:24px 40px;text-align:center;">
+              <p style="margin:0 0 4px;color:#C2A14A;font-size:12px;font-weight:bold;">
+                Comité Organizador · CONEIC XVIII
+              </p>
+              <p style="margin:0;color:#86C2DE;font-size:11px;">
+                Buenos Aires, Argentina · 2026
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

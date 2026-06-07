@@ -1,27 +1,42 @@
 import { useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
+import {
+    ALL_FACULTIES_BY_REGION,
+    getContactForFaculty,
+    getContactForProvince,
+    getContactForInternational,
+    ARGENTINIAN_PROVINCES,
+    INTERNATIONAL_COUNTRIES,
+} from '../data/filiales.js';
 
 // ─── Stage & Phase Configuration ─────────────────────────────────────────────
-// NOTE: All dates are preliminary pending approval by ANEIC Argentina CD.
-// Prices are assumed and must be confirmed before launch.
 const STAGES = [
     {
         id: 1,
-        label: 'Primera Etapa',
-        priceFull: 100000,
-        priceInstallment: 55000,
-        preRegistration: { start: new Date('2026-05-30'), end: new Date('2026-06-01') },
-        delegatePhase:   { start: new Date('2026-06-02'), end: new Date('2026-06-07') },
-        paymentPhase:    { start: new Date('2026-06-08'), end: new Date('2026-06-14') },
+        label: '1ª Etapa',
+        priceFull: 80000,
+        priceInstallment: 45000,
+        preRegistration: { start: new Date('2026-05-26'), end: new Date('2026-06-28') },
+        delegatePhase:   { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
+        paymentPhase:    { start: new Date('2026-07-06'), end: new Date('2026-07-12') },
     },
     {
         id: 2,
-        label: 'Segunda Etapa',
+        label: '2ª Etapa',
         priceFull: 130000,
         priceInstallment: 70000,
-        preRegistration: { start: new Date('2026-06-23'), end: new Date('2026-06-30') },
-        delegatePhase:   { start: new Date('2026-07-01'), end: new Date('2026-07-07') },
-        paymentPhase:    { start: new Date('2026-07-08'), end: new Date('2026-07-13') },
+        preRegistration: { start: new Date('2026-07-27'), end: new Date('2026-08-02') },
+        delegatePhase:   { start: new Date('2026-08-03'), end: new Date('2026-08-09') },
+        paymentPhase:    { start: new Date('2026-08-10'), end: new Date('2026-08-16') },
+    },
+    {
+        id: 3,
+        label: '3ª Etapa',
+        priceFull: 160000,
+        priceInstallment: 85000,
+        preRegistration: { start: new Date('2026-08-31'), end: new Date('2026-09-06') },
+        delegatePhase:   { start: new Date('2026-09-07'), end: new Date('2026-09-13') },
+        paymentPhase:    { start: new Date('2026-09-14'), end: new Date('2026-09-20') },
     },
 ];
 
@@ -36,10 +51,41 @@ const getCurrentPhase = (today) => {
     }
     if (today < STAGES[0].preRegistration.start)
         return { stage: STAGES[0], phase: 'upcoming' };
-    if (today > STAGES[0].paymentPhase.end && today < STAGES[1].preRegistration.start)
-        return { stage: STAGES[1], phase: 'between' };
+    for (let i = 0; i < STAGES.length - 1; i++) {
+        if (today > STAGES[i].paymentPhase.end && today < STAGES[i + 1].preRegistration.start)
+            return { stage: STAGES[i + 1], phase: 'between' };
+    }
     return { stage: null, phase: 'closed' };
 };
+
+// ─── Validation ───────────────────────────────────────────────────────────────
+const validateFields = (data, isOtra, province, isInternacional, selectedCountry) => {
+    const errs = {};
+    if (!data.name.trim()) errs.name = 'El nombre es requerido.';
+    if (!data.lastname.trim()) errs.lastname = 'El apellido es requerido.';
+    const dniDigits = data.dni.replace(/\D/g, '');
+    if (!/^\d{7,8}$/.test(dniDigits)) errs.dni = 'El DNI debe tener 7 u 8 dígitos.';
+    if (!data.phone.trim()) errs.phone = 'El celular es requerido.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = 'Ingresá un email válido.';
+    if (!data.faculty) errs.faculty = 'Seleccioná una facultad o delegación.';
+    if (isOtra && !province) errs.province = 'Seleccioná tu provincia.';
+    if (isInternacional && !selectedCountry) errs.country = 'Seleccioná tu país.';
+    if (!data.emergencyContactName.trim()) errs.emergencyContactName = 'El nombre del contacto de emergencia es requerido.';
+    if (!data.emergencyContactPhone.trim()) errs.emergencyContactPhone = 'El teléfono de emergencia es requerido.';
+    return errs;
+};
+
+// ─── Small UI helpers ─────────────────────────────────────────────────────────
+/** Red asterisk for required fields */
+const Req = () => <span className="text-red-500 ml-0.5">*</span>;
+
+/** Per-field error message */
+const FieldError = ({ msg }) =>
+    msg ? <p className="text-red-500 text-xs mt-1 font-medium">{msg}</p> : null;
+
+/** Returns the CSS classes for an input, highlighting errors when submitted */
+const fieldCls = (errors, submitted, field, extra = '') =>
+    `w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white ${errors[field] && submitted ? 'border-red-400 bg-red-50' : 'border-gray-200'} ${extra}`;
 
 // ─── Timeline Component ───────────────────────────────────────────────────────
 const PHASE_DEFS = [
@@ -56,14 +102,12 @@ const RegistrationTimeline = ({ today }) => (
         <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-center">
             {STAGES.map((stage, si) => (
                 <div key={stage.id} className="flex items-start md:flex-1">
-                    {/* Stage divider */}
                     {si > 0 && (
                         <div className="hidden md:flex items-center self-stretch px-2">
                             <div className="w-px h-full bg-gray-200" />
                         </div>
                     )}
                     <div className="flex-1 px-2">
-                        {/* Stage label */}
                         <p className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 text-center">
                             {stage.label}
                         </p>
@@ -136,7 +180,7 @@ const PhaseBanner = ({ phase, stage }) => {
             bg: 'bg-gray-50 border-gray-200',
             icon: '⏳',
             title: 'Entre etapas',
-            text: `La pre-inscripción para la Segunda Etapa abre el ${fmt(STAGES[1].preRegistration.start)}.`,
+            text: `La pre-inscripción para la ${stage?.label} abre el ${stage ? fmt(stage.preRegistration.start) : '—'}.`,
         },
         closed: {
             bg: 'bg-gray-50 border-gray-200',
@@ -163,12 +207,22 @@ const Registration = () => {
     const form = useRef();
     const today = new Date();
     const { stage: currentStage, phase: currentPhase } = getCurrentPhase(today);
-    const isFormOpen = true; // TODO: remove before launch — bypasses date restriction for demo
+    const [isFormOpen, setIsFormOpen] = useState(false);
 
     const [file, setFile] = useState(null);
+    const [certificateFile, setCertificateFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [isDuplicate, setIsDuplicate] = useState(false);
+    const [selectedFaculty, setSelectedFaculty] = useState('');
+    const [selectedProvince, setSelectedProvince] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState('');
     const [dietarySelection, setDietarySelection] = useState('');
+    const [errors, setErrors] = useState({});
+    const [submitted, setSubmitted] = useState(false);
+    const [participatedInJoreic, setParticipatedInJoreic] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     const dietaryOptions = [
         'Sin restricciones',
@@ -182,74 +236,247 @@ const Registration = () => {
         'Otro',
     ];
 
-    const handleSubmit = (e) => {
+    const isOtra = selectedFaculty === 'Otra';
+    const isInternacional = selectedFaculty === 'Internacional';
+
+    // International registrations are disabled until stage 3
+    const INTERNATIONAL_DISABLED = true;
+
+    const effectiveStage = currentStage;
+
+    // Resolved contact (delegate or ANEIC vocal) for the selected faculty/province
+    const delegateContact = isInternacional
+        ? getContactForInternational()
+        : isOtra
+        ? (selectedProvince ? getContactForProvince(selectedProvince) : null)
+        : (selectedFaculty  ? getContactForFaculty(selectedFaculty)   : null);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitted(true);
+
+        const name                 = form.current.user_name.value;
+        const lastname             = form.current.user_lastname.value;
+        const dni                  = form.current.user_dni.value;
+        const phone                = form.current.user_phone.value;
+        const email                = form.current.user_email.value;
+        const emergencyContactName         = form.current.user_emergency_contact.value;
+        const emergencyContactRelationship = form.current.user_emergency_relationship.value;
+        const emergencyContactPhone        = form.current.user_emergency_phone.value;
+
+        const errs = validateFields(
+            { name, lastname, dni, phone, email, faculty: selectedFaculty, emergencyContactName, emergencyContactPhone },
+            isOtra,
+            selectedProvince,
+            isInternacional,
+            selectedCountry,
+        );
+        setErrors(errs);
+
+        if (Object.keys(errs).length > 0) {
+            // Scroll to the first visible error message
+            setTimeout(() => {
+                const firstErr = document.querySelector('[data-field-error="true"]');
+                if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
+            return;
+        }
+
         setIsSubmitting(true);
+        setIsDuplicate(false);
 
-        const SERVICE_ID  = 'YOUR_SERVICE_ID';
-        const TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-        const PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
+        // Faculty value: "Otra (Provincia)" when isOtra, always 'Internacional' when international
+        const facultyValue = isInternacional ? 'Internacional' : isOtra ? `Otra (${selectedProvince})` : selectedFaculty;
 
-        fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name:                  form.current.user_name.value,
-                lastname:              form.current.user_lastname.value,
-                dni:                   form.current.user_dni.value,
-                phone:                 form.current.user_phone.value,
-                email:                 form.current.user_email.value,
-                faculty:               form.current.user_faculty.value,
-                bloodType:             form.current.user_blood.value,
-                medicalConditions:     form.current.user_medical.value,
-                emergencyContactName:  form.current.user_emergency_contact.value,
-                emergencyContactPhone: form.current.user_emergency_phone.value,
-                stageName:             currentStage.label,
-                price:                 currentStage.priceFull,
-            }),
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Error saving registration');
-                return emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current, PUBLIC_KEY);
-            })
-            .then(() => {
-                setIsSubmitting(false);
-                setIsSuccess(true);
-            })
-            .catch(() => {
-                setIsSubmitting(false);
-                setIsSuccess(true);
+        try {
+            // Upload certificate if provided
+            let certificateFileName = null;
+            if (certificateFile) {
+                const fd = new FormData();
+                fd.append('file', certificateFile);
+                const upRes = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/upload`, { method: 'POST', body: fd });
+                if (upRes.ok) {
+                    const upData = await upRes.json();
+                    certificateFileName = upData.url;
+                }
+            }
+
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    lastname,
+                    dni,
+                    phone,
+                    email,
+                    faculty:               facultyValue,
+                    bloodType:             form.current.user_blood.value,
+                    medicalConditions:     form.current.user_medical.value,
+                    emergencyContactName,
+                    emergencyContactRelationship,
+                    emergencyContactPhone,
+                    stageName:             currentStage?.label ?? 'Demo',
+                    price:                 effectiveStage?.priceFull ?? 0,
+                    participatedInJoreic,
+                    certificateFileName,
+                }),
             });
+
+            if (response.status === 409) {
+                setIsDuplicate(true);
+                return;
+            }
+
+            // Send confirmation email via EmailJS (non-blocking)
+            const serviceId  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_REGISTRATION;
+            const publicKey  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+            if (serviceId && templateId && publicKey) {
+                try {
+                    await emailjs.send(
+                        serviceId,
+                        templateId,
+                        {
+                            to_name:        name,
+                            to_email:       email,
+                            faculty:        facultyValue,
+                            delegate_name:  delegateContact?.name      ?? 'tu delegado',
+                            filial_name:    delegateContact?.filialName ?? 'ANEIC Nacional',
+                            web_url:        window.location.origin,
+                            delegate_phone: delegateContact?.phone     ?? '',
+                            delegate_email: delegateContact?.email     ?? '',
+                        },
+                        publicKey,
+                    );
+                } catch {
+                    // email optional — continue regardless
+                }
+            }
+
+            setIsSuccess(true);
+        } catch {
+            // Network error still shows success to avoid leaving user in limbo
+            setIsSuccess(true);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    // ── Success Screen ──────────────────────────────────────────────────────
-    if (isSuccess) {
+    // ── Already registered screen ───────────────────────────────────────────
+    if (isDuplicate) {
         return (
             <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-12 border border-gray-100 p-12 text-center">
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-12 h-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                     </svg>
                 </div>
-                <h2 className="text-3xl font-bold text-institutional font-title mb-4">¡Solicitud Enviada!</h2>
+                <h2 className="text-3xl font-bold text-yellow-700 font-title mb-4">Ya estás inscripto</h2>
                 <p className="text-gray-600 font-body text-lg max-w-xl mx-auto mb-8">
-                    Hemos recibido tu pre-inscripción correctamente.
+                    El email ingresado ya tiene una pre-inscripción registrada en el sistema.
                 </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-lg mx-auto mb-4">
-                    <p className="text-sm text-blue-800 font-bold">📋 Próximo paso: comunicarse con tu delegado</p>
-                    <p className="text-sm text-blue-700 mt-1">
-                        El pago se gestiona a través de tu delegación. Contactá a tu delegado para coordinar el pago y confirmar tu vacante.
-                    </p>
-                </div>
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 max-w-lg mx-auto mb-8">
-                    <p className="text-sm text-yellow-800 font-bold">⚠️ Importante</p>
-                    <p className="text-sm text-yellow-700">
-                        Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción y confirme el pago.
+                    <p className="text-sm text-yellow-800 font-bold">¿No recordás haberte inscripto?</p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                        Contactá a tu delegado para verificar el estado de tu inscripción.
                     </p>
                 </div>
-                <button onClick={() => setIsSuccess(false)} className="text-primary-blue font-bold hover:underline">
+                <button onClick={() => setIsDuplicate(false)} className="text-primary-blue font-bold hover:underline">
                     Volver al formulario
                 </button>
+            </div>
+        );
+    }
+
+    // ── Success Screen ──────────────────────────────────────────────────────
+    const resetForm = () => {
+        setIsSuccess(false);
+        setIsFormOpen(false);
+        setSelectedFaculty('');
+        setSelectedProvince('');
+        setSelectedCountry('');
+        setParticipatedInJoreic(false);
+        setCertificateFile(null);
+        setErrors({});
+        setSubmitted(false);
+        setTermsAccepted(false);
+    };
+
+    if (isSuccess) {
+        return (
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-12 border border-gray-100 p-8 md:p-12 max-w-lg mx-auto">
+
+                {/* Back button — top */}
+                <div className="text-center mb-8">
+                    <button onClick={resetForm} className="inline-flex items-center gap-2 text-primary-blue font-bold hover:underline text-sm">
+                        ← Volver al formulario
+                    </button>
+                </div>
+
+                {/* Check + title */}
+                <div className="text-center mb-6">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                        <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h2 className="text-3xl font-bold text-institutional font-title mb-2">¡Solicitud Enviada!</h2>
+                    <p className="text-gray-600 font-body text-base">
+                        Hemos recibido tu pre-inscripción correctamente.
+                    </p>
+                </div>
+
+                {/* Important warning */}
+                <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 mb-4">
+                    <p className="text-sm font-bold text-yellow-800 mb-1">⚠️ Importante</p>
+                    <p className="text-sm text-yellow-700 leading-relaxed">
+                        Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción.
+                        Contactate con tu delegado/vocal para coordinar el pago.
+                    </p>
+                </div>
+
+                {/* Next step */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left">
+                    <p className="text-sm font-bold text-blue-900 mb-1">¿Próximo paso?</p>
+                    <p className="text-sm text-blue-800 leading-relaxed">
+                        Espera a recibir el mail que indica que tu inscripción ha sido{' '}
+                        <strong>habilitada</strong>, y cuáles son los pasos a seguir.
+                    </p>
+                </div>
+
+                {/* Delegate contact — bottom */}
+                <div className="border border-gray-200 rounded-xl p-4 text-left">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
+                        En caso de tener dudas, podés contactarte con tu delegado/a
+                    </p>
+                    {delegateContact ? (
+                        <div className="space-y-1.5">
+                            <p className="text-sm text-gray-700">
+                                Filial: <strong className="text-institutional">{delegateContact.filialName}</strong>
+                            </p>
+                            <p className="text-sm text-gray-700">
+                                Contacto: <strong>{delegateContact.name}</strong>
+                                {delegateContact.email && (
+                                    <> — <a href={`mailto:${delegateContact.email}`} className="text-primary-blue font-bold underline hover:text-blue-900 break-all">{delegateContact.email}</a></>
+                                )}
+                            </p>
+                            {delegateContact.phone && (
+                                <p className="text-sm text-gray-700">
+                                    WhatsApp:{' '}
+                                    <a href={`https://wa.me/54${delegateContact.phone}`} className="text-primary-blue font-bold underline" target="_blank" rel="noreferrer">
+                                        +54 {delegateContact.phone}
+                                    </a>
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-gray-600">
+                            Contactate con tu delegado para coordinar el pago y confirmar tu vacante.
+                        </p>
+                    )}
+                </div>
             </div>
         );
     }
@@ -263,14 +490,18 @@ const Registration = () => {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
                         <h3 className="text-2xl font-bold text-institutional font-title mb-2">Formulario de Inscripción</h3>
-                        <p className="text-gray-500 font-subtitle">Completa tus datos para reservar tu lugar.</p>
+                        <p className="text-gray-500 font-subtitle">
+                            Completa tus datos para reservar tu lugar.{' '}
+                            <span className="text-red-500 font-bold">*</span>
+                            <span className="text-gray-400 text-xs ml-1">campos obligatorios</span>
+                        </p>
                     </div>
                     {isFormOpen && currentStage && (
                         <div className="bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-200 text-center min-w-[180px]">
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{currentStage.label}</p>
-                            <p className="text-3xl font-bold text-primary-red">${currentStage.priceFull.toLocaleString('es-AR')}</p>
+                            <p className="text-3xl font-bold text-primary-red">${effectiveStage.priceFull.toLocaleString('es-AR')}</p>
                             <p className="text-xs text-gray-400 mt-1">
-                                o 2 cuotas de ${currentStage.priceInstallment.toLocaleString('es-AR')}
+                                o 2 cuotas de ${effectiveStage.priceInstallment.toLocaleString('es-AR')}
                             </p>
                             <p className="text-xs text-green-600 font-bold mt-1">
                                 Cierra el {fmt(currentStage.preRegistration.end)}
@@ -283,32 +514,168 @@ const Registration = () => {
             {/* Timeline */}
             <RegistrationTimeline today={today} />
 
+            {/* Terms & Conditions Modal */}
+            {showTermsModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full flex flex-col max-h-[90vh]">
+                        <div className="p-6 border-b border-gray-100">
+                            <h3 className="text-xl font-bold text-institutional font-title">Términos y Condiciones</h3>
+                        </div>
+                        <div className="overflow-y-auto max-h-[70vh] p-6 space-y-4 text-sm text-gray-700 font-body leading-relaxed">
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Confirmación de inscripción</p>
+                                <p>La inscripción no se considerará confirmada hasta que: el/la participante haya sido habilitado/a por su delegado/a correspondiente, y se haya acreditado el pago total de la inscripción, ya sea mediante un único pago o mediante el esquema de dos cuotas habilitado por el Comité Organizador.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Pagos</p>
+                                <p>Los pagos deberán realizarse dentro de las fechas y modalidades establecidas por el Comité Organizador, coordinando los mismos con el/la delegado/a correspondiente.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Política de reembolso</p>
+                                <p>Los importes abonados en concepto de inscripción no son reembolsables bajo ninguna circunstancia. Esto aplica tanto para pagos parciales como para pagos totales.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Transferencia de inscripción</p>
+                                <p>En caso de que un/a participante decida no asistir al Congreso, podrá transferir su inscripción a otra persona. La nueva persona participante deberá ser previamente habilitada por el/la delegado/a correspondiente, a fin de garantizar el cumplimiento de los criterios de prioridad y cupos establecidos para cada delegación.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Prohibición de reventa</p>
+                                <p>Queda prohibida la reventa de cupos de inscripción. El Comité Organizador podrá anular cualquier inscripción transferida o comercializada de manera indebida.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Acreditación de pagos</p>
+                                <p>Los pagos realizados pueden demorar algunos días hábiles en verse reflejados en el sistema de inscripción.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold text-gray-800 mb-1">Modificaciones</p>
+                                <p>El Comité Organizador se reserva el derecho de modificar fechas, modalidades de pago o condiciones administrativas vinculadas al proceso de inscripción, informando dichos cambios por los canales oficiales correspondientes.</p>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-gray-100 space-y-4">
+                            <label className="flex items-center gap-3 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={termsAccepted}
+                                    onChange={e => setTermsAccepted(e.target.checked)}
+                                    className="w-4 h-4 accent-primary-blue"
+                                />
+                                <span className="text-sm text-gray-700 font-body">Leí y acepto los Términos y Condiciones</span>
+                            </label>
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => { setShowTermsModal(false); setTermsAccepted(false); }}
+                                    className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-600 font-bold hover:bg-gray-50 transition"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={!termsAccepted}
+                                    onClick={() => { setShowTermsModal(false); setIsFormOpen(true); }}
+                                    className={`flex-1 py-2 rounded-lg font-bold transition ${termsAccepted ? 'bg-primary-blue text-white hover:bg-blue-800' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                                >
+                                    Continuar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Content: form or phase banner */}
             <div className="p-10">
                 {!isFormOpen ? (
-                    <PhaseBanner phase={currentPhase} stage={currentStage} />
+                    <div>
+                        <PhaseBanner phase={currentPhase} stage={currentStage} />
+                        {currentPhase === 'preRegistration' && (
+                            <div className="mt-6 text-center">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTermsModal(true)}
+                                    className="bg-gradient-to-r from-primary-red to-red-700 text-white px-10 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all transform hover:-translate-y-1 font-title tracking-wider uppercase"
+                                >
+                                    Inscribirse
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 ) : (
-                    <form ref={form} className="space-y-8" onSubmit={handleSubmit}>
+                    <form ref={form} className="space-y-8" onSubmit={handleSubmit} noValidate>
+
+                        {/* Global validation error summary */}
+                        {submitted && Object.keys(errors).length > 0 && (
+                            <div className="bg-red-50 border border-red-300 rounded-xl p-4 flex items-start gap-3">
+                                <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm font-bold text-red-700">Por favor corregí los siguientes campos:</p>
+                                    <ul className="list-disc list-inside mt-1 space-y-0.5">
+                                        {Object.values(errors).map((msg, i) => (
+                                            <li key={i} className="text-sm text-red-600">{msg}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Sección 1: Datos Personales */}
                         <div>
                             <h4 className="text-lg font-bold text-institutional mb-6 border-l-4 border-complementary-gold pl-3 uppercase tracking-wide">1. Datos Personales</h4>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Nombre (Como en DNI)</label>
-                                    <input name="user_name" required type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Juan Ignacio" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Nombre (Como en DNI) <Req />
+                                    </label>
+                                    <input
+                                        name="user_name"
+                                        type="text"
+                                        className={fieldCls(errors, submitted, 'name')}
+                                        placeholder="Juan Ignacio"
+                                        data-field-error={submitted && !!errors.name}
+                                    />
+                                    <FieldError msg={submitted ? errors.name : ''} />
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Apellido (Como en DNI)</label>
-                                    <input name="user_lastname" required type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Pérez" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Apellido (Como en DNI) <Req />
+                                    </label>
+                                    <input
+                                        name="user_lastname"
+                                        type="text"
+                                        className={fieldCls(errors, submitted, 'lastname')}
+                                        placeholder="Pérez"
+                                        data-field-error={submitted && !!errors.lastname}
+                                    />
+                                    <FieldError msg={submitted ? errors.lastname : ''} />
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">DNI (Sin puntos)</label>
-                                    <input name="user_dni" required type="number" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="12345678" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        DNI (Sin puntos) <Req />
+                                    </label>
+                                    <input
+                                        name="user_dni"
+                                        type="text"
+                                        inputMode="numeric"
+                                        className={fieldCls(errors, submitted, 'dni')}
+                                        placeholder="12345678"
+                                        data-field-error={submitted && !!errors.dni}
+                                    />
+                                    <FieldError msg={submitted ? errors.dni : ''} />
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Celular (+54 9...)</label>
-                                    <input name="user_phone" required type="tel" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="+54 9 11 1234 5678" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Celular (+54 9...) <Req />
+                                    </label>
+                                    <input
+                                        name="user_phone"
+                                        type="tel"
+                                        className={fieldCls(errors, submitted, 'phone')}
+                                        placeholder="+54 9 11 1234 5678"
+                                        data-field-error={submitted && !!errors.phone}
+                                    />
+                                    <FieldError msg={submitted ? errors.phone : ''} />
                                 </div>
                             </div>
                         </div>
@@ -318,93 +685,198 @@ const Registration = () => {
                             <h4 className="text-lg font-bold text-institutional mb-6 border-l-4 border-complementary-gold pl-3 uppercase tracking-wide">2. Datos Académicos</h4>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Email Universitario</label>
-                                    <input name="user_email" required type="email" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="juan@utn.edu.ar" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Email <Req />
+                                    </label>
+                                    <input
+                                        name="user_email"
+                                        type="email"
+                                        className={fieldCls(errors, submitted, 'email')}
+                                        placeholder="juan@email.com"
+                                        data-field-error={submitted && !!errors.email}
+                                    />
+                                    <FieldError msg={submitted ? errors.email : ''} />
                                 </div>
-                                <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Delegación / Facultad</label>
-                                    <div className="relative">
-                                        <select name="user_faculty" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 appearance-none hover:bg-white cursor-pointer">
+
+                                {/* Certificate upload */}
+                                <div className="group md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
+                                        Certificado de Alumno Regular <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 border-2 border-dashed border-gray-300 rounded-xl px-4 py-3 cursor-pointer hover:bg-gray-50 transition group-focus-within:border-primary-blue">
+                                        <span className="text-xl">📄</span>
+                                        <span className="text-sm text-gray-500">
+                                            {certificateFile ? certificateFile.name : 'Seleccionar PDF o imagen…'}
+                                        </span>
+                                        <input
+                                            type="file"
+                                            accept="image/*,application/pdf"
+                                            className="hidden"
+                                            onChange={e => setCertificateFile(e.target.files[0] || null)}
+                                        />
+                                    </label>
+                                    {certificateFile && (
+                                        <button type="button" onClick={() => setCertificateFile(null)} className="text-xs text-red-400 hover:text-red-600 mt-1">✕ Quitar archivo</button>
+                                    )}
+                                    <p className="text-xs text-gray-400 mt-1">PDF o imagen, máx. 10 MB.</p>
+                                </div>
+
+                                {/* Faculty selector — full width */}
+                                <div className="group md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Delegación / Facultad <Req />
+                                    </label>
+                                    <div className="relative" data-field-error={submitted && !!errors.faculty}>
+                                        <select
+                                            name="user_faculty"
+                                            value={selectedFaculty}
+                                            onChange={e => {
+                                                setSelectedFaculty(e.target.value);
+                                                setSelectedProvince('');
+                                                setSelectedCountry('');
+                                            }}
+                                            className={fieldCls(errors, submitted, 'faculty', 'appearance-none cursor-pointer')}
+                                        >
                                             <option value="">Seleccionar...</option>
-                                            <optgroup label="Región Centro">
-                                                <option>UTN - Facultad Regional de Paraná</option>
-                                                <option>UTN - Facultad Regional de Rafaela</option>
-                                                <option>UTN - Facultad Regional de Rosario</option>
-                                                <option>Universidad Nacional de Rosario</option>
-                                                <option>UTN - Facultad Regional de Santa Fe</option>
-                                                <option>UTN - Facultad Regional de Venado Tuerto</option>
-                                            </optgroup>
-                                            <optgroup label="Región Este">
-                                                <option>UTN - Facultad Regional de Avellaneda</option>
-                                                <option>Universidad de Belgrano</option>
-                                                <option>Universidad de Buenos Aires</option>
-                                                <option>Universidad Católica Argentina</option>
-                                                <option>Universidad de la Defensa Nacional</option>
-                                                <option>UTN - Facultad Regional de Buenos Aires</option>
-                                                <option>UTN - Facultad Regional de Concepción del Uruguay</option>
-                                                <option>UTN - Facultad Regional Concordia</option>
-                                                <option>UTN - Facultad Regional de General Pacheco</option>
-                                                <option>Universidad Nacional de la Matanza</option>
-                                                <option>Universidad Nacional de La Plata</option>
-                                                <option>UTN - Facultad Regional de La Plata</option>
-                                                <option>Universidad Nacional de Morón</option>
-                                            </optgroup>
-                                            <optgroup label="Región Norte">
-                                                <option>Universidad Nacional del Nordeste</option>
-                                                <option>Universidad Nacional de Formosa</option>
-                                                <option>Universidad Nacional de Misiones</option>
-                                                <option>Universidad Católica de Salta</option>
-                                                <option>Universidad Nacional de Salta</option>
-                                                <option>Universidad Nacional de Santiago del Estero</option>
-                                                <option>Universidad Nacional de Tucumán</option>
-                                                <option>UTN - Facultad Regional de Tucumán</option>
-                                            </optgroup>
-                                            <optgroup label="Región Oeste">
-                                                <option>Universidad Católica de Córdoba</option>
-                                                <option>Universidad Nacional de Córdoba</option>
-                                                <option>UTN - Facultad Regional de Córdoba</option>
-                                                <option>UTN - Facultad Regional de La Rioja</option>
-                                                <option>Universidad Nacional de La Rioja</option>
-                                                <option>Universidad Nacional de Cuyo</option>
-                                                <option>UTN - Facultad Regional de Mendoza</option>
-                                                <option>Universidad Nacional de San Juan</option>
-                                                <option>UTN - Facultad Regional de San Rafael</option>
-                                            </optgroup>
-                                            <optgroup label="Región Sur">
-                                                <option>Universidad Nacional del Sur</option>
-                                                <option>UTN - Facultad Regional de Bahía Blanca</option>
-                                                <option>Universidad Nacional de la Patagonia San Juan Bosco - Sede Comodoro Rivadavia</option>
-                                                <option>Universidad Nacional del Comahue</option>
-                                                <option>Universidad Nacional del Centro de la Provincia de Buenos Aires - Sede Olavarría</option>
-                                                <option>Universidad Nacional de la Patagonia San Juan Bosco - Sede Trelew</option>
-                                            </optgroup>
+                                            {ALL_FACULTIES_BY_REGION.filter(r => r.region !== 'Internacional').map(({ region, faculties }) => (
+                                                <optgroup key={region} label={region}>
+                                                    {faculties.map(f => (
+                                                        <option key={f} value={f}>{f}</option>
+                                                    ))}
+                                                </optgroup>
+                                            ))}
                                             <optgroup label="Otra">
-                                                <option>Otra</option>
+                                                <option value="Otra">Otra (indicar provincia)</option>
                                             </optgroup>
                                         </select>
                                         <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="group md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Certificado de Alumno Regular (PDF)</label>
-                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition cursor-pointer relative">
-                                        <div className="space-y-1 text-center">
-                                            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                             </svg>
-                                            <div className="flex text-sm text-gray-600 justify-center">
-                                                <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary-blue hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-blue">
-                                                    <span>Subir un archivo</span>
-                                                    <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={(e) => setFile(e.target.files[0])} />
-                                                </label>
-                                                <p className="pl-1">o arrastrar y soltar</p>
-                                            </div>
-                                            <p className="text-xs text-gray-500">PDF hasta 5MB</p>
-                                            {file && <p className="text-sm font-bold text-green-600 mt-2">Archivo seleccionado: {file.name}</p>}
                                         </div>
                                     </div>
+                                    <FieldError msg={submitted ? errors.faculty : ''} />
+
+                                    {/* Province selector — appears only when "Otra" is selected */}
+                                    {isOtra && (
+                                        <div className="mt-3" data-field-error={submitted && !!errors.province}>
+                                            <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
+                                                Provincia <Req />
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    name="user_province"
+                                                    value={selectedProvince}
+                                                    onChange={e => setSelectedProvince(e.target.value)}
+                                                    className={fieldCls(errors, submitted, 'province', 'appearance-none cursor-pointer')}
+                                                >
+                                                    <option value="">Seleccionar provincia...</option>
+                                                    {ARGENTINIAN_PROVINCES.map(p => (
+                                                        <option key={p} value={p}>{p}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <FieldError msg={submitted ? errors.province : ''} />
+                                        </div>
+                                    )}
+
+                                    {/* Alert shown when international is selected and registrations are disabled */}
+                                    {isInternacional && INTERNATIONAL_DISABLED && (
+                                        <div className="mt-3 bg-amber-50 border border-amber-300 rounded-xl p-4 flex gap-3">
+                                            <span className="text-amber-500 text-xl shrink-0">⚠️</span>
+                                            <div>
+                                                <p className="text-sm font-bold text-amber-800 font-subtitle mb-1">
+                                                    Inscripciones internacionales aún no habilitadas
+                                                </p>
+                                                <p className="text-xs text-amber-700 leading-relaxed">
+                                                    Los estudiantes internacionales se inscriben en la <strong>última etapa</strong>, con prioridad para los estudiantes nacionales.
+                                                    Por el momento, la pre-inscripción internacional está suspendida. ¡Volvé a consultar próximamente!
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Country selector — appears only when "Internacional" is selected */}
+                                    {isInternacional && !INTERNATIONAL_DISABLED && (
+                                        <div className="mt-3" data-field-error={submitted && !!errors.country}>
+                                            <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
+                                                País <Req />
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    name="user_country"
+                                                    value={selectedCountry}
+                                                    onChange={e => setSelectedCountry(e.target.value)}
+                                                    className={fieldCls(errors, submitted, 'country', 'appearance-none cursor-pointer')}
+                                                >
+                                                    <option value="">Seleccionar país...</option>
+                                                    {INTERNATIONAL_COUNTRIES.map(c => (
+                                                        <option key={c} value={c}>{c}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <FieldError msg={submitted ? errors.country : ''} />
+                                        </div>
+                                    )}
+
+                                    {/* ── Conocé tu filial ─────────────────────────────────── */}
+                                    {delegateContact && (
+                                        <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
+                                            <span className="text-2xl leading-none mt-0.5">🏛️</span>
+                                            <div className="text-sm text-blue-800 space-y-0.5">
+                                                <p className="font-bold text-blue-900">
+                                                    Conocé tu filial — {delegateContact.filialName}
+                                                </p>
+                                                {delegateContact.isVocal ? (
+                                                    <p>
+                                                        Tu región no tiene delegado designado aún. Tu contacto de referencia es el/la{' '}
+                                                        <strong>{delegateContact.name}</strong>:{' '}
+                                                        <a href={`mailto:${delegateContact.email}`} className="underline hover:text-blue-900 font-semibold">
+                                                            {delegateContact.email}
+                                                        </a>
+                                                    </p>
+                                                ) : (
+                                                    <p>
+                                                        Tu delegado/a es <strong>{delegateContact.name}</strong>. Podés contactarle en{' '}
+                                                        <a href={`mailto:${delegateContact.email}`} className="underline hover:text-blue-900 font-semibold">
+                                                            {delegateContact.email}
+                                                        </a>{' '}
+                                                        para coordinar el pago y confirmar tu vacante.
+                                                    </p>
+                                                )}
+                                                {delegateContact.phone && (
+                                                    <p className="text-sm text-blue-700 mt-1">
+                                                        WhatsApp: <a href={`https://wa.me/54${delegateContact.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">+54 {delegateContact.phone}</a>
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* JOREIC checkbox */}
+                                <div className="md:col-span-2">
+                                    <label className="flex items-center gap-3 cursor-pointer group select-none">
+                                        <input
+                                            type="checkbox"
+                                            checked={participatedInJoreic}
+                                            onChange={e => setParticipatedInJoreic(e.target.checked)}
+                                            className="w-4 h-4 accent-primary-blue"
+                                        />
+                                        <span className="text-sm text-gray-700">
+                                            Participé en la <strong>JOREIC de mi región</strong>
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -414,13 +886,17 @@ const Registration = () => {
                             <h4 className="text-lg font-bold text-institutional mb-6 border-l-4 border-complementary-gold pl-3 uppercase tracking-wide">3. Salud y Emergencia</h4>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Grupo Sanguíneo</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Grupo Sanguíneo
+                                    </label>
                                     <select name="user_blood" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800">
                                         <option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>0+</option><option>0-</option>
                                     </select>
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Mano Hábil</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Mano Hábil
+                                    </label>
                                     <select name="user_dominant_hand" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 hover:bg-white">
                                         <option value="derecha">Derecha</option>
                                         <option value="izquierda">Izquierda</option>
@@ -428,15 +904,21 @@ const Registration = () => {
                                     </select>
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Obra Social / Prepaga</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Obra Social / Prepaga
+                                    </label>
                                     <input name="user_insurance" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Ej. OSDE / Swiss Medical / Ninguna" />
                                 </div>
                                 <div className="group md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Afecciones Médicas / Alergias</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Afecciones Médicas / Alergias
+                                    </label>
                                     <input name="user_medical" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Asma, alergias, medicación crónica, etc." />
                                 </div>
                                 <div className="group md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Restricciones Alimentarias</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Restricciones Alimentarias
+                                    </label>
                                     <div className="relative mb-2">
                                         <select
                                             name="user_dietary"
@@ -463,32 +945,58 @@ const Registration = () => {
                                     )}
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Nombre Contacto Emergencia</label>
-                                    <input name="user_emergency_contact" required type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="María Pérez" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Nombre Contacto Emergencia <Req />
+                                    </label>
+                                    <input
+                                        name="user_emergency_contact"
+                                        type="text"
+                                        className={fieldCls(errors, submitted, 'emergencyContactName')}
+                                        placeholder="María Pérez"
+                                        data-field-error={submitted && !!errors.emergencyContactName}
+                                    />
+                                    <FieldError msg={submitted ? errors.emergencyContactName : ''} />
                                 </div>
                                 <div className="group">
-                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">Teléfono Emergencia</label>
-                                    <input name="user_emergency_phone" required type="tel" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="+54 9 11 1234 5678" />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Parentesco
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            name="user_emergency_relationship"
+                                            defaultValue=""
+                                            className={`${fieldCls(errors, submitted, '')} appearance-none cursor-pointer`}
+                                        >
+                                            <option value="">Seleccionar...</option>
+                                            {['Madre', 'Padre', 'Hermano/a', 'Pareja', 'Cónyuge', 'Familiar', 'Amigo/a', 'Otro'].map(r => (
+                                                <option key={r} value={r}>{r}</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Terms */}
-                        <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100 flex items-start gap-4 hover:bg-blue-50 transition-colors cursor-pointer">
-                            <input required type="checkbox" className="mt-1 h-5 w-5 text-primary-blue rounded border-gray-300 focus:ring-primary-blue cursor-pointer" />
-                            <div className="space-y-1">
-                                <p className="font-bold text-institutional text-sm">Términos y Condiciones</p>
-                                <p className="text-sm text-gray-600 font-body leading-relaxed">
-                                    Acepto los términos. Entiendo que esta es una <strong>pre-inscripción</strong> sujeta a validación por mi delegado.
-                                    El pago se realizará posteriormente siguiendo las instrucciones de mi delegación.
-                                </p>
+                                <div className="group">
+                                    <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                        Teléfono Emergencia <Req />
+                                    </label>
+                                    <input
+                                        name="user_emergency_phone"
+                                        type="tel"
+                                        className={fieldCls(errors, submitted, 'emergencyContactPhone')}
+                                        placeholder="+54 9 11 1234 5678"
+                                        data-field-error={submitted && !!errors.emergencyContactPhone}
+                                    />
+                                    <FieldError msg={submitted ? errors.emergencyContactPhone : ''} />
+                                </div>
                             </div>
                         </div>
 
                         <button
                             type="submit"
-                            disabled={isSubmitting}
-                            className={`group w-full bg-gradient-to-r from-primary-red to-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all transform hover:-translate-y-1 font-title tracking-wider uppercase relative overflow-hidden ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+                            disabled={isSubmitting || (isInternacional && INTERNATIONAL_DISABLED)}
+                            className={`group w-full bg-gradient-to-r from-primary-red to-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all transform hover:-translate-y-1 font-title tracking-wider uppercase relative overflow-hidden ${isSubmitting || (isInternacional && INTERNATIONAL_DISABLED) ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                             <span className="relative z-10 flex items-center justify-center gap-2">
@@ -501,9 +1009,6 @@ const Registration = () => {
                             </span>
                         </button>
 
-                        <p className="text-center text-xs text-gray-400">
-                            Una vez enviada, contactá a tu delegado para agilizar la validación.
-                        </p>
                     </form>
                 )}
             </div>

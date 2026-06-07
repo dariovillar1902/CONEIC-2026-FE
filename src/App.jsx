@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import MainLayout from './layouts/MainLayout';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -14,8 +14,12 @@ import AssistantDashboard from './pages/AssistantDashboard';
 import GalleryPage from './pages/GalleryPage';
 import GamesPage from './pages/GamesPage';
 import AboutPage from './pages/AboutPage';
-import { SchedulePage, VenuesPage, ActivitiesPage, RegistrationPage, SponsorsPage } from './pages/Wrappers';
+import { SchedulePage, VenuesPage, ActivitiesPage, RegistrationPage } from './pages/Wrappers';
 import SubcommitteesPage from './pages/SubcommitteesPage';
+import FaqPage from './pages/FaqPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
+import SupportPage from './pages/SupportPage';
+import CommitteePage from './pages/CommitteePage';
 
 const router = createBrowserRouter([
   {
@@ -26,12 +30,23 @@ const router = createBrowserRouter([
       { path: 'login', element: <LoginPage /> },
       { path: 'schedule', element: <SchedulePage /> },
       { path: 'venues', element: <VenuesPage /> },
-      { path: 'sponsors', element: <SponsorsPage /> },
+      { path: 'sponsors', element: <SupportPage /> },
+      { path: 'endorsements', element: <Navigate to="/sponsors?tab=avales" replace /> },
       { path: 'registration', element: <RegistrationPage /> },
       { path: 'gallery', element: <GalleryPage /> },
       { path: 'games', element: <GamesPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'subcomisiones', element: <SubcommitteesPage /> },
+      { path: 'faq', element: <FaqPage /> },
+      { path: 'committee', element: <CommitteePage /> },
+    ]
+  },
+  // Change-password: accessible to any logged-in user
+  {
+    path: '/change-password',
+    element: <DashboardLayout allowedRoles={['assistant', 'delegate', 'admin']} />,
+    children: [
+      { index: true, element: <ChangePasswordPage /> }
     ]
   },
   // Protected Routes

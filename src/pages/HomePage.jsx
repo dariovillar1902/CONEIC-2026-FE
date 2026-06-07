@@ -19,9 +19,12 @@ const HomePage = () => {
           <div className="mb-8 flex justify-center animate-fade-in">
              <img src="/assets/LOGO_V-CONEIC-COLOR-BLANCO.png" alt="CONEIC Logo" className="h-64 md:h-80 object-contain drop-shadow-2xl" />
           </div>
-          <div className="space-y-2 mb-12 animate-fade-in-up">
+          <div className="space-y-0 mb-12 animate-fade-in-up">
               <p className="text-2xl md:text-3xl font-bold font-title tracking-widest text-complementary-gold uppercase">
-                13 al 16 de octubre de 2026
+                13 al 16 de octubre
+              </p>
+              <p className="text-2xl md:text-3xl font-bold font-title tracking-widest text-complementary-gold uppercase">
+                2026
               </p>
           </div>
 

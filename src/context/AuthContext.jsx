@@ -31,13 +31,16 @@ export const AuthProvider = ({ children }) => {
         }
 
         const userData = await response.json();
-        
+
         // Map API response to our app's user structure
-        const user = { 
-            name: userData.email.split('@')[0], 
-            email: userData.email, 
+        const user = {
+            name: userData.email.split('@')[0],
+            email: userData.email,
             role: userData.role,
-            delegationName: userData.delegationName
+            delegationName: userData.delegationName,
+            filial: userData.filial ?? null,
+            managedFaculties: userData.managedFaculties ?? [],
+            mustChangePassword: userData.mustChangePassword ?? false,
         };
 
         setUser(user);
@@ -55,12 +58,22 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('coneic_user');
   };
 
+  /** Called after a successful password change so the flag is cleared without re-login. */
+  const clearMustChangePassword = () => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, mustChangePassword: false };
+      localStorage.setItem('coneic_user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const hasRole = (role) => {
       return user?.role === role;
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, hasRole, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, hasRole, loading, clearMustChangePassword }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -1,35 +1,62 @@
+import { useState } from 'react';
+
+const ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII'];
+
+// Ordered most-recent → oldest for display
 const PREV_EDITIONS = [
-  {
-    edition: 'XVII CONEIC — Mendoza 2024',
-    src: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop',
-    alt: 'Congreso estudiantil Mendoza 2024',
-  },
-  {
-    edition: 'XVI CONEIC — Córdoba 2023',
-    src: 'https://images.unsplash.com/photo-1559223607-a43c990c692c?q=80&w=800&auto=format&fit=crop',
-    alt: 'Congreso estudiantil Córdoba 2023',
-  },
-  {
-    edition: 'XV CONEIC — Rosario 2022',
-    src: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop',
-    alt: 'Congreso estudiantil Rosario 2022',
-  },
-  {
-    edition: 'XIV CONEIC — Tucumán 2019',
-    src: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=800&auto=format&fit=crop',
-    alt: 'Congreso estudiantil Tucumán 2019',
-  },
-  {
-    edition: 'XIII CONEIC — La Plata 2018',
-    src: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800&auto=format&fit=crop',
-    alt: 'Congreso estudiantil La Plata 2018',
-  },
-  {
-    edition: 'XII CONEIC — Neuquén 2017',
-    src: 'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
-    alt: 'Congreso estudiantil Neuquén 2017',
-  },
+  { edition: 17, year: 2025, city: 'San Rafael' },
+  { edition: 16, year: 2024, city: 'Rosario' },
+  { edition: 15, year: 2023, city: 'Córdoba' },
+  { edition: 14, year: 2022, city: 'San Juan' },
+  { edition: 13, year: 2021, city: 'Trelew' },
+  { edition: 12, year: 2019, city: 'La Rioja' },
+  { edition: 11, year: 2018, city: 'Salta' },
+  { edition: 10, year: 2017, city: 'San Rafael' },
+  { edition: 9,  year: 2016, city: 'Misiones' },
+  { edition: 8,  year: 2015, city: 'San Juan' },
+  { edition: 7,  year: 2014, city: 'Olavarría' },
+  { edition: 6,  year: 2013, city: 'Santa Fe' },
+  { edition: 5,  year: 2012, city: 'Tucumán' },
+  { edition: 4,  year: 2011, city: 'Bahía Blanca' },
+  { edition: 3,  year: 2010, city: 'Mendoza' },
+  { edition: 2,  year: 2009, city: 'Córdoba' },
+  { edition: 1,  year: 2008, city: 'Rosario' },
 ];
+
+// Rotate through a set of elegant palette backgrounds
+const CARD_PALETTES = [
+  { bg: 'bg-institutional',     text: 'text-white',             numColor: 'text-complementary-gold' },
+  { bg: 'bg-primary-red',       text: 'text-white',             numColor: 'text-white/70' },
+  { bg: 'bg-slate-800',         text: 'text-white',             numColor: 'text-sky-300' },
+  { bg: 'bg-indigo-900',        text: 'text-white',             numColor: 'text-indigo-300' },
+  { bg: 'bg-emerald-900',       text: 'text-white',             numColor: 'text-emerald-300' },
+  { bg: 'bg-amber-800',         text: 'text-white',             numColor: 'text-amber-300' },
+];
+
+const EditionCard = ({ item }) => {
+  const palette = CARD_PALETTES[(item.edition - 1) % CARD_PALETTES.length];
+  return (
+    <div className={`${palette.bg} rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col`}>
+      {/* Number block */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pt-8 pb-4">
+        <span className={`font-title font-black leading-none select-none ${palette.numColor}`}
+          style={{ fontSize: 'clamp(3rem, 8vw, 5rem)' }}>
+          {ROMAN[item.edition - 1]}
+        </span>
+        <span className={`${palette.text} font-title font-bold text-lg mt-1 tracking-widest uppercase`}>
+          CONEIC
+        </span>
+      </div>
+      {/* Info strip */}
+      <div className="bg-black/20 px-5 py-3 text-center">
+        <p className={`${palette.text} font-bold text-sm tracking-wide`}>{item.year}</p>
+        {item.city && (
+          <p className={`${palette.text} text-xs opacity-80 mt-0.5`}>{item.city}</p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const GalleryPage = () => {
   return (
@@ -65,32 +92,29 @@ const GalleryPage = () => {
             Ediciones Anteriores
           </h2>
           <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-            Más de 18 años reuniendo a los mejores estudiantes de ingeniería civil de&nbsp;Argentina.
+            Más de 17 años reuniendo a los mejores estudiantes de ingeniería civil de&nbsp;Argentina.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PREV_EDITIONS.map((item, idx) => (
-            <div
-              key={idx}
-              className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white"
-            >
-              <div className="h-56 overflow-hidden">
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-institutional/80 via-institutional/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <p className="text-white font-bold font-title text-sm">{item.edition}</p>
-              </div>
-              <div className="p-4 bg-white">
-                <p className="text-sm font-bold text-institutional font-title">{item.edition}</p>
-              </div>
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {PREV_EDITIONS.map((item) => (
+            <EditionCard key={item.edition} item={item} />
           ))}
+        </div>
+
+        {/* Link to ANEIC archive */}
+        <div className="mt-10 text-center">
+          <a
+            href="https://sites.google.com/view/aneicarg/eventos/congreso-nacional"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-institutional text-white font-bold px-8 py-3 rounded-full hover:bg-primary-red transition-colors shadow-md uppercase tracking-widest text-sm"
+          >
+            Ver todas las ediciones en ANEIC Argentina
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
       </div>
 

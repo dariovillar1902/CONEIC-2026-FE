@@ -20,13 +20,12 @@ const Navbar = () => {
     const effectiveScrolled = scrolled || !isHome;
 
     const navLinks = [
-        { name: 'Inicio', href: '/' },
-        { name: 'Cronograma', href: '/schedule' },
-        { name: 'Sedes', href: '/venues' },
-        { name: 'Sobre Nosotros', href: '/about' },
-        { name: 'Sponsors', href: '/sponsors' },
-        { name: 'Galería', href: '/gallery' },
-        { name: 'Subcomisiones', href: '/subcomisiones' },
+        { name: 'Inicio',              href: '/' },
+        { name: 'Cronograma y Sedes',  href: '/schedule' },
+        { name: 'Sobre Nosotros',      href: '/about' },
+        { name: 'Sponsors & Avales',   href: '/sponsors' },
+        { name: 'Galería',             href: '/gallery' },
+        { name: 'FAQ',                 href: '/faq' },
     ];
 
     return (
@@ -42,15 +41,26 @@ const Navbar = () => {
                     {/* Desktop Menu */}
                     <div className="hidden lg:flex items-center space-x-6">
                         {navLinks.map((link) => (
-                            <Link 
-                                key={link.name} 
-                                to={link.href} 
+                            <Link
+                                key={link.name}
+                                to={link.href}
                                 className={`font-subtitle text-xs font-bold uppercase tracking-widest transition-colors duration-300 hover:text-complementary-gold ${effectiveScrolled ? 'text-gray-300' : 'text-white drop-shadow-sm'}`}
                             >
                                 {link.name}
                             </Link>
                         ))}
-                        {/* Ingresar oculto temporalmente */}
+                        <Link
+                            to="/registration"
+                            className="font-subtitle text-xs font-bold uppercase tracking-widest bg-complementary-gold text-institutional px-4 py-2 rounded-full hover:bg-yellow-400 transition-colors shadow-sm"
+                        >
+                            Inscribirse
+                        </Link>
+                        <Link
+                            to="/login"
+                            className="ml-1 font-subtitle text-xs font-bold uppercase tracking-widest bg-primary-red text-white px-4 py-2 rounded-full hover:bg-red-800 transition-colors shadow-sm"
+                        >
+                            Ingresar
+                        </Link>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -76,8 +86,8 @@ const Navbar = () => {
                 <div className="lg:hidden bg-institutional border-t border-gray-800 absolute w-full shadow-2xl animate-fade-in-down h-screen">
                     <div className="px-4 pt-4 pb-6 space-y-2">
                         {navLinks.map((link) => (
-                            <Link 
-                                key={link.name} 
+                            <Link
+                                key={link.name}
                                 to={link.href}
                                 onClick={() => setIsOpen(false)}
                                 className="block px-4 py-3 rounded-lg text-sm font-bold text-gray-300 hover:text-white hover:bg-white/10 font-subtitle uppercase tracking-widest transition"
@@ -85,7 +95,20 @@ const Navbar = () => {
                                 {link.name}
                             </Link>
                         ))}
-                        {/* Ingresar oculto temporalmente */}
+                        <Link
+                            to="/registration"
+                            onClick={() => setIsOpen(false)}
+                            className="block px-4 py-3 rounded-lg text-sm font-bold bg-complementary-gold text-institutional hover:bg-yellow-400 font-subtitle uppercase tracking-widest transition text-center mt-2"
+                        >
+                            Inscribirse
+                        </Link>
+                        <Link
+                            to="/login"
+                            onClick={() => setIsOpen(false)}
+                            className="block px-4 py-3 rounded-lg text-sm font-bold bg-primary-red text-white hover:bg-red-800 font-subtitle uppercase tracking-widest transition text-center mt-1"
+                        >
+                            Ingresar
+                        </Link>
                     </div>
                 </div>
             )}

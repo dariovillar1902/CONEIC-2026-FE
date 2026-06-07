@@ -63,8 +63,8 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-grow">
-                     <Outlet />
+                <main className="flex-grow min-w-0 overflow-hidden">
+                    <Outlet />
                 </main>
             </div>
         </div>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+  EmailJS Template ID: template_1zgcz68
+  Asunto: Inscripción habilitada – CONEIC XVIII
+  Variables disponibles:
+    {{to_name}}       — Nombre completo del inscripto
+    {{to_email}}      — Email (usado como destinatario en EmailJS)
+    {{faculty}}       — Facultad del inscripto
+    {{delegate_name}} — Nombre del delegado
+    {{filial_name}}   — Nombre de la filial ANEIC
+    {{delegate_phone}}— Teléfono/WhatsApp del delegado
+    {{delegate_email}}— Email del delegado
+    {{web_url}}       — URL base del sitio
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inscripción habilitada – CONEIC XVIII</title>
+  <style>
+    body { margin:0; padding:0; background:#f4f4f7; font-family:'Helvetica Neue',Arial,sans-serif; }
+    .wrapper { max-width:600px; margin:40px auto; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+    .header { background:#1a2a5e; padding:32px 40px; text-align:center; }
+    .header img { height:52px; }
+    .header h1 { color:#ffffff; font-size:22px; margin:16px 0 0; font-weight:700; letter-spacing:.5px; }
+    .badge { display:inline-block; background:#c8a84b; color:#1a2a5e; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:4px 14px; border-radius:99px; margin-top:10px; }
+    .body { padding:36px 40px; }
+    .body p { color:#444; font-size:15px; line-height:1.7; margin:0 0 16px; }
+    .body p.lead { font-size:16px; color:#1a2a5e; font-weight:600; }
+    .highlight-box { background:#e8f0fe; border-radius:10px; padding:20px 24px; margin:24px 0; text-align:center; }
+    .highlight-box p { margin:0; font-size:15px; color:#1a2a5e; font-weight:700; }
+    .delegate-box { background:#f0f3fa; border-left:4px solid #c8a84b; border-radius:8px; padding:18px 20px; margin:24px 0; }
+    .delegate-box p { margin:0 0 6px; font-size:14px; color:#333; }
+    .delegate-box p:last-child { margin:0; }
+    .delegate-box strong { color:#1a2a5e; }
+    .note { background:#fffbea; border:1px solid #f0d060; border-radius:8px; padding:14px 18px; margin:24px 0; }
+    .note p { margin:0; font-size:13px; color:#7a6000; }
+    .footer { background:#f4f4f7; padding:24px 40px; text-align:center; }
+    .footer p { color:#999; font-size:12px; margin:0; line-height:1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <img src="https://coneic-2026.vercel.app/assets/LOGO_H-CONEIC-COLOR-BLANCO.png" alt="CONEIC XVIII" />
+      <h1>¡Inscripción habilitada!</h1>
+      <span class="badge">XVIII CONEIC · Buenos Aires 2026</span>
+    </div>
+
+    <div class="body">
+      <p class="lead">Hola, {{to_name}}:</p>
+      <p>¡Tu inscripción al <strong>XVIII CONEIC</strong> fue habilitada correctamente! Ya podés continuar con el proceso de pago.</p>
+
+      <div class="highlight-box">
+        <p>El siguiente paso es coordinar el pago con tu delegado/a.</p>
+      </div>
+
+      <p>A continuación encontrás los datos de contacto de tu delegado/a para coordinar los próximos pasos:</p>
+
+      <div class="delegate-box">
+        <p><strong>Tu delegado/a:</strong> {{delegate_name}}</p>
+        <p><strong>Filial:</strong> {{filial_name}}</p>
+        {{#if delegate_phone}}<p><strong>WhatsApp:</strong> {{delegate_phone}}</p>{{/if}}
+        {{#if delegate_email}}<p><strong>Email:</strong> {{delegate_email}}</p>{{/if}}
+      </div>
+
+      <div class="note">
+        <p>⏳ Una vez realizado el pago, la acreditación en nuestro sistema puede demorar algunos días. Agradecemos tu paciencia durante este proceso.</p>
+      </div>
+
+      <p>¡Gracias por sumarte a esta nueva edición del congreso!</p>
+      <p>Saludos,<br/><strong>Comité Organizador CONEIC XVIII</strong></p>
+    </div>
+
+    <div class="footer">
+      <p>Este mensaje fue enviado automáticamente. Por favor no respondas a este correo.<br/>
+      Si tenés dudas, escribinos a <a href="mailto:coneic.argentina@gmail.com" style="color:#1a2a5e;">coneic.argentina@gmail.com</a></p>
+    </div>
+  </div>
+</body>
+</html>
