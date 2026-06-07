@@ -1,52 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import emailjs from '@emailjs/browser';
 import { getContactForFaculty } from '../data/filiales.js';
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 const API = import.meta.env.VITE_API_URL;
 
-const EJS_SERVICE   = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-const EJS_KEY       = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-const TPL_VALIDATED = import.meta.env.VITE_EMAILJS_TEMPLATE_VALIDATED;
-const TPL_CONFIRMED = import.meta.env.VITE_EMAILJS_TEMPLATE_CONFIRMED;
-
-/** Sends the "Inscripción habilitada" email (template 02). */
-async function sendValidatedEmail(reg) {
-  if (!EJS_SERVICE || !TPL_VALIDATED || !EJS_KEY) return;
-  const delegateContact = getContactForFaculty(reg.faculty);
-  try {
-    await emailjs.send(EJS_SERVICE, TPL_VALIDATED, {
-      to_name:        `${reg.name} ${reg.lastname}`,
-      to_email:       reg.email,
-      faculty:        reg.faculty ?? '',
-      delegate_name:  delegateContact?.name      ?? 'tu delegado/a',
-      filial_name:    delegateContact?.filialName ?? 'ANEIC Nacional',
-      delegate_phone: delegateContact?.phone     ?? '',
-      delegate_email: delegateContact?.email     ?? '',
-      web_url:        window.location.origin,
-    }, EJS_KEY);
-  } catch {
-    // email is non-critical — swallow silently
-  }
-}
-
-/** Sends the "Inscripción confirmada" email (template 03), for Pago Completo or 2da Cuota. */
-async function sendConfirmedEmail(reg, password) {
-  if (!EJS_SERVICE || !TPL_CONFIRMED || !EJS_KEY) return;
-  const detail =
-    reg.paymentCondition === 'SegundaCuota'
-      ? 'tu pago correspondiente a la segunda cuota de tu inscripción'
-      : 'tu pago correspondiente al pago completo de tu inscripción';
-  try {
-    await emailjs.send(EJS_SERVICE, TPL_CONFIRMED, {
-      to_name:        `${reg.name} ${reg.lastname}`,
-      to_email:       reg.email,
-      payment_detail: detail,
-      temp_password:  password ?? '(ver con tu delegado)',
-      login_url:      `${window.location.origin}/login`,
-    }, EJS_KEY);
-  } catch { /* non-critical */ }
-}
+// Los emails transaccionales los envía la API automáticamente via Azure Communication Services.
+// Ver: CONEIC-2026-API/Coneic.Api/Services/AcsEmailService.cs
 
 const STATUS_LABELS = {
   Pending:   { label: 'Pendiente',  color: 'bg-yellow-100 text-yellow-800' },
@@ -288,8 +247,7 @@ const RegistrationsPanel = () => {
         prev.map(r => r.id === id ? updatedReg : r)
       );
 
-      if (newStatus === 'Validated') sendValidatedEmail(updatedReg);
-      if (newStatus === 'Paid')      sendConfirmedEmail(updatedReg, generatedPassword);
+      // Emails enviados automáticamente por la API (Azure Communication Services)
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {

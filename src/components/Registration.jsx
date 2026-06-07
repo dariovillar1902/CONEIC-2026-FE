@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import emailjs from '@emailjs/browser';
 import {
     ALL_FACULTIES_BY_REGION,
     getContactForFaculty,
@@ -328,33 +327,7 @@ const Registration = () => {
                 return;
             }
 
-            // Send confirmation email via EmailJS (non-blocking)
-            const serviceId  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_REGISTRATION;
-            const publicKey  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-            if (serviceId && templateId && publicKey) {
-                try {
-                    await emailjs.send(
-                        serviceId,
-                        templateId,
-                        {
-                            to_name:        name,
-                            to_email:       email,
-                            faculty:        facultyValue,
-                            delegate_name:  delegateContact?.name      ?? 'tu delegado',
-                            filial_name:    delegateContact?.filialName ?? 'ANEIC Nacional',
-                            web_url:        window.location.origin,
-                            delegate_phone: delegateContact?.phone     ?? '',
-                            delegate_email: delegateContact?.email     ?? '',
-                        },
-                        publicKey,
-                    );
-                } catch {
-                    // email optional — continue regardless
-                }
-            }
-
+            // El email de pre-inscripción lo envía la API automáticamente (Azure Communication Services)
             setIsSuccess(true);
         } catch {
             // Network error still shows success to avoid leaving user in limbo
