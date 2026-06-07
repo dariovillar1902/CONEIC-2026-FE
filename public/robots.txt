@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Páginas privadas (dashboards y autenticación)
+Disallow: /admin
+Disallow: /delegate
+Disallow: /my-ticket
+Disallow: /change-password
+Disallow: /login
+
+Sitemap: https://coneic2026.com.ar/sitemap.xml
