@@ -103,11 +103,6 @@ const LoginPage = () => {
             </button>
           </div>
           
-          <div className="text-xs text-gray-400 text-center mt-4">
-               <p className="font-mono text-[10px]">Admin: dvillar@frba.utn.edu.ar (Pass: admin)</p>
-               <p className="font-mono text-[10px]">Delegado FRBA: delegate@frba.utn.edu.ar (Pass: demo)</p>
-               <p className="font-mono text-[10px]">Delegado FRGP: delegate@frgp.utn.edu.ar (Pass: demo)</p>
-          </div>
         </form>
       </div>
     </div>
