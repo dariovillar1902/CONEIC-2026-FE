@@ -1,54 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { PAYMENT_AMOUNTS } from '../data/filiales.js';
-import emailjs from '@emailjs/browser';
 
 const API = import.meta.env.VITE_API_URL;
 
-const EJS_SERVICE       = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-const EJS_KEY           = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-const TPL_FIRST_PAYMENT = import.meta.env.VITE_EMAILJS_TEMPLATE_FIRST_PAYMENT;
-const TPL_VALIDATED     = import.meta.env.VITE_EMAILJS_TEMPLATE_VALIDATED;
-
-/** Sends the "Inscripción habilitada" email when a delegate enables a student. */
-async function sendValidatedEmailFromDelegate(reg, delegateUser) {
-  if (!EJS_SERVICE || !TPL_VALIDATED || !EJS_KEY) return;
-  try {
-    await emailjs.send(EJS_SERVICE, TPL_VALIDATED, {
-      to_name:        `${reg.name} ${reg.lastname}`,
-      to_email:       reg.email,
-      faculty:        reg.faculty ?? '',
-      delegate_name:  delegateUser?.displayName ?? delegateUser?.email ?? 'tu delegado/a',
-      filial_name:    delegateUser?.filial ?? 'ANEIC',
-      delegate_phone: delegateUser?.phone  ?? '',
-      delegate_email: delegateUser?.email  ?? '',
-      web_url:        window.location.origin,
-    }, EJS_KEY);
-  } catch { /* non-critical */ }
-}
-
-/**
- * Sends the "Primera cuota recibida" email (template 04) for each assignment
- * with paymentType === 'Pagó 1° Cuota', looking up the registration email
- * from the provided registrations list.
- */
-async function sendFirstPaymentEmails(assignments, registrations) {
-  if (!EJS_SERVICE || !TPL_FIRST_PAYMENT || !EJS_KEY) return;
-  const firstCuota = assignments.filter(a => a.paymentType === 'Pagó 1° Cuota');
-  for (const a of firstCuota) {
-    const reg = registrations.find(r => r.id === a.registrationId);
-    if (!reg) continue;
-    try {
-      await emailjs.send(EJS_SERVICE, TPL_FIRST_PAYMENT, {
-        to_name:  a.personName || `${reg.name} ${reg.lastname}`,
-        to_email: reg.email,
-        due_date: 'a confirmar con tu delegado/a',
-      }, EJS_KEY);
-    } catch {
-      // non-critical — continue with next
-    }
-  }
-}
+// Los emails transaccionales los envía la API automáticamente via Azure Communication Services.
+// Ver: CONEIC-2026-API/Coneic.Api/Services/AcsEmailService.cs
 
 // New simplified payment conditions (items 7)
 const PAYMENT_CONDITIONS = [
@@ -269,13 +226,7 @@ const DelegateDashboard = () => {
                 })
             ));
 
-            // Send "Inscripción habilitada" email for every newly-enabled student
-            const newlyEnabled = entries.filter(([, ch]) => ch.isEnabled && !ch._origEnabled);
-            for (const [id] of newlyEnabled) {
-                const reg = original.find(a => a.id === Number(id));
-                if (reg) sendValidatedEmailFromDelegate(reg, user);
-            }
-
+            // El email "Inscripción habilitada" lo envía la API automáticamente en el PATCH /payment
             setPendingPaymentChanges({});
         } catch {
             alert('Error al guardar los cambios');
