@@ -332,7 +332,9 @@ const DelegateDashboard = () => {
         try {
             const form = new FormData();
             form.append('file', batchFile);
-            const res = await fetch(`${API}/api/registrations/upload`, { method: 'POST', body: form });
+            // Pasar el email del delegado para que el blob quede en comprobantes/{delegado}/
+            const params = new URLSearchParams({ delegateEmail: user?.email ?? '' });
+            const res = await fetch(`${API}/api/registrations/upload?${params}`, { method: 'POST', body: form });
             if (!res.ok) throw new Error('Error al subir el archivo');
             const data = await res.json();
             return data.url;

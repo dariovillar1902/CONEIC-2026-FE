@@ -288,12 +288,22 @@ const Registration = () => {
         const facultyValue = isInternacional ? 'Internacional' : isOtra ? `Otra (${selectedProvince})` : selectedFaculty;
 
         try {
-            // Upload certificate if provided
+            // Upload certificate if provided — pass student info for meaningful blob name
             let certificateFileName = null;
             if (certificateFile) {
                 const fd = new FormData();
                 fd.append('file', certificateFile);
-                const upRes = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/upload`, { method: 'POST', body: fd });
+                const params = new URLSearchParams({
+                    type: 'certificate',
+                    dni,
+                    apellido: lastname,
+                    nombre: name,
+                    faculty: facultyValue,
+                });
+                const upRes = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/registrations/upload?${params}`,
+                    { method: 'POST', body: fd }
+                );
                 if (upRes.ok) {
                     const upData = await upRes.json();
                     certificateFileName = upData.url;
