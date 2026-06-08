@@ -5,7 +5,7 @@ const HomePage = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-institutional text-white min-h-[85vh] flex items-center relative overflow-hidden">
+      <section className="pt-32 pb-8 px-4 sm:px-6 lg:px-8 bg-institutional text-white min-h-[85vh] flex flex-col items-center relative overflow-hidden">
         <div className="absolute inset-0 z-0">
              <div className="absolute inset-0 bg-gradient-to-b from-institutional/60 via-institutional/40 to-institutional/80 z-10"></div>
              <img
@@ -15,7 +15,7 @@ const HomePage = () => {
              />
         </div>
 
-        <div className="max-w-7xl mx-auto text-center relative z-20">
+        <div className="max-w-7xl mx-auto text-center relative z-20 flex-1 flex flex-col items-center justify-center">
           <div className="mb-8 flex justify-center animate-fade-in">
              <img src="/assets/LOGO_V-CONEIC-COLOR-BLANCO.png" alt="CONEIC Logo" className="h-64 md:h-80 object-contain drop-shadow-2xl" />
           </div>
@@ -36,13 +36,36 @@ const HomePage = () => {
             Innovación, técnica y cultura en el corazón del&nbsp;país.
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up delay-200">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up delay-200 mb-16">
             <Link to="/registration" className="bg-primary-red hover:bg-red-900 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-1 hover:shadow-red-900/40 hover:shadow-xl uppercase tracking-widest text-sm border-2 border-primary-red">
               Inscribirse
             </Link>
             <Link to="/schedule" className="bg-transparent hover:bg-white/10 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-1 backdrop-blur-sm border-2 border-white uppercase tracking-widest text-sm">
               Cronograma
             </Link>
+          </div>
+        </div>
+
+        {/* Inscription Stages Banner — inside hero so the cards below can still overlap */}
+        <div className="relative z-20 w-full max-w-5xl mx-auto pb-10 px-2">
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-complementary-gold mb-4">
+            Fechas de inscripción
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              { label: 'Etapa 1', preReg: '22 al 26 de Junio',         hab: '29 Jun al 5 Jul',    pago: '6 al 8 de Julio' },
+              { label: 'Etapa 2', preReg: '27 al 31 de Julio',         hab: '3 al 9 de Agosto',   pago: '10 al 12 de Agosto' },
+              { label: 'Etapa 3', preReg: '31 Ago al 4 de Sep',        hab: '7 al 13 de Sep',     pago: '14 al 16 de Sep' },
+            ].map(({ label, preReg, hab, pago }) => (
+              <div key={label} className="border border-white/20 rounded-xl py-4 px-5 bg-white/5 text-center backdrop-blur-sm">
+                <p className="text-xs font-black uppercase tracking-widest text-complementary-gold mb-3">{label}</p>
+                <div className="space-y-1 text-xs">
+                  <p><span className="text-gray-400">Pre-inscripción: </span><span className="text-white font-semibold">{preReg}</span></p>
+                  <p><span className="text-gray-400">Hab. y Recaudación: </span><span className="text-white font-semibold">{hab}</span></p>
+                  <p><span className="text-gray-400">Pago único: </span><span className="text-white font-semibold">{pago}</span></p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

@@ -90,7 +90,6 @@ const STATIC_DAYS = [
       { time: '14:00–16:00', name: 'Concurso de Ponencias Estudiantiles',   type: 'academic',  detail: 'Auditorio Belgrano' },
       { time: '16:00–16:45', name: 'Coffee Break',                          type: 'break' },
       { time: '16:45–19:05', name: 'Charlas Magistrales',                   type: 'academic',  detail: 'Auditorio Belgrano' },
-      { time: '23:00',       name: 'Evento de Bienvenida',                  type: 'social' },
     ],
   },
   {
@@ -102,7 +101,6 @@ const STATIC_DAYS = [
       { time: '12:30–14:00', name: 'Almuerzo libre',                        type: 'break' },
       { time: '14:00–18:00', name: 'Solidarias – Charlas de Compromiso Social', type: 'solidarity' },
       { time: '17:00–17:40', name: 'Coffee Break',                          type: 'break' },
-      { time: '23:00',       name: 'Evento',                                type: 'social' },
     ],
   },
   {
@@ -127,7 +125,6 @@ const STATIC_DAYS = [
       { time: '15:30–16:00', name: 'Descanso',                              type: 'break' },
       { time: '16:00–17:40', name: 'Charlas Magistrales',                   type: 'academic',  detail: 'Auditorio Belgrano' },
       { time: '17:50–18:30', name: 'Acto de Cierre',                        type: 'general',   detail: 'Cierre oficial del XVIII CONEIC' },
-      { time: '23:00',       name: 'Evento de Cierre',                      type: 'social' },
     ],
   },
 ];

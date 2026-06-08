@@ -90,7 +90,7 @@ const CongresoTab = ({ setTab }) => (
                     <span className="text-primary-red font-bold tracking-widest uppercase text-sm">Organización</span>
                     <h2 className="text-3xl font-bold text-institutional font-title">Hecho por Estudiantes, para&nbsp;Estudiantes</h2>
                     <p className="text-gray-600 text-lg">
-                        La organización del XVIII CONEIC está a cargo de la <strong className="text-institutional">Comisión Organizadora</strong>, conformada íntegramente por estudiantes visionarios de la Universidad Tecnológica Nacional — Facultad Regional Buenos&nbsp;Aires.
+                        La organización del XVIII CONEIC está a cargo de la <strong className="text-institutional">Comisión Organizadora</strong>, conformada por estudiantes de distintas universidades del país comprometidos con la ingeniería civil y la vida estudiantil.
                     </p>
                     <p className="text-gray-600">
                         Trabajamos de manera voluntaria y profesional durante más de un año para garantizar la excelencia académica y logística del evento.
