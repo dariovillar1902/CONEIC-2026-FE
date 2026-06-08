@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { PAYMENT_AMOUNTS } from '../data/filiales.js';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -13,6 +12,14 @@ const PAYMENT_CONDITIONS = [
     { value: 'Pagó Completo', label: 'Pagó Completo' },
     { value: 'Pagó 1° Cuota', label: 'Pagó 1° Cuota' },
     { value: 'No Pagó',       label: 'No Pagó' },
+];
+
+// Opciones de estado de pago para asignar al subir comprobantes
+const PAYMENT_CONDITION_UPLOAD_OPTIONS = [
+    { value: '',               label: '— Estado de pago —' },
+    { value: 'Pagó Completo',  label: 'Pagó Completo' },
+    { value: 'Pagó 1° Cuota',  label: 'Pagó 1° Cuota' },
+    { value: 'Pagó 2° Cuota',  label: 'Pagó 2° Cuota' },
 ];
 
 /* ─── Inline editable cell ────────────────────────────────────────── */
@@ -49,46 +56,6 @@ const EditableCell = ({ value, onSave, placeholder = '—', multiline = false })
     );
 };
 
-/* ─── Inline amount editor ────────────────────────────────────────── */
-const AmountCell = ({ paid, pending, onSave }) => {
-    const [editing, setEditing] = useState(false);
-    const [draftPaid, setDraftPaid] = useState(String(paid ?? 0));
-    const [draftPending, setDraftPending] = useState(String(pending ?? 0));
-
-    const commit = () => {
-        setEditing(false);
-        const p = parseFloat(draftPaid) || 0;
-        const pe = parseFloat(draftPending) || 0;
-        if (p !== paid || pe !== pending) onSave(p, pe);
-    };
-
-    if (editing) {
-        return (
-            <div className="space-y-1">
-                <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-gray-400 w-12">Pagado</span>
-                    <input type="number" className="border rounded px-1 py-0.5 text-xs w-20 focus:outline-none focus:ring-1 focus:ring-green-500" value={draftPaid} onChange={e => setDraftPaid(e.target.value)} />
-                </div>
-                <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-gray-400 w-12">Pendiente</span>
-                    <input type="number" className="border rounded px-1 py-0.5 text-xs w-20 focus:outline-none focus:ring-1 focus:ring-red-400" value={draftPending} onChange={e => setDraftPending(e.target.value)} />
-                </div>
-                <div className="flex gap-1 pt-0.5">
-                    <button onClick={commit} className="text-[10px] bg-green-600 text-white rounded px-2 py-0.5 hover:bg-green-700 transition">OK</button>
-                    <button onClick={() => setEditing(false)} className="text-[10px] text-gray-400 hover:text-gray-600 px-1">✕</button>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div onClick={() => setEditing(true)} className="cursor-pointer hover:bg-blue-50 rounded px-1 py-0.5 transition" title="Clic para editar montos">
-            <div className="text-green-700 font-bold text-sm">${paid?.toLocaleString('es-AR') ?? 0}</div>
-            {pending > 0 && <div className="text-red-500 text-xs font-bold">Deb: ${pending?.toLocaleString('es-AR')}</div>}
-            {!pending && <div className="text-gray-300 text-xs">—</div>}
-        </div>
-    );
-};
 
 /* ─── Main Component ──────────────────────────────────────────────── */
 const DelegateDashboard = () => {
@@ -234,22 +201,6 @@ const DelegateDashboard = () => {
         }
     };
 
-    const handleAmountsUpdate = async (id, amountPaid, amountPending) => {
-        const original = [...attendees];
-        setAttendees(attendees.map(a => a.id === id ? { ...a, amountPaid, amountPending } : a));
-        try {
-            const res = await fetch(`${API}/api/registrations/${id}/amounts`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amountPaid, amountPending }),
-            });
-            if (!res.ok) throw new Error();
-        } catch {
-            alert('Error al actualizar montos');
-            setAttendees(original);
-        }
-    };
-
     const handleObservationsUpdate = async (id, observations) => {
         const original = [...attendees];
         setAttendees(attendees.map(a => a.id === id ? { ...a, observations } : a));
@@ -355,16 +306,10 @@ const DelegateDashboard = () => {
             receiptUrl = uploaded;
         }
 
-        const enrichedAssignments = batchAssignments.map(a => {
-            const reg = attendees.find(r => r.id === Number(a.registrationId));
-            const fullPrice = reg?.price ?? 100000;
-            const paymentType = a.amount >= fullPrice
-                ? 'Pagó Completo'
-                : a.amount > 0
-                ? 'Pagó 1° Cuota'
-                : 'No Pagó';
-            return { ...a, paymentType };
-        });
+        const enrichedAssignments = batchAssignments.map(a => ({
+            ...a,
+            paymentType: a.paymentCondition || 'No Pagó',
+        }));
 
         const payload = {
             delegateEmail,
@@ -450,7 +395,7 @@ const DelegateDashboard = () => {
     // Assignment row helpers
     const addAssignmentRow = () => setBatchAssignments(prev => [
         ...prev,
-        { registrationId: '', personName: '', amount: PAYMENT_AMOUNTS[0] },
+        { registrationId: '', personName: '', paymentCondition: '' },
     ]);
 
     const updateAssignmentRow = (idx, field, value) => {
@@ -534,9 +479,8 @@ const DelegateDashboard = () => {
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Facultad</th>
                             )}
                             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Habilitado</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Forma de Pago</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado de Pago</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Etapa</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Observaciones</th>
                             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                         </tr>
@@ -566,41 +510,26 @@ const DelegateDashboard = () => {
                                         onChange={e => queuePaymentChange(
                                             person.id,
                                             e.target.checked,
-                                            pendingPaymentChanges[person.id]?.paymentCondition ?? person.paymentCondition ?? ''
+                                            person.paymentCondition ?? ''
                                         )}
                                         className="h-5 w-5 text-green-600 rounded border-gray-300 focus:ring-green-500 cursor-pointer"
                                     />
                                 </td>
-                                {/* Forma de pago */}
+                                {/* Estado de Pago — solo lectura, se actualiza via comprobante */}
                                 <td className="px-4 py-3">
-                                    <select
-                                        value={pendingPaymentChanges[person.id]?.paymentCondition ?? person.paymentCondition ?? ''}
-                                        onChange={e => queuePaymentChange(
-                                            person.id,
-                                            pendingPaymentChanges[person.id]?.isEnabled ?? person.isEnabled ?? false,
-                                            e.target.value
-                                        )}
-                                        className={`text-xs border rounded px-2 py-1 outline-none focus:ring-2 focus:ring-primary-blue cursor-pointer ${
-                                            person.paymentCondition === 'Pagó Completo' ? 'bg-green-50 border-green-300 text-green-800' :
-                                            person.paymentCondition === 'Pagó 1° Cuota' ? 'bg-blue-50 border-blue-300 text-blue-800' :
-                                            person.paymentCondition === 'No Pagó'        ? 'bg-red-50 border-red-300 text-red-700' :
-                                            'bg-gray-50 border-gray-200 text-gray-500'
-                                        }`}
-                                    >
-                                        {PAYMENT_CONDITIONS.map(opt => (
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                        ))}
-                                    </select>
+                                    {person.paymentCondition ? (
+                                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
+                                            person.paymentCondition === 'Pagó Completo'  ? 'bg-green-100 text-green-800' :
+                                            person.paymentCondition === 'Pagó 1° Cuota' || person.paymentCondition === 'Pagó 2° Cuota' ? 'bg-blue-100 text-blue-800' :
+                                            'bg-red-100 text-red-700'
+                                        }`}>
+                                            {person.paymentCondition}
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs text-gray-400 italic">No Pagó</span>
+                                    )}
                                 </td>
                                 <td className="px-4 py-3 text-xs text-gray-600">{person.stageName}</td>
-                                {/* Monto — inline editable */}
-                                <td className="px-4 py-3">
-                                    <AmountCell
-                                        paid={person.amountPaid}
-                                        pending={person.amountPending}
-                                        onSave={(p, pe) => handleAmountsUpdate(person.id, p, pe)}
-                                    />
-                                </td>
                                 {/* Observaciones — inline editable */}
                                 <td className="px-4 py-3 max-w-[180px]">
                                     <EditableCell
@@ -630,7 +559,7 @@ const DelegateDashboard = () => {
                         ))}
                         {filteredAttendees.length === 0 && (
                             <tr>
-                                <td colSpan={managedFaculties.length > 1 ? 11 : 10} className="px-4 py-10 text-center text-gray-400 text-sm">
+                                <td colSpan={managedFaculties.length > 1 ? 10 : 9} className="px-4 py-10 text-center text-gray-400 text-sm">
                                     No hay inscripciones registradas.
                                 </td>
                             </tr>
@@ -644,7 +573,7 @@ const DelegateDashboard = () => {
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div>
                         <h2 className="text-lg font-bold text-institutional font-title">Comprobantes de Pago Grupal</h2>
-                        <p className="text-xs text-gray-500 mt-0.5">Cargá el comprobante de la transferencia grupal y asigná los montos por persona.</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Cargá el comprobante de la transferencia grupal y asigná el estado de pago por persona.</p>
                     </div>
                     <button onClick={() => openBatchModal()} className="bg-complementary-gold text-white px-4 py-2 rounded-lg font-bold text-sm hover:opacity-90 transition shadow-sm">
                         + Nuevo comprobante
@@ -675,14 +604,13 @@ const DelegateDashboard = () => {
                                             {batch.assignments.map((a, i) => (
                                                 <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
                                                     <span className={`inline-block px-2 py-0.5 rounded font-bold ${
-                                                        a.paymentType === 'Pagó Completo' ? 'bg-green-100 text-green-700' :
-                                                        a.paymentType === 'Pagó 1° Cuota' ? 'bg-blue-100 text-blue-700' :
+                                                        a.paymentType === 'Pagó Completo'  ? 'bg-green-100 text-green-700' :
+                                                        a.paymentType === 'Pagó 1° Cuota' || a.paymentType === 'Pagó 2° Cuota' ? 'bg-blue-100 text-blue-700' :
                                                         'bg-red-100 text-red-600'
                                                     }`}>
-                                                        {a.paymentType}
+                                                        {a.paymentType || 'Sin asignar'}
                                                     </span>
                                                     <span className="font-medium">{a.personName}</span>
-                                                    <span className="text-gray-400">— ${Number(a.amount).toLocaleString('es-AR')}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -841,38 +769,32 @@ const DelegateDashboard = () => {
 
                         {/* File upload */}
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-widest">Comprobante (foto o PDF)</label>
+                            <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-widest">Comprobante de pago</label>
                             <label className="flex items-center justify-center gap-2 w-full border-2 border-dashed border-gray-300 rounded-lg px-4 py-4 cursor-pointer hover:bg-gray-50 transition">
                                 <span className="text-2xl">📎</span>
                                 <span className="text-sm text-gray-600">
-                                    {batchFile ? batchFile.name : 'Elegir imagen o PDF…'}
+                                    {batchFile ? batchFile.name : 'Elegir archivo…'}
                                 </span>
                                 <input
                                     type="file"
-                                    accept="image/*,application/pdf"
+                                    accept="application/pdf,image/jpeg,image/jpg"
                                     className="hidden"
-                                    onChange={e => { setBatchFile(e.target.files[0] || null); setBatchReceiptUrl(''); }}
+                                    onChange={e => {
+                                        const file = e.target.files[0] || null;
+                                        if (file && file.size > 10 * 1024 * 1024) {
+                                            alert('El archivo supera el límite de 10 MB. Por favor elegí un archivo más pequeño.');
+                                            e.target.value = '';
+                                            return;
+                                        }
+                                        setBatchFile(file);
+                                        setBatchReceiptUrl('');
+                                    }}
                                 />
                             </label>
+                            <p className="text-xs text-gray-400 mt-1">Formatos permitidos: PDF o JPG · Tamaño máximo: 10 MB</p>
                             {batchFile && (
                                 <button type="button" onClick={() => setBatchFile(null)} className="text-xs text-red-400 hover:text-red-600 mt-1">✕ Quitar archivo</button>
                             )}
-                        </div>
-
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                            <div className="flex-1 h-px bg-gray-200" /> o pegá un link <div className="flex-1 h-px bg-gray-200" />
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-widest">Link al comprobante (opcional)</label>
-                            <input
-                                type="url"
-                                placeholder="https://..."
-                                value={batchReceiptUrl}
-                                disabled={!!batchFile}
-                                onChange={e => setBatchReceiptUrl(e.target.value)}
-                                className="border p-2 rounded w-full text-sm disabled:bg-gray-50 disabled:text-gray-400"
-                            />
                         </div>
 
                         {/* Per-person assignments */}
@@ -905,14 +827,14 @@ const DelegateDashboard = () => {
                                             ))}
                                         </select>
 
-                                        {/* Amount select */}
+                                        {/* Estado de pago */}
                                         <select
-                                            value={row.amount}
-                                            onChange={e => updateAssignmentRow(idx, 'amount', Number(e.target.value))}
-                                            className="border rounded px-2 py-1.5 text-xs w-36 bg-white"
+                                            value={row.paymentCondition ?? ''}
+                                            onChange={e => updateAssignmentRow(idx, 'paymentCondition', e.target.value)}
+                                            className="border rounded px-2 py-1.5 text-xs w-40 bg-white"
                                         >
-                                            {PAYMENT_AMOUNTS.map(amt => (
-                                                <option key={amt} value={amt}>${amt.toLocaleString('es-AR')}</option>
+                                            {PAYMENT_CONDITION_UPLOAD_OPTIONS.map(opt => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
                                             ))}
                                         </select>
 
