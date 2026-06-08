@@ -2,6 +2,10 @@ import { useState } from 'react';
 
 const FAQS = [
   {
+    q: '¿Cuáles son los requisitos para inscribirme al CONEIC XVIII?',
+    a: 'Podés pre-inscribirte si sos estudiante regular de la carrera de Ingeniería Civil o afín en una universidad miembro de ANEIC. Para confirmar tu inscripción, tu delegado/a verificará tu condición de alumno/a regular. Si tu facultad no tiene filial activa, contactate con nosotros y te asignaremos una delegación de referencia.',
+  },
+  {
     q: '¿Qué es un delegado y por qué tengo que hablar con él?',
     a: 'El delegado es tu nexo directo con la organización del congreso. Su rol es verificar que seas estudiante de la filial y gestionar el cobro de tu inscripción de forma segura.',
   },
@@ -12,10 +16,6 @@ const FAQS = [
   {
     q: 'Ya completé el formulario y me apareció el cartel de "Solicitud Enviada", ¿ya tengo mi lugar asegurado?',
     a: 'No. Ese cartel indica que tus datos fueron recibidos. El cupo solo se confirma una vez que el delegado habilita tu inscripción y se registra el pago.',
-  },
-  {
-    q: '¿Cuánto tiempo tengo que esperar a que el delegado me contacte?',
-    a: 'Para agilizar el proceso, te recomendamos que seas vos quien inicie el contacto con tu filial. Sin embargo, recordá que, antes de continuar con la inscripción, tu delegado/a deberá habilitarte. Por eso, te recomendamos esperar a recibir el mail de confirmación de habilitación antes de comunicarte para coordinar los próximos pasos de la inscripción.',
   },
   {
     q: 'Mi universidad no aparece en el desplegable, ¿qué hago?',

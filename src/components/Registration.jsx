@@ -13,29 +13,23 @@ const STAGES = [
     {
         id: 1,
         label: '1ª Etapa',
-        priceFull: 80000,
-        priceInstallment: 45000,
-        preRegistration: { start: new Date('2026-05-26'), end: new Date('2026-06-28') },
+        preRegistration: { start: new Date('2026-06-22'), end: new Date('2026-06-26') },
         delegatePhase:   { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
-        paymentPhase:    { start: new Date('2026-07-06'), end: new Date('2026-07-12') },
+        paymentPhase:    { start: new Date('2026-07-06'), end: new Date('2026-07-08') },
     },
     {
         id: 2,
         label: '2ª Etapa',
-        priceFull: 130000,
-        priceInstallment: 70000,
-        preRegistration: { start: new Date('2026-07-27'), end: new Date('2026-08-02') },
+        preRegistration: { start: new Date('2026-07-27'), end: new Date('2026-07-31') },
         delegatePhase:   { start: new Date('2026-08-03'), end: new Date('2026-08-09') },
-        paymentPhase:    { start: new Date('2026-08-10'), end: new Date('2026-08-16') },
+        paymentPhase:    { start: new Date('2026-08-10'), end: new Date('2026-08-12') },
     },
     {
         id: 3,
         label: '3ª Etapa',
-        priceFull: 160000,
-        priceInstallment: 85000,
-        preRegistration: { start: new Date('2026-08-31'), end: new Date('2026-09-06') },
+        preRegistration: { start: new Date('2026-08-31'), end: new Date('2026-09-04') },
         delegatePhase:   { start: new Date('2026-09-07'), end: new Date('2026-09-13') },
-        paymentPhase:    { start: new Date('2026-09-14'), end: new Date('2026-09-20') },
+        paymentPhase:    { start: new Date('2026-09-14'), end: new Date('2026-09-16') },
     },
 ];
 
@@ -89,8 +83,8 @@ const fieldCls = (errors, submitted, field, extra = '') =>
 // ─── Timeline Component ───────────────────────────────────────────────────────
 const PHASE_DEFS = [
     { key: 'preRegistration', label: 'Pre-inscripción' },
-    { key: 'delegatePhase',   label: 'Delegados' },
-    { key: 'paymentPhase',    label: 'Pagos' },
+    { key: 'delegatePhase',   label: 'Habilitación y Pagos' },
+    { key: 'paymentPhase',    label: 'Confirmación' },
 ];
 
 const RegistrationTimeline = ({ today }) => (
@@ -482,10 +476,6 @@ const Registration = () => {
                     {isFormOpen && currentStage && (
                         <div className="bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-200 text-center min-w-[180px]">
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{currentStage.label}</p>
-                            <p className="text-3xl font-bold text-primary-red">${effectiveStage.priceFull.toLocaleString('es-AR')}</p>
-                            <p className="text-xs text-gray-400 mt-1">
-                                o 2 cuotas de ${effectiveStage.priceInstallment.toLocaleString('es-AR')}
-                            </p>
                             <p className="text-xs text-green-600 font-bold mt-1">
                                 Cierra el {fmt(currentStage.preRegistration.end)}
                             </p>
