@@ -46,28 +46,6 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Inscription Stages Banner — inside hero so the cards below can still overlap */}
-        <div className="relative z-20 w-full max-w-5xl mx-auto pb-10 px-2">
-          <p className="text-center text-xs font-bold uppercase tracking-widest text-complementary-gold mb-4">
-            Fechas de inscripción
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {[
-              { label: 'Etapa 1', preReg: '22 al 26 de Junio',         hab: '29 Jun al 5 Jul',    pago: '6 al 8 de Julio' },
-              { label: 'Etapa 2', preReg: '27 al 31 de Julio',         hab: '3 al 9 de Agosto',   pago: '10 al 12 de Agosto' },
-              { label: 'Etapa 3', preReg: '31 Ago al 4 de Sep',        hab: '7 al 13 de Sep',     pago: '14 al 16 de Sep' },
-            ].map(({ label, preReg, hab, pago }) => (
-              <div key={label} className="border border-white/20 rounded-xl py-4 px-5 bg-white/5 text-center backdrop-blur-sm">
-                <p className="text-xs font-black uppercase tracking-widest text-complementary-gold mb-3">{label}</p>
-                <div className="space-y-1 text-xs">
-                  <p><span className="text-gray-400">Pre-inscripción: </span><span className="text-white font-semibold">{preReg}</span></p>
-                  <p><span className="text-gray-400">Hab. y Recaudación: </span><span className="text-white font-semibold">{hab}</span></p>
-                  <p><span className="text-gray-400">Pago único: </span><span className="text-white font-semibold">{pago}</span></p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* Thematic Axes */}
