@@ -40,27 +40,26 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
             </header>
 
             <div className="flex flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 gap-8">
-                {/* Sidebar (Optional or Role Based) */}
-                <aside className="hidden md:block w-64 flex-shrink-0">
-                    <nav className="space-y-2 sticky top-24">
-                        {user.role === 'admin' && (
-                            <>
-                                <Link to="/admin" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Dashboard Integrado</Link>
-                                <Link to="/admin/scanner" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Escáner QR</Link>
-                                <Link to="/admin/users" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Usuarios</Link>
-                            </>
-                        )}
-                        {user.role === 'delegate' && (
-                            <Link to="/delegate" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">ABM Inscripciones</Link>
-                        )}
-                        {user.role === 'assistant' && (
-                            <>
-                                <Link to="/my-ticket" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Mi Entrada QR</Link>
-                                <Link to="/activities" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Actividades</Link>
-                            </>
-                        )}
-                    </nav>
-                </aside>
+                {/* Sidebar — only for admin and assistant */}
+                {user.role !== 'delegate' && (
+                    <aside className="hidden md:block w-64 flex-shrink-0">
+                        <nav className="space-y-2 sticky top-24">
+                            {user.role === 'admin' && (
+                                <>
+                                    <Link to="/admin" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Dashboard Integrado</Link>
+                                    <Link to="/admin/scanner" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Escáner QR</Link>
+                                    <Link to="/admin/users" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Usuarios</Link>
+                                </>
+                            )}
+                            {user.role === 'assistant' && (
+                                <>
+                                    <Link to="/my-ticket" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Mi Entrada QR</Link>
+                                    <Link to="/activities" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Actividades</Link>
+                                </>
+                            )}
+                        </nav>
+                    </aside>
+                )}
 
                 {/* Main Content */}
                 <main className="flex-grow min-w-0 overflow-hidden">
