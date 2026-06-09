@@ -13,7 +13,7 @@ const STAGES = [
     {
         id: 1,
         label: '1ª Etapa',
-        preRegistration: { start: new Date('2026-06-22'), end: new Date('2026-06-26') },
+        preRegistration: { start: new Date('2026-06-09'), end: new Date('2026-06-26') },
         delegatePhase:   { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
         paymentPhase:    { start: new Date('2026-07-06'), end: new Date('2026-07-08') },
     },

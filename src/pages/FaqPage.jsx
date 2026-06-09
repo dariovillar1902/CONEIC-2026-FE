@@ -3,7 +3,7 @@ import { useState } from 'react';
 const FAQS = [
   {
     q: '¿Cuáles son los requisitos para inscribirme al CONEIC XVIII?',
-    a: 'Podés pre-inscribirte si sos estudiante regular de la carrera de Ingeniería Civil o afín en una universidad miembro de ANEIC. Para confirmar tu inscripción, tu delegado/a verificará tu condición de alumno/a regular. Si tu facultad no tiene filial activa, contactate con nosotros y te asignaremos una delegación de referencia.',
+    a: 'Podés pre-inscribirte si sos estudiante regular de la carrera de Ingeniería Civil. Para confirmar tu inscripción, tu delegado/a verificará tu condición de alumno/a regular. Si tu facultad no tiene filial activa, contactate con nosotros y te asignaremos una delegación de referencia.',
   },
   {
     q: '¿Qué es un delegado y por qué tengo que hablar con él?',
