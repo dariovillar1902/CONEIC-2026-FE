@@ -41,13 +41,13 @@ import VisualSchedule from '../components/VisualSchedule';
 const VENUES = [
   {
     name: 'Auditorio Belgrano',
-    address: 'Av. Belgrano 954, Ciudad Autónoma de Buenos Aires',
+    address: 'Virrey Loreto 2348, C1426 Cdad. Autónoma de Buenos Aires',
     icon: '🎤',
     color: 'border-vial',
     badge: 'bg-vial/10 text-vial',
-    activities: ['Acreditaciones', 'Apertura y Cierre', 'Charlas Magistrales', 'Ponencias Estudiantiles', 'Eventos nocturnos'],
+    activities: ['Acreditaciones', 'Apertura y Cierre', 'Charlas Magistrales', 'Ponencias Estudiantiles'],
     days: 'Martes y Viernes',
-    mapsUrl: 'https://maps.google.com/?q=Av.+Belgrano+954+Buenos+Aires',
+    mapsUrl: 'https://maps.google.com/?q=Virrey+Loreto+2348,+C1426,+Buenos+Aires,+Argentina',
   },
 ];
 

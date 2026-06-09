@@ -9,27 +9,30 @@ import {
 } from '../data/filiales.js';
 
 // ─── Stage & Phase Configuration ─────────────────────────────────────────────
+// Helper: create date at local midnight (avoids UTC off-by-one in Argentina, UTC-3)
+const d = (y, m, day) => new Date(y, m - 1, day);
+
 const STAGES = [
     {
         id: 1,
         label: '1ª Etapa',
-        preRegistration: { start: new Date('2026-06-09'), end: new Date('2026-06-26') },
-        delegatePhase:   { start: new Date('2026-06-29'), end: new Date('2026-07-05') },
-        paymentPhase:    { start: new Date('2026-07-06'), end: new Date('2026-07-08') },
+        preRegistration: { start: d(2026, 6, 9),  end: d(2026, 6, 26) },
+        delegatePhase:   { start: d(2026, 6, 29), end: d(2026, 7,  5) },
+        paymentPhase:    { start: d(2026, 7,  6),  end: d(2026, 7,  8) },
     },
     {
         id: 2,
         label: '2ª Etapa',
-        preRegistration: { start: new Date('2026-07-27'), end: new Date('2026-07-31') },
-        delegatePhase:   { start: new Date('2026-08-03'), end: new Date('2026-08-09') },
-        paymentPhase:    { start: new Date('2026-08-10'), end: new Date('2026-08-12') },
+        preRegistration: { start: d(2026, 7, 27), end: d(2026, 7, 31) },
+        delegatePhase:   { start: d(2026, 8,  3), end: d(2026, 8,  9) },
+        paymentPhase:    { start: d(2026, 8, 10), end: d(2026, 8, 12) },
     },
     {
         id: 3,
         label: '3ª Etapa',
-        preRegistration: { start: new Date('2026-08-31'), end: new Date('2026-09-04') },
-        delegatePhase:   { start: new Date('2026-09-07'), end: new Date('2026-09-13') },
-        paymentPhase:    { start: new Date('2026-09-14'), end: new Date('2026-09-16') },
+        preRegistration: { start: d(2026, 8, 31), end: d(2026, 9,  4) },
+        delegatePhase:   { start: d(2026, 9,  7), end: d(2026, 9, 13) },
+        paymentPhase:    { start: d(2026, 9, 14), end: d(2026, 9, 16) },
     },
 ];
 
