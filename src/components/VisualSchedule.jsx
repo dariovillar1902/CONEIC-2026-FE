@@ -39,13 +39,6 @@ const SCHEDULE = [
     { name: 'Asamblea ANEIC + Recreativa',     location: '' },
     { name: 'Acto de Cierre',                  location: 'Auditorio Belgrano' },
   ],
-  // Noche
-  [
-    { name: 'Evento de Bienvenida',  location: '' },
-    { name: 'Evento',                location: '' },
-    { name: '–',                     location: '' },
-    { name: 'Evento de Cierre',      location: '' },
-  ],
 ];
 
 const Cell = ({ name, location, span = 1 }) => (
