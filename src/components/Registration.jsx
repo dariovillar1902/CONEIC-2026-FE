@@ -214,6 +214,7 @@ const Registration = () => {
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [participatedInJoreic, setParticipatedInJoreic] = useState(false);
+    const [interestedInMaccaferri, setInterestedInMaccaferri] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -322,6 +323,7 @@ const Registration = () => {
                     stageName:             currentStage?.label ?? 'Demo',
                     price:                 effectiveStage?.priceFull ?? 0,
                     participatedInJoreic,
+                    interestedInMaccaferri,
                     certificateFileName,
                 }),
             });
@@ -375,6 +377,7 @@ const Registration = () => {
         setSelectedProvince('');
         setSelectedCountry('');
         setParticipatedInJoreic(false);
+        setInterestedInMaccaferri(false);
         setCertificateFile(null);
         setErrors({});
         setSubmitted(false);
@@ -851,6 +854,24 @@ const Registration = () => {
                                         </span>
                                     </label>
                                 </div>
+
+                                {/* Desafío Barreras de Maccaferri — solo 1ª Etapa */}
+                                {currentStage?.id === 1 && (
+                                    <div className="md:col-span-2">
+                                        <label className="flex items-start gap-3 cursor-pointer group select-none">
+                                            <input
+                                                type="checkbox"
+                                                checked={interestedInMaccaferri}
+                                                onChange={e => setInterestedInMaccaferri(e.target.checked)}
+                                                className="w-4 h-4 mt-0.5 accent-primary-blue shrink-0"
+                                            />
+                                            <span className="text-sm text-gray-700 leading-relaxed">
+                                                Estoy interesado/a en participar del{' '}
+                                                <strong className="text-institutional">Desafío Barreras de Maccaferri</strong>
+                                            </span>
+                                        </label>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
