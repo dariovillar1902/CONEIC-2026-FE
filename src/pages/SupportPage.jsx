@@ -10,7 +10,7 @@ const waUrl = (phone) => `https://wa.me/549${phone.replace(/\D/g, '')}`;
 const SPONSORS_ORO = [
     {
         name: 'Druetta',
-        logoUrl: '/assets/sponsors/logo-druetta.png',
+        logoUrl: '/assets/sponsors/logo-druetta.jpg',
         url: 'https://www.druetta.com.ar/',
         cardBg: 'bg-[#1c3a5e]',
     },
