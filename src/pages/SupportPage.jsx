@@ -7,7 +7,22 @@ const waUrl = (phone) => `https://wa.me/549${phone.replace(/\D/g, '')}`;
 /* ══════════════════════════════════════════════════════════════════════════════
    SPONSORS DATA
 ══════════════════════════════════════════════════════════════════════════════ */
-const SPONSORS = [
+const SPONSORS_ORO = [
+    {
+        name: 'Druetta',
+        logoUrl: '/assets/sponsors/logo-druetta.png',
+        url: 'https://druetta.com.ar',
+        cardBg: 'bg-[#1c3a5e]',
+    },
+];
+
+const SPONSORS_PLATA = [
+    {
+        name: 'Fadic',
+        logoUrl: '/assets/sponsors/logo-fadic.png',
+        url: 'https://fadic.com.ar',
+        cardBg: 'bg-[#2d2d2d]',
+    },
     {
         name: 'Maccaferri',
         logoUrl: 'https://www.maccaferri.com/wp-content/themes/maccaferri/src/images/header/logo-maccaferri.png',
@@ -37,7 +52,7 @@ const ENDORSERS = [
     {
         shortName: 'ANEIC',
         fullName: 'ANEIC Argentina',
-        url: 'https://www.aneic.org.ar',
+        url: 'https://sites.google.com/view/aneicarg/inicio?authuser=0',
         logoUrl: '/assets/avales/logo-aneic.png',
         logoBg: 'bg-white',
         description: 'La red federal estudiantil más importante del país en su área. Nuclea y conecta a futuros profesionales de la ingeniería civil de diversas universidades argentinas, promoviendo la integración, el intercambio académico, el desarrollo técnico y la formación integral a través de eventos, proyectos y actividades comunitarias.',
@@ -389,26 +404,50 @@ const REGION_STYLE = {
 /* ══════════════════════════════════════════════════════════════════════════════
    SPONSORS TAB
 ══════════════════════════════════════════════════════════════════════════════ */
+const SponsorCard = ({ s, size = 'md' }) => {
+    const sizeClass = size === 'lg' ? 'w-80 h-44' : 'w-64 h-36';
+    return (
+        <a
+            href={s.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${s.cardBg} ${sizeClass} p-6 rounded-2xl shadow-md border border-white/10 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center overflow-hidden group`}
+        >
+            <img
+                src={s.logoUrl}
+                alt={s.name}
+                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
+                className="max-w-[75%] max-h-[75%] object-contain group-hover:scale-105 transition-transform duration-500"
+            />
+            <span style={{ display: 'none' }} className="text-xl font-bold text-white font-title text-center">{s.name}</span>
+        </a>
+    );
+};
+
+const TierDivider = ({ label, className }) => (
+    <div className={`flex items-center gap-3 mb-6 ${className}`}>
+        <div className="h-px flex-1 bg-current opacity-30"></div>
+        <span className="font-black uppercase tracking-widest text-xs px-4 py-1 rounded-full border border-current opacity-80">{label}</span>
+        <div className="h-px flex-1 bg-current opacity-30"></div>
+    </div>
+);
+
 const SponsorsTab = () => (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="flex flex-wrap justify-center gap-8 items-center mb-14 min-h-[160px]">
-            {SPONSORS.map((s) => (
-                <a
-                    key={s.name}
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${s.cardBg} p-6 rounded-2xl shadow-md border border-white/10 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-64 h-36 flex items-center justify-center overflow-hidden group`}
-                >
-                    <img
-                        src={s.logoUrl}
-                        alt={s.name}
-                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
-                        className="max-w-[75%] max-h-[75%] object-contain group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <span style={{ display: 'none' }} className="text-xl font-bold text-white font-title">{s.name}</span>
-                </a>
-            ))}
+        {/* Oro tier */}
+        <div className="mb-10">
+            <TierDivider label="Oro" className="text-yellow-600" />
+            <div className="flex flex-wrap justify-center gap-8 items-center">
+                {SPONSORS_ORO.map((s) => <SponsorCard key={s.name} s={s} size="lg" />)}
+            </div>
+        </div>
+
+        {/* Plata tier */}
+        <div className="mb-14">
+            <TierDivider label="Plata" className="text-gray-400" />
+            <div className="flex flex-wrap justify-center gap-8 items-center">
+                {SPONSORS_PLATA.map((s) => <SponsorCard key={s.name} s={s} />)}
+            </div>
         </div>
 
         <div className="bg-institutional rounded-3xl p-10 text-center text-white">

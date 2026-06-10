@@ -1,4 +1,19 @@
-const SPONSORS = [
+const SPONSORS_ORO = [
+    {
+        name: 'Druetta',
+        logoUrl: '/assets/sponsors/logo-druetta.png',
+        url: 'https://druetta.com.ar',
+        cardBg: 'bg-[#1c3a5e]',
+    },
+];
+
+const SPONSORS_PLATA = [
+    {
+        name: 'Fadic',
+        logoUrl: '/assets/sponsors/logo-fadic.png',
+        url: 'https://fadic.com.ar',
+        cardBg: 'bg-[#2d2d2d]',
+    },
     {
         name: 'Maccaferri',
         logoUrl: 'https://www.maccaferri.com/wp-content/themes/maccaferri/src/images/header/logo-maccaferri.png',
@@ -13,26 +28,41 @@ const SPONSORS = [
     },
 ];
 
-const SponsorCard = ({ sponsor }) => (
-    <a
-        href={sponsor.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`${sponsor.cardBg} p-6 rounded-2xl shadow-md border border-white/10 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-64 h-36 flex items-center justify-center overflow-hidden group`}
-    >
-        <img
-            src={sponsor.logoUrl}
-            alt={sponsor.name}
-            onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'block';
-            }}
-            className="max-w-[75%] max-h-[75%] object-contain group-hover:scale-105 transition-transform duration-500"
-        />
-        <span style={{ display: 'none' }} className="text-xl font-bold text-white font-title">
-            {sponsor.name}
+const SponsorCard = ({ sponsor, size = 'md' }) => {
+    const sizeClass = size === 'lg'
+        ? 'w-80 h-44'
+        : 'w-64 h-36';
+    return (
+        <a
+            href={sponsor.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${sponsor.cardBg} ${sizeClass} p-6 rounded-2xl shadow-md border border-white/10 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center overflow-hidden group`}
+        >
+            <img
+                src={sponsor.logoUrl}
+                alt={sponsor.name}
+                onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                }}
+                className="max-w-[75%] max-h-[75%] object-contain group-hover:scale-105 transition-transform duration-500"
+            />
+            <span style={{ display: 'none' }} className="text-xl font-bold text-white font-title text-center">
+                {sponsor.name}
+            </span>
+        </a>
+    );
+};
+
+const TierLabel = ({ label, color }) => (
+    <div className="flex items-center gap-3 mb-6">
+        <div className={`h-px flex-1 ${color}`}></div>
+        <span className={`font-black uppercase tracking-widest text-xs px-4 py-1 rounded-full border ${color.replace('bg-', 'border-').replace('/30', '')} ${color}`}>
+            {label}
         </span>
-    </a>
+        <div className={`h-px flex-1 ${color}`}></div>
+    </div>
 );
 
 const Sponsors = () => (
@@ -47,10 +77,24 @@ const Sponsors = () => (
                 </p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-8 items-center mb-14">
-                {SPONSORS.map((s) => (
-                    <SponsorCard key={s.name} sponsor={s} />
-                ))}
+            {/* Oro */}
+            <div className="mb-10">
+                <TierLabel label="Oro" color="bg-yellow-100 text-yellow-700 border-yellow-300" />
+                <div className="flex flex-wrap justify-center gap-8 items-center">
+                    {SPONSORS_ORO.map((s) => (
+                        <SponsorCard key={s.name} sponsor={s} size="lg" />
+                    ))}
+                </div>
+            </div>
+
+            {/* Plata */}
+            <div className="mb-14">
+                <TierLabel label="Plata" color="bg-gray-100 text-gray-500 border-gray-300" />
+                <div className="flex flex-wrap justify-center gap-8 items-center">
+                    {SPONSORS_PLATA.map((s) => (
+                        <SponsorCard key={s.name} sponsor={s} />
+                    ))}
+                </div>
             </div>
 
             {/* CTA */}

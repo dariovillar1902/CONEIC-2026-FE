@@ -1,9 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
     ALL_FACULTIES_BY_REGION,
-    getContactForFaculty,
-    getContactForProvince,
-    getContactForInternational,
     ARGENTINIAN_PROVINCES,
     INTERNATIONAL_COUNTRIES,
 } from '../data/filiales.js';
@@ -66,6 +63,8 @@ const validateFields = (data, isOtra, province, isInternacional, selectedCountry
     if (!data.faculty) errs.faculty = 'Seleccioná una facultad o delegación.';
     if (isOtra && !province) errs.province = 'Seleccioná tu provincia.';
     if (isInternacional && !selectedCountry) errs.country = 'Seleccioná tu país.';
+    if (!data.bloodType) errs.bloodType = 'El grupo sanguíneo es requerido.';
+    if (!data.medicalConditions?.trim()) errs.medicalConditions = 'Ingresá tus afecciones médicas o "Ninguna" si no tenés.';
     if (!data.emergencyContactName.trim()) errs.emergencyContactName = 'El nombre del contacto de emergencia es requerido.';
     if (!data.emergencyContactPhone.trim()) errs.emergencyContactPhone = 'El teléfono de emergencia es requerido.';
     return errs;
@@ -216,7 +215,6 @@ const Registration = () => {
     const [dietarySelection, setDietarySelection] = useState('');
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
-    const [participatedInJoreic, setParticipatedInJoreic] = useState(false);
     const [interestedInMaccaferri, setInterestedInMaccaferri] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
@@ -241,12 +239,17 @@ const Registration = () => {
 
     const effectiveStage = currentStage;
 
-    // Resolved contact (delegate or ANEIC vocal) for the selected faculty/province
-    const delegateContact = isInternacional
-        ? getContactForInternational()
-        : isOtra
-        ? (selectedProvince ? getContactForProvince(selectedProvince) : null)
-        : (selectedFaculty  ? getContactForFaculty(selectedFaculty)   : null);
+    // Delegation info from API (replaces filiales.js contact display)
+    const [delegationInfo, setDelegationInfo] = useState(null);
+
+    useEffect(() => {
+        const faculty = isInternacional ? null : isOtra ? null : selectedFaculty || null;
+        if (!faculty) { setDelegationInfo(null); return; }
+        fetch(`${import.meta.env.VITE_API_URL}/api/registrations/directory?faculty=${encodeURIComponent(faculty)}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => setDelegationInfo(data))
+            .catch(() => setDelegationInfo(null));
+    }, [selectedFaculty, isOtra, isInternacional]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -261,8 +264,11 @@ const Registration = () => {
         const emergencyContactRelationship = form.current.user_emergency_relationship.value;
         const emergencyContactPhone        = form.current.user_emergency_phone.value;
 
+        const bloodType         = form.current.user_blood.value;
+        const medicalConditions = form.current.user_medical.value;
+
         const errs = validateFields(
-            { name, lastname, dni, phone, email, faculty: selectedFaculty, emergencyContactName, emergencyContactPhone },
+            { name, lastname, dni, phone, email, faculty: selectedFaculty, bloodType, medicalConditions, emergencyContactName, emergencyContactPhone },
             isOtra,
             selectedProvince,
             isInternacional,
@@ -325,7 +331,6 @@ const Registration = () => {
                     emergencyContactPhone,
                     stageName:             currentStage?.label ?? 'Demo',
                     price:                 effectiveStage?.priceFull ?? 0,
-                    participatedInJoreic,
                     interestedInMaccaferri,
                     certificateFileName,
                 }),
@@ -335,6 +340,7 @@ const Registration = () => {
                 setIsDuplicate(true);
                 return;
             }
+
 
             // El email de pre-inscripción lo envía la API automáticamente (Azure Communication Services)
             setIsSuccess(true);
@@ -357,7 +363,7 @@ const Registration = () => {
                 </div>
                 <h2 className="text-3xl font-bold text-yellow-700 font-title mb-4">Ya estás inscripto</h2>
                 <p className="text-gray-600 font-body text-lg max-w-xl mx-auto mb-8">
-                    El email ingresado ya tiene una pre-inscripción registrada en el sistema.
+                    El email o DNI ingresado ya tiene una pre-inscripción registrada en el sistema.
                 </p>
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 max-w-lg mx-auto mb-8">
                     <p className="text-sm text-yellow-800 font-bold">¿No recordás haberte inscripto?</p>
@@ -379,7 +385,6 @@ const Registration = () => {
         setSelectedFaculty('');
         setSelectedProvince('');
         setSelectedCountry('');
-        setParticipatedInJoreic(false);
         setInterestedInMaccaferri(false);
         setCertificateFile(null);
         setErrors({});
@@ -432,31 +437,25 @@ const Registration = () => {
                 {/* Delegate contact — bottom */}
                 <div className="border border-gray-200 rounded-xl p-4 text-left">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
-                        En caso de tener dudas, podés contactarte con tu delegado/a
+                        En caso de tener dudas, podés contactarte con tu delegación por WhatsApp
                     </p>
-                    {delegateContact ? (
+                    {delegationInfo ? (
                         <div className="space-y-1.5">
                             <p className="text-sm text-gray-700">
-                                Filial: <strong className="text-institutional">{delegateContact.filialName}</strong>
+                                Delegación: <strong className="text-institutional">{delegationInfo.delegationName}</strong>
                             </p>
-                            <p className="text-sm text-gray-700">
-                                Contacto: <strong>{delegateContact.name}</strong>
-                                {delegateContact.email && (
-                                    <> — <a href={`mailto:${delegateContact.email}`} className="text-primary-blue font-bold underline hover:text-blue-900 break-all">{delegateContact.email}</a></>
-                                )}
-                            </p>
-                            {delegateContact.phone && (
-                                <p className="text-sm text-gray-700">
-                                    WhatsApp:{' '}
-                                    <a href={`https://wa.me/54${delegateContact.phone}`} className="text-primary-blue font-bold underline" target="_blank" rel="noreferrer">
-                                        +54 {delegateContact.phone}
+                            {delegationInfo.contacts?.map(c => (
+                                <p key={c.name} className="text-sm text-gray-700">
+                                    • {c.name} —{' '}
+                                    <a href={`https://wa.me/54${c.phone}`} className="text-primary-blue font-bold underline" target="_blank" rel="noreferrer">
+                                        +54 {c.phone}
                                     </a>
                                 </p>
-                            )}
+                            ))}
                         </div>
                     ) : (
                         <p className="text-sm text-gray-600">
-                            Contactate con tu delegado para coordinar el pago y confirmar tu vacante.
+                            Contactate con tu delegación para coordinar el pago y confirmar tu vacante.
                         </p>
                     )}
                 </div>
@@ -808,73 +807,43 @@ const Registration = () => {
                                         </div>
                                     )}
 
-                                    {/* ── Conocé tu filial ─────────────────────────────────── */}
-                                    {delegateContact && (
+                                    {/* ── Conocé tu delegación ──────────────────────────── */}
+                                    {delegationInfo && (
                                         <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
                                             <span className="text-2xl leading-none mt-0.5">🏛️</span>
-                                            <div className="text-sm text-blue-800 space-y-0.5">
-                                                <p className="font-bold text-blue-900">
-                                                    Conocé tu filial — {delegateContact.filialName}
+                                            <div className="text-sm text-blue-800 space-y-1">
+                                                <p className="font-bold text-blue-900">Conocé tu delegación</p>
+                                                <p>
+                                                    Delegación: <strong className="text-institutional">{delegationInfo.delegationName}</strong>
                                                 </p>
-                                                {delegateContact.isVocal ? (
-                                                    <p>
-                                                        Tu región no tiene delegado designado aún. Tu contacto de referencia es el/la{' '}
-                                                        <strong>{delegateContact.name}</strong>:{' '}
-                                                        <a href={`mailto:${delegateContact.email}`} className="underline hover:text-blue-900 font-semibold">
-                                                            {delegateContact.email}
+                                                {delegationInfo.contacts?.map(c => (
+                                                    <p key={c.name} className="text-blue-700">
+                                                        • {c.name} —{' '}
+                                                        <a href={`https://wa.me/54${c.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">
+                                                            +54 {c.phone}
                                                         </a>
                                                     </p>
-                                                ) : (
-                                                    <p>
-                                                        Tu delegado/a es <strong>{delegateContact.name}</strong>. Podés contactarle en{' '}
-                                                        <a href={`mailto:${delegateContact.email}`} className="underline hover:text-blue-900 font-semibold">
-                                                            {delegateContact.email}
-                                                        </a>{' '}
-                                                        para coordinar el pago y confirmar tu vacante.
-                                                    </p>
-                                                )}
-                                                {delegateContact.phone && (
-                                                    <p className="text-sm text-blue-700 mt-1">
-                                                        WhatsApp: <a href={`https://wa.me/54${delegateContact.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">+54 {delegateContact.phone}</a>
-                                                    </p>
-                                                )}
+                                                ))}
                                             </div>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* JOREIC checkbox */}
+                                {/* Desafío Barreras de Maccaferri */}
                                 <div className="md:col-span-2">
-                                    <label className="flex items-center gap-3 cursor-pointer group select-none">
+                                    <label className="flex items-start gap-3 cursor-pointer group select-none">
                                         <input
                                             type="checkbox"
-                                            checked={participatedInJoreic}
-                                            onChange={e => setParticipatedInJoreic(e.target.checked)}
-                                            className="w-4 h-4 accent-primary-blue"
+                                            checked={interestedInMaccaferri}
+                                            onChange={e => setInterestedInMaccaferri(e.target.checked)}
+                                            className="w-4 h-4 mt-0.5 accent-primary-blue shrink-0"
                                         />
-                                        <span className="text-sm text-gray-700">
-                                            Participé en la <strong>JOREIC de mi región</strong>
+                                        <span className="text-sm text-gray-700 leading-relaxed">
+                                            Estoy interesado/a en participar del{' '}
+                                            <strong className="text-institutional">Desafío Barreras de Maccaferri</strong>
                                         </span>
                                     </label>
                                 </div>
-
-                                {/* Desafío Barreras de Maccaferri — solo 1ª Etapa */}
-                                {currentStage?.id === 1 && (
-                                    <div className="md:col-span-2">
-                                        <label className="flex items-start gap-3 cursor-pointer group select-none">
-                                            <input
-                                                type="checkbox"
-                                                checked={interestedInMaccaferri}
-                                                onChange={e => setInterestedInMaccaferri(e.target.checked)}
-                                                className="w-4 h-4 mt-0.5 accent-primary-blue shrink-0"
-                                            />
-                                            <span className="text-sm text-gray-700 leading-relaxed">
-                                                Estoy interesado/a en participar del{' '}
-                                                <strong className="text-institutional">Desafío Barreras de Maccaferri</strong>
-                                            </span>
-                                        </label>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
@@ -882,13 +851,15 @@ const Registration = () => {
                         <div>
                             <h4 className="text-lg font-bold text-institutional mb-6 border-l-4 border-complementary-gold pl-3 uppercase tracking-wide">3. Salud y Emergencia</h4>
                             <div className="grid md:grid-cols-2 gap-6">
-                                <div className="group">
+                                <div className="group" data-field-error={submitted && !!errors.bloodType}>
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
-                                        Grupo Sanguíneo
+                                        Grupo Sanguíneo <Req />
                                     </label>
-                                    <select name="user_blood" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800">
+                                    <select name="user_blood" className={fieldCls(errors, submitted, 'bloodType', 'appearance-none cursor-pointer')}>
+                                        <option value="">Seleccionar...</option>
                                         <option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>0+</option><option>0-</option>
                                     </select>
+                                    <FieldError msg={submitted ? errors.bloodType : ''} />
                                 </div>
                                 <div className="group">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
@@ -906,11 +877,12 @@ const Registration = () => {
                                     </label>
                                     <input name="user_insurance" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Ej. OSDE / Swiss Medical / Ninguna" />
                                 </div>
-                                <div className="group md:col-span-2">
+                                <div className="group md:col-span-2" data-field-error={submitted && !!errors.medicalConditions}>
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
-                                        Afecciones Médicas / Alergias
+                                        Afecciones Médicas / Alergias <Req />
                                     </label>
-                                    <input name="user_medical" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Asma, alergias, medicación crónica, etc." />
+                                    <input name="user_medical" type="text" className={fieldCls(errors, submitted, 'medicalConditions')} placeholder="Asma, alergias, medicación crónica, etc. o &quot;Ninguna&quot;" />
+                                    <FieldError msg={submitted ? errors.medicalConditions : ''} />
                                 </div>
                                 <div className="group md:col-span-2">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">

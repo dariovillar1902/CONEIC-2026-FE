@@ -71,6 +71,14 @@ export const SchedulePage = () => (
 
       <VisualSchedule />
 
+      {/* Ponencias note */}
+      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+        <span className="text-2xl flex-shrink-0">📝</span>
+        <p className="text-sm text-blue-800">
+          <strong>Ponencias Estudiantiles</strong> — La convocatoria para presentar trabajos está próxima a abrirse. ¡Pronto podrás postular tu investigación!
+        </p>
+      </div>
+
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
         <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-2 border border-gray-200 shadow-sm">
           <span className="text-lg">🎤</span>

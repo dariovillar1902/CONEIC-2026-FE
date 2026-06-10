@@ -14,7 +14,7 @@ const ENDORSERS = [
     {
         shortName: 'ANEIC',
         fullName: 'ANEIC Argentina',
-        url: 'https://www.aneic.org.ar',
+        url: 'https://sites.google.com/view/aneicarg/inicio?authuser=0',
         logoUrl: '/assets/avales/logo-aneic.png',
         logoBg: 'bg-white',
         description:

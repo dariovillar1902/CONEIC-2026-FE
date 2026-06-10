@@ -334,19 +334,28 @@ const DelegateDashboard = () => {
                     body: JSON.stringify(payload),
                 });
             }
-            if (!res.ok) throw new Error();
-            const saved = await res.json();
-            setBatches(prev => editingBatchId
-                ? prev.map(b => b.id === editingBatchId ? saved : b)
-                : [saved, ...prev]);
-            setIsBatchModalOpen(false);
+            if (!res.ok) throw new Error(`Error ${res.status}`);
 
-            // Send "primera cuota recibida" emails for new batches only
-            if (!editingBatchId) {
-                sendFirstPaymentEmails(enrichedAssignments, attendees);
+            let saved;
+            try { saved = await res.json(); } catch { /* JSON parse optional */ }
+
+            if (saved) {
+                setBatches(prev => editingBatchId
+                    ? prev.map(b => b.id === editingBatchId ? saved : b)
+                    : [saved, ...prev]);
             }
-        } catch {
-            alert('Error al guardar el comprobante');
+
+            // Update attendees payment conditions locally from assignments
+            setAttendees(prev => prev.map(a => {
+                const assignment = enrichedAssignments.find(
+                    x => String(x.registrationId) === String(a.id)
+                );
+                return assignment ? { ...a, paymentCondition: assignment.paymentType } : a;
+            }));
+
+            setIsBatchModalOpen(false);
+        } catch (err) {
+            alert(`Error al guardar el comprobante: ${err.message}`);
         }
     };
 
@@ -460,9 +469,6 @@ const DelegateDashboard = () => {
                     <button onClick={() => openBatchModal()} className="bg-complementary-gold text-white px-4 py-2 rounded-lg font-bold text-sm hover:opacity-90 transition flex items-center gap-2 shadow-sm">
                         + Comprobante grupal
                     </button>
-                    <button onClick={() => setIsAddModalOpen(true)} className="bg-primary-blue text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
-                        + Agregar Manual
-                    </button>
                 </div>
             </div>
 
@@ -474,7 +480,7 @@ const DelegateDashboard = () => {
                             <SortHeader label="Fecha"    sKey="createdAt" sortConfig={sortConfig} requestSort={requestSort} />
                             <SortHeader label="Apellido" sKey="lastname"  sortConfig={sortConfig} requestSort={requestSort} />
                             <SortHeader label="Nombre"   sKey="name"      sortConfig={sortConfig} requestSort={requestSort} />
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacto</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datos</th>
                             {managedFaculties.length > 1 && (
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Facultad</th>
                             )}
@@ -496,6 +502,7 @@ const DelegateDashboard = () => {
                                 <td className="px-4 py-3 text-sm">
                                     <div className="text-gray-900">{person.email}</div>
                                     <div className="text-xs text-gray-500">{person.dni}</div>
+                                    {person.phone && <div className="text-xs text-gray-500">{person.phone}</div>}
                                 </td>
                                 {managedFaculties.length > 1 && (
                                     <td className="px-4 py-3 text-xs text-gray-500 max-w-[140px]">
@@ -618,7 +625,6 @@ const DelegateDashboard = () => {
                                 )}
                             </div>
                             <div className="flex gap-2 shrink-0">
-                                <button onClick={() => openBatchModal(batch)} className="text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition font-bold">Editar</button>
                                 <button onClick={() => handleBatchDelete(batch.id)} className="text-xs text-red-500 border border-red-200 px-2 py-1 rounded hover:bg-red-50 transition font-bold">Eliminar</button>
                             </div>
                         </div>
@@ -702,11 +708,11 @@ const DelegateDashboard = () => {
                             </div>
                             <div className="col-span-2">
                                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
-                                <input name="email" type="email" defaultValue={editingReg.email} className="border p-2 rounded w-full text-sm" required />
+                                <input name="email" type="email" defaultValue={editingReg.email} readOnly className="border p-2 rounded w-full text-sm bg-gray-100 cursor-not-allowed text-gray-500" />
                             </div>
                             <div className="col-span-2">
                                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Facultad</label>
-                                <input name="faculty" defaultValue={editingReg.faculty} className="border p-2 rounded w-full text-sm" />
+                                <input name="faculty" defaultValue={editingReg.faculty} readOnly className="border p-2 rounded w-full text-sm bg-gray-100 cursor-not-allowed text-gray-500" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Grupo sanguíneo</label>
@@ -856,16 +862,13 @@ const DelegateDashboard = () => {
                             />
                         </div>
 
-                        {/* Invoice checkbox */}
-                        <label className="flex items-center gap-3 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={batchNeedsInvoice}
-                                onChange={e => setBatchNeedsInvoice(e.target.checked)}
-                                className="w-4 h-4 accent-primary-blue"
-                            />
-                            <span className="text-sm text-gray-700 font-medium">Solicitar factura para este comprobante</span>
-                        </label>
+                        {/* Invoice info */}
+                        <p className="text-sm text-gray-600">
+                            Si necesitás factura enviá un mail a{' '}
+                            <a href="mailto:tesoreriaconeic@gmail.com" className="text-primary-blue underline font-medium">
+                                tesoreriaconeic@gmail.com
+                            </a>
+                        </p>
 
                         <div className="flex gap-4 pt-2 border-t border-gray-100">
                             <button type="button" onClick={() => setIsBatchModalOpen(false)} className="flex-1 text-gray-500 font-bold hover:bg-gray-100 p-2 rounded transition">Cancelar</button>
