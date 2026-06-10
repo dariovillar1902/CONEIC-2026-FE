@@ -602,6 +602,170 @@ const TesoreriaPanel = () => {
   );
 };
 
+/* ─── Sub-panel: Comprobantes (validación de comprobantes por tesorería) ── */
+const ComprobantesPanel = () => {
+  const [batches, setBatches]     = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [validatingId, setValidatingId] = useState(null);
+  const [search, setSearch]       = useState('');
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/api/paymentbatches`);
+      const data = await res.json();
+      setBatches(Array.isArray(data) ? data : []);
+    } catch { /* ignore */ } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const filtered = batches.filter(b => {
+    const q = search.toLowerCase();
+    return !q ||
+      b.delegateEmail?.toLowerCase().includes(q) ||
+      b.delegationName?.toLowerCase().includes(q) ||
+      b.assignments?.some(a => a.personName?.toLowerCase().includes(q));
+  });
+
+  const validateBatch = async (id) => {
+    if (!window.confirm('¿Confirmar recepción de este comprobante? Se enviarán los emails correspondientes a los inscriptos incluidos.')) return;
+    setValidatingId(id);
+    try {
+      const res = await fetch(`${API}/api/paymentbatches/${id}/validate`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.message || 'Error al validar el comprobante');
+        return;
+      }
+      const updated = await res.json();
+      setBatches(prev => prev.map(b => b.id === id ? updated : b));
+    } catch {
+      alert('Error al validar el comprobante');
+    } finally {
+      setValidatingId(null);
+    }
+  };
+
+  const paymentTypeBadge = (type) => {
+    if (type === 'Pagó Completo') return 'bg-green-100 text-green-800';
+    if (type === 'Pagó 1° Cuota') return 'bg-blue-100 text-blue-800';
+    if (type === 'Pagó 2° Cuota') return 'bg-indigo-100 text-indigo-800';
+    return 'bg-gray-100 text-gray-600';
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-24">
+      <div className="animate-spin rounded-full h-10 w-10 border-4 border-institutional border-t-transparent"></div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800">
+        <strong>Panel exclusivo de Tesorería.</strong> Al marcar un comprobante como recibido, se envían automáticamente
+        los emails a los inscriptos incluidos según el tipo de pago (1° cuota, 2° cuota o pago completo).
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <input
+          type="text"
+          placeholder="Buscar por delegado, persona…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-institutional/40 w-full sm:w-72"
+        />
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500">{batches.filter(b => !b.isValidated).length} sin validar</span>
+          <button onClick={fetchData} className="text-gray-500 hover:text-institutional transition text-lg" title="Actualizar">🔄</button>
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+          <p className="text-gray-400 text-4xl mb-4">📂</p>
+          <p className="text-gray-500">No hay comprobantes cargados.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filtered.map(batch => (
+            <div key={batch.id} className={`bg-white rounded-xl shadow-sm border ${batch.isValidated ? 'border-green-200' : 'border-gray-200'} overflow-hidden`}>
+              {/* Batch header */}
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 ${batch.isValidated ? 'bg-green-50' : 'bg-gray-50'} border-b`}>
+                <div>
+                  <p className="font-bold text-gray-800 text-sm">{batch.delegateEmail}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {new Date(batch.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    {batch.description && <span className="ml-2 italic">· {batch.description}</span>}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {batch.receiptUrl && (
+                    <a href={batch.receiptUrl} target="_blank" rel="noopener noreferrer"
+                      className="text-xs text-institutional underline font-semibold hover:text-blue-800 transition">
+                      Ver comprobante ↗
+                    </a>
+                  )}
+                  {batch.isValidated ? (
+                    <span className="inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full">
+                      ✅ Validado {batch.validatedAt ? new Date(batch.validatedAt).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }) : ''}
+                    </span>
+                  ) : (
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        disabled={validatingId === batch.id}
+                        onChange={() => validateBatch(batch.id)}
+                        className="w-4 h-4 accent-green-600 cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-gray-600">
+                        {validatingId === batch.id ? 'Validando…' : 'Confirmar recepción'}
+                      </span>
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Assignments */}
+              {batch.assignments?.length > 0 && (
+                <div className="px-5 py-3">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-gray-400 uppercase tracking-wider font-bold border-b">
+                        <th className="pb-2 text-left">Persona</th>
+                        <th className="pb-2 text-left">Tipo de pago</th>
+                        <th className="pb-2 text-right">Monto</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {batch.assignments.map((a, i) => (
+                        <tr key={i} className="border-b border-gray-50 last:border-0">
+                          <td className="py-2 font-semibold text-gray-700">{a.personName}</td>
+                          <td className="py-2">
+                            <span className={`inline-block px-2 py-0.5 rounded font-bold ${paymentTypeBadge(a.paymentType)}`}>
+                              {a.paymentType || '—'}
+                            </span>
+                          </td>
+                          <td className="py-2 text-right text-gray-600 font-mono">
+                            {a.amount ? `$${Number(a.amount).toLocaleString('es-AR')}` : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ─── Main component ────────────────────────────────────────────────── */
 const AdminDashboard = () => {
   const { user, hasRole } = useAuth();
@@ -610,7 +774,10 @@ const AdminDashboard = () => {
   const TABS = [
     { id: 'overview',      label: '🏠 Resumen' },
     { id: 'registrations', label: '📋 Inscripciones' },
-    ...(isTesoreria ? [{ id: 'tesoreria', label: '💳 Tesorería' }] : []),
+    ...(isTesoreria ? [
+      { id: 'tesoreria',     label: '💳 Tesorería' },
+      { id: 'comprobantes',  label: '📄 Comprobantes' },
+    ] : []),
   ];
 
   const [activeTab, setActiveTab] = useState(isTesoreria ? 'tesoreria' : 'overview');
@@ -649,6 +816,7 @@ const AdminDashboard = () => {
       {activeTab === 'overview'      && <Overview registrations={allRegs} />}
       {activeTab === 'registrations' && <RegistrationsPanel />}
       {activeTab === 'tesoreria'     && <TesoreriaPanel />}
+      {activeTab === 'comprobantes'  && <ComprobantesPanel />}
     </div>
   );
 };

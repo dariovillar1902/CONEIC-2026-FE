@@ -411,10 +411,15 @@ const DelegateDashboard = () => {
         setBatchAssignments(prev => prev.map((row, i) => {
             if (i !== idx) return row;
             const updated = { ...row, [field]: value };
-            // When selecting a registration, auto-fill personName
             if (field === 'registrationId' && value) {
                 const reg = attendees.find(a => String(a.id) === String(value));
-                if (reg) updated.personName = `${reg.name} ${reg.lastname}`;
+                if (reg) {
+                    updated.personName = `${reg.name} ${reg.lastname}`;
+                    // Auto-set payment condition based on current status
+                    if (reg.paymentCondition === 'Pagó 1° Cuota') {
+                        updated.paymentCondition = 'Pagó 2° Cuota';
+                    }
+                }
             }
             return updated;
         }));
@@ -422,6 +427,35 @@ const DelegateDashboard = () => {
 
     const removeAssignmentRow = (idx) =>
         setBatchAssignments(prev => prev.filter((_, i) => i !== idx));
+
+    // Returns the available payment options for a given attendee, based on their current payment status
+    const getPaymentOptionsForAttendee = (attendeeId) => {
+        const reg = attendees.find(a => String(a.id) === String(attendeeId));
+        if (!reg) return PAYMENT_CONDITION_UPLOAD_OPTIONS;
+        if (reg.paymentCondition === 'Pagó 1° Cuota') {
+            return [
+                { value: '', label: '— Estado de pago —' },
+                { value: 'Pagó 2° Cuota', label: 'Pagó 2° Cuota' },
+            ];
+        }
+        return PAYMENT_CONDITION_UPLOAD_OPTIONS;
+    };
+
+    // IDs already assigned in the current batch (to prevent duplicates)
+    const assignedIds = new Set(batchAssignments.map(a => String(a.registrationId)).filter(Boolean));
+
+    // Attendees available to add: not fully paid, selectable per row
+    const getAvailableAttendeesForRow = (idx) => {
+        const currentId = String(batchAssignments[idx]?.registrationId ?? '');
+        return attendees.filter(a => {
+            if (a.paymentCondition === 'Pagó Completo' || a.status === 'Paid') return false;
+            const id = String(a.id);
+            // Allow the currently selected person in this row
+            if (id === currentId) return true;
+            // Exclude already assigned in other rows
+            return !assignedIds.has(id);
+        });
+    };
 
     // ── Counts ────────────────────────────────────────────────────────
     const enabledCount = attendees.filter(a => a.isEnabled).length;
@@ -819,27 +853,28 @@ const DelegateDashboard = () => {
                             <div className="space-y-2">
                                 {batchAssignments.map((row, idx) => (
                                     <div key={idx} className="flex flex-wrap items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                                        {/* Person select */}
+                                        {/* Person select — excludes already-assigned and fully-paid */}
                                         <select
                                             value={row.registrationId}
                                             onChange={e => updateAssignmentRow(idx, 'registrationId', e.target.value)}
                                             className="border rounded px-2 py-1.5 text-xs flex-1 min-w-[140px] bg-white"
                                         >
                                             <option value="">— Persona —</option>
-                                            {attendees.map(a => (
+                                            {getAvailableAttendeesForRow(idx).map(a => (
                                                 <option key={a.id} value={a.id}>
                                                     {a.lastname}, {a.name}
+                                                    {a.paymentCondition === 'Pagó 1° Cuota' ? ' (1° cuota abonada)' : ''}
                                                 </option>
                                             ))}
                                         </select>
 
-                                        {/* Estado de pago */}
+                                        {/* Estado de pago — filtered by current payment status */}
                                         <select
                                             value={row.paymentCondition ?? ''}
                                             onChange={e => updateAssignmentRow(idx, 'paymentCondition', e.target.value)}
-                                            className="border rounded px-2 py-1.5 text-xs w-40 bg-white"
+                                            className="border rounded px-2 py-1.5 text-xs w-44 bg-white"
                                         >
-                                            {PAYMENT_CONDITION_UPLOAD_OPTIONS.map(opt => (
+                                            {getPaymentOptionsForAttendee(row.registrationId).map(opt => (
                                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
                                             ))}
                                         </select>

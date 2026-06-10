@@ -2,7 +2,7 @@ const SPONSORS_ORO = [
     {
         name: 'Druetta',
         logoUrl: '/assets/sponsors/logo-druetta.png',
-        url: 'https://druetta.com.ar',
+        url: 'https://www.druetta.com.ar/',
         cardBg: 'bg-[#1c3a5e]',
     },
 ];
@@ -11,7 +11,7 @@ const SPONSORS_PLATA = [
     {
         name: 'Fadic',
         logoUrl: '/assets/sponsors/logo-fadic.png',
-        url: 'https://fadic.com.ar',
+        url: 'http://fadic.ar/',
         cardBg: 'bg-[#2d2d2d]',
     },
     {
