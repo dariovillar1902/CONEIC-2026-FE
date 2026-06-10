@@ -44,7 +44,7 @@ const router = createBrowserRouter([
   // Change-password: accessible to any logged-in user
   {
     path: '/change-password',
-    element: <DashboardLayout allowedRoles={['assistant', 'delegate', 'admin']} />,
+    element: <DashboardLayout allowedRoles={['assistant', 'delegate', 'admin', 'tesoreria']} />,
     children: [
       { index: true, element: <ChangePasswordPage /> }
     ]
@@ -52,7 +52,7 @@ const router = createBrowserRouter([
   // Protected Routes
   {
     path: '/admin',
-    element: <DashboardLayout allowedRoles={['admin']} />,
+    element: <DashboardLayout allowedRoles={['admin', 'tesoreria']} />,
     children: [
       { index: true, element: <AdminDashboard /> },
       { path: 'scanner', element: <AdminScannerPage /> },
@@ -68,14 +68,14 @@ const router = createBrowserRouter([
   },
   {
     path: '/my-ticket',
-    element: <DashboardLayout allowedRoles={['assistant', 'admin']} />,
+    element: <DashboardLayout allowedRoles={['assistant', 'admin', 'tesoreria']} />,
     children: [
       { index: true, element: <AssistantDashboard /> }
     ]
   },
   {
     path: '/activities',
-    element: <DashboardLayout allowedRoles={['assistant', 'admin']} />,
+    element: <DashboardLayout allowedRoles={['assistant', 'admin', 'tesoreria']} />,
     children: [
       { index: true, element: <ActivitiesPage /> }
     ]
