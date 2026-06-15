@@ -52,7 +52,7 @@ const getCurrentPhase = (today) => {
 };
 
 // ─── Validation ───────────────────────────────────────────────────────────────
-const validateFields = (data, isOtra, province, isInternacional, selectedCountry) => {
+const validateFields = (data, isOtra, province, isInternacional, selectedCountry, certificateFile) => {
     const errs = {};
     if (!data.name.trim()) errs.name = 'El nombre es requerido.';
     if (!data.lastname.trim()) errs.lastname = 'El apellido es requerido.';
@@ -67,6 +67,7 @@ const validateFields = (data, isOtra, province, isInternacional, selectedCountry
     if (!data.medicalConditions?.trim()) errs.medicalConditions = 'Ingresá tus afecciones médicas o "Ninguna" si no tenés.';
     if (!data.emergencyContactName.trim()) errs.emergencyContactName = 'El nombre del contacto de emergencia es requerido.';
     if (!data.emergencyContactPhone.trim()) errs.emergencyContactPhone = 'El teléfono de emergencia es requerido.';
+    if (!certificateFile) errs.certificateFile = 'El certificado de alumno regular es obligatorio.';
     return errs;
 };
 
@@ -95,7 +96,7 @@ const RegistrationTimeline = ({ today }) => (
             Cronograma — Fechas preliminares
         </p>
         <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-center">
-            {STAGES.map((stage, si) => (
+            {STAGES.slice(0, 2).map((stage, si) => (
                 <div key={stage.id} className="flex items-start md:flex-1">
                     {si > 0 && (
                         <div className="hidden md:flex items-center self-stretch px-2">
@@ -175,7 +176,9 @@ const PhaseBanner = ({ phase, stage }) => {
             bg: 'bg-gray-50 border-gray-200',
             icon: '⏳',
             title: 'Entre etapas',
-            text: `La pre-inscripción para la ${stage?.label} abre el ${stage ? fmt(stage.preRegistration.start) : '—'}.`,
+            text: stage?.id === 3
+                ? 'La apertura de la siguiente etapa se comunicará próximamente. ¡Seguí atento a nuestras redes!'
+                : `La pre-inscripción para la ${stage?.label} abre el ${stage ? fmt(stage.preRegistration.start) : '—'}.`,
         },
         closed: {
             bg: 'bg-gray-50 border-gray-200',
@@ -275,6 +278,7 @@ const Registration = ({ forceOpen = false }) => {
             selectedProvince,
             isInternacional,
             selectedCountry,
+            certificateFile,
         );
         setErrors(errs);
 
@@ -682,11 +686,11 @@ const Registration = ({ forceOpen = false }) => {
                                 </div>
 
                                 {/* Certificate upload */}
-                                <div className="group md:col-span-2">
+                                <div className="group md:col-span-2" data-field-error={submitted && !!errors.certificateFile}>
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
-                                        Certificado de Alumno Regular <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+                                        Certificado de Alumno Regular <Req />
                                     </label>
-                                    <label className="flex items-center gap-3 border-2 border-dashed border-gray-300 rounded-xl px-4 py-3 cursor-pointer hover:bg-gray-50 transition group-focus-within:border-primary-blue">
+                                    <label className={`flex items-center gap-3 border-2 border-dashed rounded-xl px-4 py-3 cursor-pointer hover:bg-gray-50 transition group-focus-within:border-primary-blue ${errors.certificateFile && submitted ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}>
                                         <span className="text-xl">📄</span>
                                         <span className="text-sm text-gray-500">
                                             {certificateFile ? certificateFile.name : 'Seleccionar PDF o imagen…'}
@@ -702,6 +706,7 @@ const Registration = ({ forceOpen = false }) => {
                                         <button type="button" onClick={() => setCertificateFile(null)} className="text-xs text-red-400 hover:text-red-600 mt-1">✕ Quitar archivo</button>
                                     )}
                                     <p className="text-xs text-gray-400 mt-1">PDF o imagen, máx. 10 MB.</p>
+                                    <FieldError msg={submitted ? errors.certificateFile : ''} />
                                 </div>
 
                                 {/* Faculty selector — full width */}
@@ -777,8 +782,8 @@ const Registration = ({ forceOpen = false }) => {
                                                     Inscripciones internacionales aún no habilitadas
                                                 </p>
                                                 <p className="text-xs text-amber-700 leading-relaxed">
-                                                    Los estudiantes internacionales se inscriben en la <strong>última etapa</strong>, con prioridad para los estudiantes nacionales.
-                                                    Por el momento, la pre-inscripción internacional está suspendida. ¡Volvé a consultar próximamente!
+                                                    La inscripción para estudiantes internacionales se habilitará más adelante, con prioridad para los estudiantes nacionales.
+                                                    ¡Volvé a consultar próximamente!
                                                 </p>
                                             </div>
                                         </div>

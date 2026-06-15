@@ -154,10 +154,11 @@ export const VenuesPage = () => (
 );
 
 /* ─── Actividades ───────────────────────────────────────────────────── */
-import ActivitiesAdvanced from '../components/ActivitiesAdvanced';
 export const ActivitiesPage = () => (
-  <div className="pt-24 min-h-screen bg-complementary-light">
-    <ActivitiesAdvanced />
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <p className="text-gray-500 text-lg text-center max-w-md font-body">
+      Próximamente podrás acceder a tus actividades y eventos relacionados al CONEIC con tu usuario.
+    </p>
   </div>
 );
 
