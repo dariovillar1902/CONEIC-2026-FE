@@ -1,9 +1,15 @@
 const SPONSORS_ORO = [
     {
-        name: 'Druetta',
-        logoUrl: '/assets/sponsors/logo-druetta.jpg',
-        url: 'https://www.druetta.com.ar/',
+        name: 'Ag+Zinc',
+        logoUrl: '/assets/sponsors/logo-agzinc.png',
+        url: 'https://www.agzinc.com.ar/',
         cardBg: 'bg-[#1c3a5e]',
+    },
+    {
+        name: 'Penetron',
+        logoUrl: '/assets/sponsors/logo-penetron.png',
+        url: 'https://penetron.com.ar/',
+        cardBg: 'bg-[#2a2a2a]',
     },
 ];
 
