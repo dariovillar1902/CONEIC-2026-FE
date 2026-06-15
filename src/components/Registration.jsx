@@ -198,10 +198,12 @@ const PhaseBanner = ({ phase, stage }) => {
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-const Registration = () => {
+const Registration = ({ forceOpen = false }) => {
     const form = useRef();
     const today = new Date();
-    const { stage: currentStage, phase: currentPhase } = getCurrentPhase(today);
+    const { stage: currentStage, phase: currentPhase } = forceOpen
+        ? { stage: STAGES[0], phase: 'preRegistration' }
+        : getCurrentPhase(today);
     const [isFormOpen, setIsFormOpen] = useState(false);
 
     const [file, setFile] = useState(null);
@@ -333,6 +335,9 @@ const Registration = () => {
                     price:                 effectiveStage?.priceFull ?? 0,
                     interestedInMaccaferri,
                     certificateFileName,
+                    dietaryRestrictions:   dietarySelection === 'Otro'
+                        ? (form.current.user_dietary_other?.value || 'Otro')
+                        : dietarySelection || null,
                 }),
             });
 

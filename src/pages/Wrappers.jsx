@@ -170,3 +170,9 @@ export const RegistrationPage = () => (
   </div>
 );
 
+export const RegistrationPage2 = () => (
+  <div className="pt-24 min-h-screen bg-complementary-light">
+    <Registration forceOpen />
+  </div>
+);
+

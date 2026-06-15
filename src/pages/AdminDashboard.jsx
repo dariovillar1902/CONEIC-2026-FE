@@ -113,6 +113,7 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
       faculty:               fd.get('faculty'),
       bloodType:             fd.get('bloodType') || null,
       medicalConditions:     fd.get('medicalConditions') || null,
+      dietaryRestrictions:   fd.get('dietaryRestrictions') || null,
       emergencyContactName:  fd.get('emergencyContactName'),
       emergencyContactPhone: fd.get('emergencyContactPhone'),
       observations:          fd.get('observations') || null,
@@ -163,6 +164,10 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Afecciones</label>
               <input name="medicalConditions" defaultValue={reg.medicalConditions ?? ''} className="border p-2 rounded w-full text-sm" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Restricciones Alimentarias</label>
+              <input name="dietaryRestrictions" defaultValue={reg.dietaryRestrictions ?? ''} className="border p-2 rounded w-full text-sm" placeholder="Sin restricciones, Vegetariano/a, Celíaco/a, etc." />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Contacto emergencia</label>
@@ -440,24 +445,12 @@ const RegistrationsPanel = () => {
                       {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-AR') : '—'}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={r.status}
-                          disabled={updatingId === r.id}
-                          onChange={e => updateStatus(r.id, e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-institutional/40 disabled:opacity-50 cursor-pointer"
-                        >
-                          {Object.entries(STATUS_LABELS).map(([v, { label }]) => (
-                            <option key={v} value={v}>{label}</option>
-                          ))}
-                        </select>
-                        <button
-                          onClick={() => setEditingReg(r)}
-                          className="text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition font-bold whitespace-nowrap"
-                        >
-                          Editar
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => setEditingReg(r)}
+                        className="text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition font-bold whitespace-nowrap"
+                      >
+                        Editar
+                      </button>
                     </td>
                   </tr>
                 ))}

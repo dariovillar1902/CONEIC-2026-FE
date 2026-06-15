@@ -139,7 +139,7 @@ const AdminUsersPage = () => {
                             <SortHeader label="Apellido" sKey="lastname" sortConfig={sortConfig} requestSort={requestSort} />
                             <SortHeader label="Nombre" sKey="name" sortConfig={sortConfig} requestSort={requestSort} />
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacto</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">JoREIC</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desafío Barreras</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Etapa</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pago</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
