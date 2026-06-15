@@ -445,10 +445,11 @@ const DelegateDashboard = () => {
     // IDs already assigned in the current batch (to prevent duplicates)
     const assignedIds = new Set(batchAssignments.map(a => String(a.registrationId)).filter(Boolean));
 
-    // Attendees available to add: not fully paid, selectable per row
+    // Attendees available to add: must be enabled, not fully paid, selectable per row
     const getAvailableAttendeesForRow = (idx) => {
         const currentId = String(batchAssignments[idx]?.registrationId ?? '');
         return attendees.filter(a => {
+            if (!a.isEnabled) return false;
             if (a.paymentCondition === 'Pagó Completo' || a.status === 'Paid') return false;
             const id = String(a.id);
             // Allow the currently selected person in this row
