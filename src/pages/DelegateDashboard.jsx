@@ -372,6 +372,7 @@ const DelegateDashboard = () => {
             faculty:               fd.get('faculty'),
             bloodType:             fd.get('bloodType') || null,
             medicalConditions:     fd.get('medicalConditions') || null,
+            dietaryRestrictions:   fd.get('dietaryRestrictions') || null,
             emergencyContactName:  fd.get('emergencyContactName'),
             emergencyContactPhone: fd.get('emergencyContactPhone'),
             observations:          fd.get('observations') || null,
@@ -758,6 +759,10 @@ const DelegateDashboard = () => {
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Afecciones</label>
                                 <input name="medicalConditions" defaultValue={editingReg.medicalConditions ?? ''} className="border p-2 rounded w-full text-sm" />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Restricciones Alimentarias</label>
+                                <input name="dietaryRestrictions" defaultValue={editingReg.dietaryRestrictions ?? ''} className="border p-2 rounded w-full text-sm" placeholder="Sin restricciones, Vegetariano/a, Celíaco/a, etc." />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Contacto emergencia</label>

@@ -31,7 +31,7 @@ jobs:
           output_location: "dist"
         env:
           VITE_API_URL: https://coneic-2026-api-dev.azurewebsites.net
-          VITE_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.VITE_APPINSIGHTS_CONNECTION_STRING }}
+          VITE_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.VITE_APPINSIGHTS_CONNECTION_STRING_DEV }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

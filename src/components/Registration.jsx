@@ -13,7 +13,7 @@ const STAGES = [
     {
         id: 1,
         label: '1ª Etapa',
-        preRegistration: { start: d(2026, 6, 22), end: d(2026, 6, 26) },
+        preRegistration: { start: d(2026, 6, 12), end: d(2026, 6, 26) },
         delegatePhase:   { start: d(2026, 6, 29), end: d(2026, 7,  5) },
         paymentPhase:    { start: d(2026, 7,  6),  end: d(2026, 7,  8) },
     },
@@ -198,10 +198,12 @@ const PhaseBanner = ({ phase, stage }) => {
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-const Registration = () => {
+const Registration = ({ forceOpen = false }) => {
     const form = useRef();
     const today = new Date();
-    const { stage: currentStage, phase: currentPhase } = getCurrentPhase(today);
+    const { stage: currentStage, phase: currentPhase } = forceOpen
+        ? { stage: STAGES[0], phase: 'preRegistration' }
+        : getCurrentPhase(today);
     const [isFormOpen, setIsFormOpen] = useState(false);
 
     const [file, setFile] = useState(null);
@@ -333,6 +335,9 @@ const Registration = () => {
                     price:                 effectiveStage?.priceFull ?? 0,
                     interestedInMaccaferri,
                     certificateFileName,
+                    dietaryRestrictions:   dietarySelection === 'Otro'
+                        ? (form.current.user_dietary_other?.value || 'Otro')
+                        : dietarySelection || null,
                 }),
             });
 
