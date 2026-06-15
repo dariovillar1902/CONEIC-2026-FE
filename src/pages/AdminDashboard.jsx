@@ -768,12 +768,11 @@ const AdminDashboard = () => {
     { id: 'overview',      label: '🏠 Resumen' },
     { id: 'registrations', label: '📋 Inscripciones' },
     ...(isTesoreria ? [
-      { id: 'tesoreria',     label: '💳 Tesorería' },
       { id: 'comprobantes',  label: '📄 Comprobantes' },
     ] : []),
   ];
 
-  const [activeTab, setActiveTab] = useState(isTesoreria ? 'tesoreria' : 'overview');
+  const [activeTab, setActiveTab] = useState(isTesoreria ? 'comprobantes' : 'overview');
   const [allRegs, setAllRegs] = useState([]);
 
   useEffect(() => {
@@ -808,7 +807,6 @@ const AdminDashboard = () => {
 
       {activeTab === 'overview'      && <Overview registrations={allRegs} />}
       {activeTab === 'registrations' && <RegistrationsPanel />}
-      {activeTab === 'tesoreria'     && <TesoreriaPanel />}
       {activeTab === 'comprobantes'  && <ComprobantesPanel />}
     </div>
   );

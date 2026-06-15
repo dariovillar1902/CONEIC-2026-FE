@@ -48,7 +48,10 @@ const ChangePasswordPage = () => {
       }
 
       clearMustChangePassword();
-      navigate('/my-ticket');
+      const dest = user.role === 'delegate' ? '/delegate'
+                 : (user.role === 'admin' || user.role === 'tesoreria') ? '/admin'
+                 : '/my-ticket';
+      navigate(dest);
     } catch {
       setError('Error de conexión. Intente nuevamente.');
     } finally {

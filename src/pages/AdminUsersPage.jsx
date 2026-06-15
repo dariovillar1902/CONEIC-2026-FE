@@ -157,7 +157,7 @@ const AdminUsersPage = () => {
                                     <div className="text-xs text-gray-500">{person.dni}</div>
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                    {person.participatedInJoreic ? '✅' : '-'}
+                                    {person.interestedInMaccaferri ? '✅' : '-'}
                                 </td>
                                 <td className="px-4 py-3 text-xs text-gray-600">{person.stageName}</td>
                                 <td className="px-4 py-3 text-xs text-gray-600">
