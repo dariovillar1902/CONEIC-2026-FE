@@ -2,20 +2,24 @@ import { useState } from 'react';
 
 const FAQS = [
   {
-    q: '¿Cuáles son los requisitos para inscribirme al CONEIC XVIII?',
-    a: 'Podés pre-inscribirte si sos estudiante regular de la carrera de Ingeniería Civil. Para confirmar tu inscripción, tu delegado/a verificará tu condición de alumno/a regular. Si tu facultad no tiene filial activa, contactate con nosotros y te asignaremos una delegación de referencia.',
+    q: '¿Qué documentación necesito entregar al momento de pre-inscribirme?',
+    a: 'Es importante que tengas a mano tu información personal (número de DNI, Obra social) y tu certificado de alumno regular en PDF o JPG. Te invitamos a conocer el instructivo de inscripción, donde verás un paso a paso de cómo seguir el proceso.',
   },
   {
     q: '¿Qué es un delegado y por qué tengo que hablar con él?',
-    a: 'El delegado es tu nexo directo con la organización del congreso. Su rol es verificar que seas estudiante de la filial y gestionar el cobro de tu inscripción de forma segura.',
+    a: 'El delegado es tu nexo directo con la organización del congreso. Su rol es verificar que seas estudiante de la filial y gestionar el cobro de tu inscripción de forma segura. Además, será tu representante y referente durante el congreso, con quien podrás aclarar las consultas que te surjan.',
   },
   {
     q: '¿Cómo encuentro a mi delegado?',
-    a: 'Una vez completado el formulario de inscripción, se te informará quién será el/la responsable de tu filial, junto con sus datos de contacto. También podés buscarlo en la sección de Delegados de la página.',
+    a: 'Una vez completado el formulario de inscripción, se te informará quién será el/la responsable de tu filial, junto con sus datos de contacto.',
   },
   {
     q: 'Ya completé el formulario y me apareció el cartel de "Solicitud Enviada", ¿ya tengo mi lugar asegurado?',
-    a: 'No. Ese cartel indica que tus datos fueron recibidos. El cupo solo se confirma una vez que el delegado habilita tu inscripción y se registra el pago.',
+    a: 'No. Ese cartel indica que tus datos fueron recibidos. El cupo solo se confirma una vez que se haya habilitado tu inscripción y se registra el pago total de la misma.',
+  },
+  {
+    q: '¿Cuánto tiempo tengo que esperar a que el delegado me contacte?',
+    a: 'Para agilizar el proceso, te recomendamos que seas vos quien inicie el contacto con tu filial. Sin embargo, recordá que, antes de continuar con el proceso, se deberá habilitar tu inscripción. Por eso, te recomendamos esperar a recibir el mail de confirmación de habilitación antes de comunicarte para coordinar los próximos pasos de la inscripción. De esta manera, evitás depender de tiempos de espera externos y el proceso resulta más ágil para ambas partes.',
   },
   {
     q: 'Mi universidad no aparece en el desplegable, ¿qué hago?',
@@ -23,11 +27,11 @@ const FAQS = [
   },
   {
     q: '¿Qué pasa si mi delegado no me responde?',
-    a: 'Dales un margen de 48–72 horas hábiles. Si pasado ese tiempo no tenés respuesta, escribinos para que podamos dar aviso a la Secretaría de Eventos y regularizar tu situación.',
+    a: 'Dales un margen de 48-72 horas hábiles. Si pasado ese tiempo no tenés respuesta, escribinos para que podamos dar aviso a la Secretaría de Eventos y regularizar tu situación.',
   },
   {
     q: '¿Qué pasa si mi universidad ya no tiene cupos disponibles?',
-    a: 'Cada universidad tiene un cupo asignado. El orden de prioridad será seleccionado por cada delegado en función de tu actividad en tu filial. Si los cupos se llenan, quedarán en lista de espera para poder participar.',
+    a: 'Cada universidad tiene un cupo asignado. El orden de prioridad será seleccionado en función de tu actividad en tu filial. Si los cupos se llenan, quedarán en lista de espera para poder participar.',
   },
   {
     q: '¿Qué pasa si me equivoco en un dato del formulario?',
@@ -35,7 +39,7 @@ const FAQS = [
   },
   {
     q: 'No me llegó el mail de preinscripción, ¿qué hago?',
-    a: 'Revisá la casilla de SPAM o correo no deseado. Si sigue sin aparecer en el transcurso del día, contactate con nosotros para poder asesorarte.',
+    a: 'Revisá la casilla de SPAM, o correo no deseado. Si sigue sin aparecer en el transcurso del día, contactate con nosotros para poder asesorarte.',
   },
   {
     q: '¿Qué métodos de pago se aceptan?',
@@ -43,11 +47,15 @@ const FAQS = [
   },
   {
     q: '¿Se puede pagar en cuotas?',
-    a: 'Sí, dependiendo de la etapa en la que te pre-inscribas, podrás pagar en una o dos cuotas. Recordá que hasta que el segundo pago no sea recibido y registrado en nuestro sistema, la inscripción continuará figurando como pendiente de confirmación.',
+    a: 'Sí, dependiendo de la etapa en la que te pre-incribas, podrás pagar en una o dos cuotas. Recordá que hasta que el segundo pago no sea recibido y registrado en nuestro sistema, la inscripción continuará figurando como pendiente de confirmación.',
   },
   {
     q: '¿Qué pasa si pago la inscripción pero no puedo asistir?',
-    a: 'Podés transferir tu inscripción a otra persona. La nueva persona participante deberá ser previamente habilitada por el/la delegado/a correspondiente, a fin de garantizar el cumplimiento de los criterios de prioridad y cupos establecidos. Recordá que queda prohibida la reventa de cupos y que los pagos no son reembolsables en ninguna circunstancia.',
+    a: 'Podés transferir su inscripción a otra persona. La nueva persona participante deberá ser previamente habilitada, a fin de garantizar el cumplimiento de los criterios de prioridad y cupos establecidos para cada delegación. Recordá que queda prohibida la reventa de cupos de inscripción y que los pagos no son reembolsables en ninguna circunstancia.',
+  },
+  {
+    q: '¿Qué pasa si me preinscribí pero no quedé seleccionado?',
+    a: 'Estás en lista de espera para la próxima instancia. Es importante que no te vuelvas a preinscribir, ya que tu nombre figura en el sistema.',
   },
 ];
 
@@ -106,7 +114,7 @@ const FaqPage = () => {
           Sobre Delegados
         </h2>
         <div className="space-y-3 mb-10">
-          {FAQS.slice(0, 7).map((item, i) => (
+          {FAQS.slice(0, 10).map((item, i) => (
             <FaqItem
               key={i}
               item={item}
@@ -121,8 +129,8 @@ const FaqPage = () => {
           Sobre Pagos e Inscripción
         </h2>
         <div className="space-y-3 mb-12">
-          {FAQS.slice(7).map((item, i) => {
-            const idx = i + 7;
+          {FAQS.slice(10).map((item, i) => {
+            const idx = i + 10;
             return (
               <FaqItem
                 key={idx}
