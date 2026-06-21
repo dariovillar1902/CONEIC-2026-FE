@@ -706,6 +706,7 @@ const Registration = ({ forceOpen = false }) => {
                                         <button type="button" onClick={() => setCertificateFile(null)} className="text-xs text-red-400 hover:text-red-600 mt-1">✕ Quitar archivo</button>
                                     )}
                                     <p className="text-xs text-gray-400 mt-1">PDF o imagen, máx. 10 MB.</p>
+                                    <p className="text-xs text-blue-500 mt-1">Si te recibiste después de Octubre 2025, podés cargar tu constancia de título en trámite o comprobante de aprobación de tu último final o proyecto final.</p>
                                     <FieldError msg={submitted ? errors.certificateFile : ''} />
                                 </div>
 
