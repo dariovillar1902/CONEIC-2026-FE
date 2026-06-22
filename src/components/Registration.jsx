@@ -248,13 +248,16 @@ const Registration = ({ forceOpen = false }) => {
     const [delegationInfo, setDelegationInfo] = useState(null);
 
     useEffect(() => {
-        const faculty = isInternacional ? null : isOtra ? null : selectedFaculty || null;
+        if (isInternacional) { setDelegationInfo(null); return; }
+        const faculty = isOtra
+            ? (selectedProvince ? `Otra (${selectedProvince})` : null)
+            : (selectedFaculty || null);
         if (!faculty) { setDelegationInfo(null); return; }
         fetch(`${import.meta.env.VITE_API_URL}/api/registrations/directory?faculty=${encodeURIComponent(faculty)}`)
             .then(r => r.ok ? r.json() : null)
             .then(data => setDelegationInfo(data))
             .catch(() => setDelegationInfo(null));
-    }, [selectedFaculty, isOtra, isInternacional]);
+    }, [selectedFaculty, isOtra, isInternacional, selectedProvince]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

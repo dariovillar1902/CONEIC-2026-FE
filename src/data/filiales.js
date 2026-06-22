@@ -524,9 +524,9 @@ export const ARGENTINIAN_PROVINCES = [
 /** Maps each Argentine province to the ANEIC filial id that covers it. */
 const PROVINCE_TO_FILIAL_ID = {
   'Buenos Aires':                    'Este',
-  'Ciudad Autónoma de Buenos Aires': 'Este',
-  'Entre Ríos':                      'Centro',
+  'Entre Ríos':                      'Este',
   'Santa Fe':                        'Centro',
+  'Ciudad Autónoma de Buenos Aires': 'Norte',
   'Catamarca':                       'Norte',
   'Chaco':                           'Norte',
   'Corrientes':                      'Norte',
