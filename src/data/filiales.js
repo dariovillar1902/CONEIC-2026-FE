@@ -526,7 +526,7 @@ const PROVINCE_TO_FILIAL_ID = {
   'Buenos Aires':                    'Este',
   'Entre Ríos':                      'Este',
   'Santa Fe':                        'Centro',
-  'Ciudad Autónoma de Buenos Aires': 'Norte',
+  'Ciudad Autónoma de Buenos Aires': 'Este',
   'Catamarca':                       'Norte',
   'Chaco':                           'Norte',
   'Corrientes':                      'Norte',

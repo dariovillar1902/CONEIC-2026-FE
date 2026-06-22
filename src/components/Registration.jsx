@@ -461,10 +461,10 @@ const Registration = ({ forceOpen = false }) => {
                             </p>
                             {delegationInfo.contacts?.map(c => (
                                 <p key={c.name} className="text-sm text-gray-700">
-                                    • {c.name} —{' '}
-                                    <a href={`https://wa.me/54${c.phone}`} className="text-primary-blue font-bold underline" target="_blank" rel="noreferrer">
-                                        +54 {c.phone}
-                                    </a>
+                                    • {c.name}
+                                    {c.phone ? (
+                                        <>{' — '}<a href={`https://wa.me/54${c.phone}`} className="text-primary-blue font-bold underline" target="_blank" rel="noreferrer">+54 {c.phone}</a></>
+                                    ) : null}
                                 </p>
                             ))}
                         </div>
@@ -835,10 +835,10 @@ const Registration = ({ forceOpen = false }) => {
                                                 </p>
                                                 {delegationInfo.contacts?.map(c => (
                                                     <p key={c.name} className="text-blue-700">
-                                                        • {c.name} —{' '}
-                                                        <a href={`https://wa.me/54${c.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">
-                                                            +54 {c.phone}
-                                                        </a>
+                                                        • {c.name}
+                                                        {c.phone ? (
+                                                            <>{' — '}<a href={`https://wa.me/54${c.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">+54 {c.phone}</a></>
+                                                        ) : null}
                                                     </p>
                                                 ))}
                                             </div>
