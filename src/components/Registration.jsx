@@ -429,8 +429,11 @@ const Registration = ({ forceOpen = false }) => {
                 <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 mb-4">
                     <p className="text-sm font-bold text-yellow-800 mb-1">⚠️ Importante</p>
                     <p className="text-sm text-yellow-700 leading-relaxed">
-                        Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción.
-                        Contactate con tu delegado/vocal para coordinar el pago.
+                        El siguiente paso será esperar a que tu inscripción sea habilitada para poder continuar con el proceso.
+                        Esta validación se realizará durante el transcurso de la próxima semana, agradecemos tu paciencia.
+                    </p>
+                    <p className="text-sm text-yellow-700 leading-relaxed mt-2">
+                        Ante cualquier duda o consulta, podés comunicarte con tu delegado/a.
                     </p>
                 </div>
 
@@ -464,7 +467,7 @@ const Registration = ({ forceOpen = false }) => {
                         </div>
                     ) : (
                         <p className="text-sm text-gray-600">
-                            Contactate con tu delegación para coordinar el pago y confirmar tu vacante.
+                            Contactate con tu delegación para recibir más información y resolver cualquier inquietud.
                         </p>
                     )}
                 </div>
