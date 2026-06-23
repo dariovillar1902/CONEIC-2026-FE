@@ -165,11 +165,10 @@ export const FILIALES = {
     },
     delegates: [
       {
-        // Delegado principal de la región
-        name: 'Cristian Ledesma',
+        name: 'Tadeo Gabriel Fernández',
         faculty: 'Universidad Nacional del Nordeste',
-        phone: '3794707691',
-        email: 'delegacion.unne@coneic2026.com.ar', // pendiente de confirmar
+        phone: '3704605585',
+        email: 'delegacion.unne@coneic2026.com.ar',
         isRegionalFallback: true,
         managedFaculties: ['Universidad Nacional del Nordeste'],
       },
