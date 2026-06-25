@@ -248,13 +248,16 @@ const Registration = ({ forceOpen = false }) => {
     const [delegationInfo, setDelegationInfo] = useState(null);
 
     useEffect(() => {
-        const faculty = isInternacional ? null : isOtra ? null : selectedFaculty || null;
+        if (isInternacional) { setDelegationInfo(null); return; }
+        const faculty = isOtra
+            ? (selectedProvince ? `Otra (${selectedProvince})` : null)
+            : (selectedFaculty || null);
         if (!faculty) { setDelegationInfo(null); return; }
         fetch(`${import.meta.env.VITE_API_URL}/api/registrations/directory?faculty=${encodeURIComponent(faculty)}`)
             .then(r => r.ok ? r.json() : null)
             .then(data => setDelegationInfo(data))
             .catch(() => setDelegationInfo(null));
-    }, [selectedFaculty, isOtra, isInternacional]);
+    }, [selectedFaculty, isOtra, isInternacional, selectedProvince]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -429,8 +432,11 @@ const Registration = ({ forceOpen = false }) => {
                 <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 mb-4">
                     <p className="text-sm font-bold text-yellow-800 mb-1">⚠️ Importante</p>
                     <p className="text-sm text-yellow-700 leading-relaxed">
-                        Tu cupo no está asegurado hasta que tu delegado habilite tu inscripción.
-                        Contactate con tu delegado/vocal para coordinar el pago.
+                        El siguiente paso será esperar a que tu inscripción sea habilitada para poder continuar con el proceso.
+                        Esta validación se realizará durante el transcurso de la próxima semana, agradecemos tu paciencia.
+                    </p>
+                    <p className="text-sm text-yellow-700 leading-relaxed mt-2">
+                        Ante cualquier duda o consulta, podés comunicarte con tu delegado/a.
                     </p>
                 </div>
 
@@ -455,16 +461,16 @@ const Registration = ({ forceOpen = false }) => {
                             </p>
                             {delegationInfo.contacts?.map(c => (
                                 <p key={c.name} className="text-sm text-gray-700">
-                                    • {c.name} —{' '}
-                                    <a href={`https://wa.me/54${c.phone}`} className="text-primary-blue font-bold underline" target="_blank" rel="noreferrer">
-                                        +54 {c.phone}
-                                    </a>
+                                    • {c.name}
+                                    {c.phone ? (
+                                        <>{' — '}<a href={`https://wa.me/54${c.phone}`} className="text-primary-blue font-bold underline" target="_blank" rel="noreferrer">+54 {c.phone}</a></>
+                                    ) : null}
                                 </p>
                             ))}
                         </div>
                     ) : (
                         <p className="text-sm text-gray-600">
-                            Contactate con tu delegación para coordinar el pago y confirmar tu vacante.
+                            Contactate con tu delegación para recibir más información y resolver cualquier inquietud.
                         </p>
                     )}
                 </div>
@@ -829,10 +835,10 @@ const Registration = ({ forceOpen = false }) => {
                                                 </p>
                                                 {delegationInfo.contacts?.map(c => (
                                                     <p key={c.name} className="text-blue-700">
-                                                        • {c.name} —{' '}
-                                                        <a href={`https://wa.me/54${c.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">
-                                                            +54 {c.phone}
-                                                        </a>
+                                                        • {c.name}
+                                                        {c.phone ? (
+                                                            <>{' — '}<a href={`https://wa.me/54${c.phone}`} className="font-bold underline" target="_blank" rel="noreferrer">+54 {c.phone}</a></>
+                                                        ) : null}
                                                     </p>
                                                 ))}
                                             </div>

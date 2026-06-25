@@ -165,11 +165,10 @@ export const FILIALES = {
     },
     delegates: [
       {
-        // Delegado principal de la región
-        name: 'Cristian Ledesma',
+        name: 'Tadeo Gabriel Fernández',
         faculty: 'Universidad Nacional del Nordeste',
-        phone: '3794707691',
-        email: 'delegacion.unne@coneic2026.com.ar', // pendiente de confirmar
+        phone: '3704605585',
+        email: 'delegacion.unne@coneic2026.com.ar',
         isRegionalFallback: true,
         managedFaculties: ['Universidad Nacional del Nordeste'],
       },
@@ -524,9 +523,9 @@ export const ARGENTINIAN_PROVINCES = [
 /** Maps each Argentine province to the ANEIC filial id that covers it. */
 const PROVINCE_TO_FILIAL_ID = {
   'Buenos Aires':                    'Este',
-  'Ciudad Autónoma de Buenos Aires': 'Este',
-  'Entre Ríos':                      'Centro',
+  'Entre Ríos':                      'Este',
   'Santa Fe':                        'Centro',
+  'Ciudad Autónoma de Buenos Aires': 'Este',
   'Catamarca':                       'Norte',
   'Chaco':                           'Norte',
   'Corrientes':                      'Norte',

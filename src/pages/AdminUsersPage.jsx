@@ -55,16 +55,19 @@ const AdminUsersPage = () => {
         return items;
     }, [attendees, searchTerm, sortConfig]);
 
-     const handleDelete = async (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('¿Está seguro que desea eliminar esta inscripción (Admin)?')) {
-           const original = [...attendees];
-           setAttendees(attendees.filter(a => a.id !== id));
-           try {
-               // mock delete
-               // await fetch(...)
-           } catch (e) {
-               setAttendees(original);
-           }
+            const original = [...attendees];
+            setAttendees(prev => prev.filter(a => a.id !== id));
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/${id}`, {
+                    method: 'DELETE',
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            } catch (e) {
+                setAttendees(original);
+                alert('No se pudo eliminar la inscripción. Intentá de nuevo.');
+            }
         }
     };
     

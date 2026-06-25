@@ -3,14 +3,14 @@ const Venues = () => {
     {
       name: 'Sede Central: Auditorio de Belgrano',
       address: 'Virrey Loreto 2348, C1426 Cdad. Autónoma de Buenos Aires',
-      description: 'El lugar principal donde se realizarán las charlas magistrales y acreditaciones. Un espacio icónico de la ciudad con capacidad para miles de estudiantes.',
+      description: 'El lugar principal donde se realizarán las charlas magistrales y acreditaciones. Un espacio icónico de la ciudad con capacidad para miles de estudiantes.',
       embedSrc: 'https://maps.google.com/maps?q=Virrey+Loreto+2348,+Buenos+Aires,+Argentina&output=embed',
       mapsUrl: 'https://maps.google.com/?q=Virrey+Loreto+2348,+C1426,+Buenos+Aires,+Argentina',
     },
     {
-      name: 'Sede Actividades: UTN Buenos Aires',
-      address: 'Medrano 951, C1179 CABA',
-      description: 'Sede para talleres prácticos y competencias. La casa de estudios anfitriona, ubicada en el corazón de Almagro.',
+      name: 'Sede Actividades: UTN Medrano',
+      address: 'Av. Medrano 951, C1179 CABA',
+      description: 'Sede para charlas simultáneas y talleres. La casa de estudios anfitriona (UTN Facultad Regional Buenos Aires), ubicada en el corazón de Almagro.',
       embedSrc: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.687989512345!2d-58.42263722350638!3d-34.61204095793617!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcca5e396cd597%3A0x6b4f746400db0df7!2sUniversidad%20Tecnolo%CC%81gica%20Nacional%20%7C%20Facultad%20Regional%20Buenos%20Aires!5e0!3m2!1ses!2sar!4v1705689198765!5m2!1ses!2sar',
       mapsUrl: 'https://maps.google.com/?q=UTN+Facultad+Regional+Buenos+Aires,+Medrano+951,+CABA',
     },
