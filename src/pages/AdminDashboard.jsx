@@ -117,6 +117,7 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
       emergencyContactName:  fd.get('emergencyContactName'),
       emergencyContactPhone: fd.get('emergencyContactPhone'),
       observations:          fd.get('observations') || null,
+      interestedInMaccaferri: fd.get('interestedInMaccaferri') === 'on',
     };
     await onSave(updated);
   };
@@ -180,6 +181,17 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
             <div className="col-span-2">
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Observaciones</label>
               <textarea name="observations" defaultValue={reg.observations ?? ''} rows={2} className="border p-2 rounded w-full text-sm resize-none" />
+            </div>
+            <div className="col-span-2">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  name="interestedInMaccaferri"
+                  defaultChecked={!!reg.interestedInMaccaferri}
+                  className="w-4 h-4 accent-institutional"
+                />
+                <span className="text-sm font-bold text-gray-700">Desafío Barreras de Maccaferri</span>
+              </label>
             </div>
           </div>
           <div className="flex gap-3 pt-3 border-t border-gray-100">
