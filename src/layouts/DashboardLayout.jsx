@@ -29,13 +29,6 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="text-sm font-subtitle hidden md:block">Hola, {user.name}</span>
-                        <Link
-                            to="/change-password"
-                            className="text-sm text-gray-300 hover:text-white transition hidden md:block"
-                            title="Cambiar contraseña"
-                        >
-                            🔑 Contraseña
-                        </Link>
                         <button
                             onClick={logout}
                             className="text-sm bg-red-800 hover:bg-red-700 px-4 py-2 rounded-lg font-bold transition font-subtitle uppercase tracking-wide"
