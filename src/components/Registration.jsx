@@ -7,29 +7,30 @@ import {
 
 // ─── Stage & Phase Configuration ─────────────────────────────────────────────
 // Helper: create date at local midnight (avoids UTC off-by-one in Argentina, UTC-3)
-const d = (y, m, day) => new Date(y, m - 1, day);
+const d    = (y, m, day) => new Date(y, m - 1, day,  0,  0,  0);
+const dEnd = (y, m, day) => new Date(y, m - 1, day, 23, 59, 59);
 
 const STAGES = [
     {
         id: 1,
         label: '1ª Etapa',
-        preRegistration: { start: d(2026, 6, 22), end: d(2026, 6, 26) },
-        delegatePhase:   { start: d(2026, 6, 29), end: d(2026, 7,  5) },
-        paymentPhase:    { start: d(2026, 7,  6),  end: d(2026, 7,  8) },
+        preRegistration: { start: d(2026, 6, 22), end: dEnd(2026, 6, 26) },
+        delegatePhase:   { start: d(2026, 6, 29), end: dEnd(2026, 7,  5) },
+        paymentPhase:    { start: d(2026, 7,  6),  end: dEnd(2026, 7,  8) },
     },
     {
         id: 2,
         label: '2ª Etapa',
-        preRegistration: { start: d(2026, 7, 27), end: d(2026, 7, 31) },
-        delegatePhase:   { start: d(2026, 8,  3), end: d(2026, 8,  9) },
-        paymentPhase:    { start: d(2026, 8, 10), end: d(2026, 8, 12) },
+        preRegistration: { start: d(2026, 7, 27), end: dEnd(2026, 7, 31) },
+        delegatePhase:   { start: d(2026, 8,  3), end: dEnd(2026, 8,  9) },
+        paymentPhase:    { start: d(2026, 8, 10), end: dEnd(2026, 8, 12) },
     },
     {
         id: 3,
         label: '3ª Etapa',
-        preRegistration: { start: d(2026, 8, 31), end: d(2026, 9,  4) },
-        delegatePhase:   { start: d(2026, 9,  7), end: d(2026, 9, 13) },
-        paymentPhase:    { start: d(2026, 9, 14), end: d(2026, 9, 16) },
+        preRegistration: { start: d(2026, 8, 31), end: dEnd(2026, 9,  4) },
+        delegatePhase:   { start: d(2026, 9,  7), end: dEnd(2026, 9, 13) },
+        paymentPhase:    { start: d(2026, 9, 14), end: dEnd(2026, 9, 16) },
     },
 ];
 
