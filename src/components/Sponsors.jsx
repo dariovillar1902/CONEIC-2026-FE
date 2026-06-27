@@ -1,13 +1,15 @@
 const SPONSORS_ORO = [
     {
-        name: 'Ag+Zinc',
-        logoUrl: '/assets/sponsors/logo-agzinc.png',
-        url: 'https://www.agzinc.com.ar/',
-        cardBg: 'bg-[#1c3a5e]',
+        name: 'AGA + IZA',
+        logoUrlA: '/assets/sponsors/logo-aga.png',
+        logoUrlB: '/assets/sponsors/logo-iza.png',
+        url: 'https://www.druetta.com.ar/',
+        cardBg: 'bg-white',
+        dual: true,
     },
     {
         name: 'Penetron',
-        logoUrl: '/assets/sponsors/logo-penetron.png',
+        logoUrl: '/assets/sponsors/logo-penetron.svg',
         url: 'https://penetron.com.ar/',
         cardBg: 'bg-[#2a2a2a]',
     },
@@ -18,7 +20,7 @@ const SPONSORS_PLATA = [
         name: 'Fadic',
         logoUrl: '/assets/sponsors/logo-fadic.png',
         url: 'http://fadic.ar/',
-        cardBg: 'bg-[#2d2d2d]',
+        cardBg: 'bg-white',
     },
     {
         name: 'Maccaferri',
@@ -35,9 +37,31 @@ const SPONSORS_PLATA = [
 ];
 
 const SponsorCard = ({ sponsor, size = 'md' }) => {
-    const sizeClass = size === 'lg'
-        ? 'w-80 h-44'
-        : 'w-64 h-36';
+    const sizeClass = size === 'lg' ? 'w-80 h-44' : 'w-64 h-36';
+
+    if (sponsor.dual) {
+        return (
+            <a
+                href={sponsor.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${sponsor.cardBg} ${sizeClass} p-6 rounded-2xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-4 overflow-hidden group`}
+            >
+                <img
+                    src={sponsor.logoUrlA}
+                    alt="AGA"
+                    className="w-[45%] max-h-[70%] object-contain group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="w-px h-10 bg-gray-300 shrink-0" />
+                <img
+                    src={sponsor.logoUrlB}
+                    alt="IZA"
+                    className="w-[45%] max-h-[70%] object-contain group-hover:scale-105 transition-transform duration-500"
+                />
+            </a>
+        );
+    }
+
     return (
         <a
             href={sponsor.url}
