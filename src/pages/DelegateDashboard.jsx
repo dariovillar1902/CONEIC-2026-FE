@@ -89,20 +89,25 @@ const DelegateDashboard = () => {
     const delegateEmail = user?.email ?? '';
     const managedFaculties = user?.managedFaculties ?? [];
     const filial = user?.filial ?? null;
-    const quota = user?.quota ?? 0;
+    const [quota, setQuota] = useState(user?.quota ?? 0);
 
     // ── Fetch ─────────────────────────────────────────────────────────
     const fetchData = async () => {
         if (!delegateEmail) return;
         setLoading(true);
         try {
-            const [regRes, batchRes] = await Promise.all([
+            const [regRes, batchRes, quotaRes] = await Promise.all([
                 fetch(`${API}/api/registrations/delegate?email=${encodeURIComponent(delegateEmail)}`),
                 fetch(`${API}/api/paymentbatches/delegate?email=${encodeURIComponent(delegateEmail)}`),
+                fetch(`${API}/api/registrations/delegate/quota?email=${encodeURIComponent(delegateEmail)}`),
             ]);
             if (!regRes.ok) throw new Error('Error fetching registrations');
             setAttendees(await regRes.json());
             if (batchRes.ok) setBatches(await batchRes.json());
+            if (quotaRes.ok) {
+                const { quota: q } = await quotaRes.json();
+                setQuota(q);
+            }
         } catch {
             setError('No se pudieron cargar los datos.');
         } finally {
