@@ -89,6 +89,7 @@ const DelegateDashboard = () => {
     const delegateEmail = user?.email ?? '';
     const managedFaculties = user?.managedFaculties ?? [];
     const filial = user?.filial ?? null;
+    const quota = user?.quota ?? 0;
 
     // ── Fetch ─────────────────────────────────────────────────────────
     const fetchData = async () => {
@@ -161,12 +162,20 @@ const DelegateDashboard = () => {
 
     /** Marks a change as pending (checkbox / select). Does NOT hit the API. */
     const queuePaymentChange = (id, isEnabled, paymentCondition) => {
+        // Count how many will be enabled after this change (committed + pending)
+        if (isEnabled && quota > 0) {
+            const pendingEnabled = attendees.filter(a => {
+                const pending = pendingPaymentChanges[a.id];
+                const effective = pending !== undefined ? pending.isEnabled : a.isEnabled;
+                return effective;
+            }).length + (!(pendingPaymentChanges[id]?.isEnabled ?? attendees.find(a => a.id === id)?.isEnabled) ? 1 : 0);
+            if (pendingEnabled > quota) return;
+        }
         setPendingPaymentChanges(prev => ({
             ...prev,
             [id]: {
                 isEnabled,
                 paymentCondition,
-                // Preserve the original isEnabled so we know if it was newly enabled
                 _origEnabled: prev[id]?._origEnabled ?? (attendees.find(a => a.id === id)?.isEnabled ?? false),
             },
         }));
@@ -189,7 +198,7 @@ const DelegateDashboard = () => {
                 fetch(`${API}/api/registrations/${id}/payment`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ isEnabled: ch.isEnabled, paymentCondition: ch.paymentCondition }),
+                    body: JSON.stringify({ isEnabled: ch.isEnabled, paymentCondition: ch.paymentCondition, delegateEmail }),
                 })
             ));
 
@@ -460,8 +469,12 @@ const DelegateDashboard = () => {
     };
 
     // ── Counts ────────────────────────────────────────────────────────
-    const enabledCount = attendees.filter(a => a.isEnabled).length;
+    const enabledCount = attendees.filter(a => {
+        const pending = pendingPaymentChanges[a.id];
+        return pending !== undefined ? pending.isEnabled : a.isEnabled;
+    }).length;
     const paidCount    = attendees.filter(a => a.paymentCondition && a.paymentCondition !== 'No Pagó').length;
+    const quotaReached = quota > 0 && enabledCount >= quota;
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
     if (error)   return <div className="text-red-600 text-center py-12">{error}</div>;
@@ -481,7 +494,11 @@ const DelegateDashboard = () => {
                 </div>
                 <div className="flex gap-3">
                     <StatCard label="Total"      value={attendees.length} />
-                    <StatCard label="Habilitados" value={enabledCount}    color="text-green-600" />
+                    <StatCard
+                        label="Habilitados"
+                        value={quota > 0 ? `${enabledCount}/${quota}` : enabledCount}
+                        color={quotaReached ? 'text-red-600' : 'text-green-600'}
+                    />
                     <StatCard label="Con pago"    value={paidCount}       color="text-blue-600" />
                 </div>
             </div>
@@ -547,16 +564,24 @@ const DelegateDashboard = () => {
                                 )}
                                 {/* Habilitado */}
                                 <td className="px-4 py-3 text-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={pendingPaymentChanges[person.id]?.isEnabled ?? person.isEnabled ?? false}
-                                        onChange={e => queuePaymentChange(
-                                            person.id,
-                                            e.target.checked,
-                                            person.paymentCondition ?? ''
-                                        )}
-                                        className="h-5 w-5 text-green-600 rounded border-gray-300 focus:ring-green-500 cursor-pointer"
-                                    />
+                                    {(() => {
+                                        const isChecked = pendingPaymentChanges[person.id]?.isEnabled ?? person.isEnabled ?? false;
+                                        const isDisabled = quotaReached && !isChecked;
+                                        return (
+                                            <input
+                                                type="checkbox"
+                                                checked={isChecked}
+                                                disabled={isDisabled}
+                                                onChange={e => queuePaymentChange(
+                                                    person.id,
+                                                    e.target.checked,
+                                                    person.paymentCondition ?? ''
+                                                )}
+                                                title={isDisabled ? `Cupo agotado (${enabledCount}/${quota})` : undefined}
+                                                className={`h-5 w-5 rounded border-gray-300 focus:ring-green-500 ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'text-green-600 cursor-pointer'}`}
+                                            />
+                                        );
+                                    })()}
                                 </td>
                                 {/* Estado de Pago — solo lectura, se actualiza via comprobante */}
                                 <td className="px-4 py-3">
