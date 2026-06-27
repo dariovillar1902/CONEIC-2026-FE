@@ -56,7 +56,7 @@ const VENUES = [
     color: 'border-complementary-gold',
     badge: 'bg-complementary-gold/10 text-complementary-gold',
     activities: ['Charlas Simultáneas', 'Talleres'],
-    days: 'Martes a Viernes',
+    days: 'Miércoles',
     mapsUrl: 'https://maps.google.com/?q=Av.+Medrano+951,+C1179,+Buenos+Aires,+Argentina',
   },
 ];
