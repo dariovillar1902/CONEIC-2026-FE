@@ -9,10 +9,18 @@ const waUrl = (phone) => `https://wa.me/549${phone.replace(/\D/g, '')}`;
 ══════════════════════════════════════════════════════════════════════════════ */
 const SPONSORS_ORO = [
     {
-        name: 'Druetta',
-        logoUrl: '/assets/sponsors/logo-druetta.jpg',
+        name: 'AGA + IZA',
+        logoUrlA: '/assets/sponsors/logo-aga.png',
+        logoUrlB: '/assets/sponsors/logo-iza.png',
         url: 'https://www.druetta.com.ar/',
-        cardBg: 'bg-[#1c3a5e]',
+        cardBg: 'bg-white',
+        dual: true,
+    },
+    {
+        name: 'Penetron',
+        logoUrl: '/assets/sponsors/logo-penetron.svg',
+        url: 'https://penetron.com.ar/',
+        cardBg: 'bg-[#2a2a2a]',
     },
 ];
 
@@ -21,7 +29,7 @@ const SPONSORS_PLATA = [
         name: 'Fadic',
         logoUrl: '/assets/sponsors/logo-fadic.png',
         url: 'http://fadic.ar/',
-        cardBg: 'bg-[#2d2d2d]',
+        cardBg: 'bg-white',
     },
     {
         name: 'Maccaferri',
@@ -406,6 +414,22 @@ const REGION_STYLE = {
 ══════════════════════════════════════════════════════════════════════════════ */
 const SponsorCard = ({ s, size = 'md' }) => {
     const sizeClass = size === 'lg' ? 'w-80 h-44' : 'w-64 h-36';
+
+    if (s.dual) {
+        return (
+            <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${s.cardBg} ${sizeClass} p-6 rounded-2xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-4 overflow-hidden group`}
+            >
+                <img src={s.logoUrlA} alt="AGA" className="w-[45%] max-h-[70%] object-contain group-hover:scale-105 transition-transform duration-500" />
+                <div className="w-px h-10 bg-gray-300 shrink-0" />
+                <img src={s.logoUrlB} alt="IZA" className="w-[45%] max-h-[70%] object-contain group-hover:scale-105 transition-transform duration-500" />
+            </a>
+        );
+    }
+
     return (
         <a
             href={s.url}
