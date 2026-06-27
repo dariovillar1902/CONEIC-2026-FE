@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }) => {
             filial: userData.filial ?? null,
             managedFaculties: userData.managedFaculties ?? [],
             mustChangePassword: userData.mustChangePassword ?? false,
+            quota: userData.quota ?? 0,
         };
 
         setUser(user);
