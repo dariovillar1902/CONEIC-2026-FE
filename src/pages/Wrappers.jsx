@@ -49,6 +49,16 @@ const VENUES = [
     days: 'Martes y Viernes',
     mapsUrl: 'https://maps.google.com/?q=Virrey+Loreto+2348,+C1426,+Buenos+Aires,+Argentina',
   },
+  {
+    name: 'UTN Medrano',
+    address: 'Av. Medrano 951, C1179 Cdad. Autónoma de Buenos Aires',
+    icon: '🏫',
+    color: 'border-complementary-gold',
+    badge: 'bg-complementary-gold/10 text-complementary-gold',
+    activities: ['Charlas Simultáneas', 'Talleres'],
+    days: 'Martes a Viernes',
+    mapsUrl: 'https://maps.google.com/?q=Av.+Medrano+951,+C1179,+Buenos+Aires,+Argentina',
+  },
 ];
 
 export const SchedulePage = () => (
@@ -108,11 +118,11 @@ export const SchedulePage = () => (
         <span className="text-complementary-gold font-bold tracking-widest uppercase text-sm">Ubicaciones</span>
         <h2 className="text-3xl font-bold text-institutional font-title mt-2">Sedes del Congreso</h2>
         <p className="text-gray-500 font-subtitle mt-2 max-w-xl mx-auto">
-          El XVIII CONEIC se desarrolla en tres espacios complementarios dentro de la Ciudad Autónoma de Buenos Aires.
+          El XVIII CONEIC se desarrolla en dos sedes dentro de la Ciudad Autónoma de Buenos Aires.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
         {VENUES.map(v => (
           <div key={v.name} className={`bg-white rounded-2xl shadow-sm border-t-4 ${v.color} overflow-hidden hover:shadow-lg transition-shadow`}>
             <div className="p-6">
