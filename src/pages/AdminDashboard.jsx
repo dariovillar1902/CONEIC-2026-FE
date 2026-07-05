@@ -774,7 +774,7 @@ const ComprobantesPanel = () => {
 /* ─── Main component ────────────────────────────────────────────────── */
 const AdminDashboard = () => {
   const { user, hasRole } = useAuth();
-  const isTesoreria = hasRole('tesoreria') || hasRole('admin');
+  const isTesoreria = hasRole('tesoreria') || user?.email === 'directorio@coneic2026.com.ar';
 
   const TABS = [
     { id: 'overview',      label: '🏠 Resumen' },
