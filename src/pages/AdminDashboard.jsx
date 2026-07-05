@@ -774,7 +774,7 @@ const ComprobantesPanel = () => {
 /* ─── Main component ────────────────────────────────────────────────── */
 const AdminDashboard = () => {
   const { user, hasRole } = useAuth();
-  const isTesoreria = hasRole('tesoreria');
+  const isTesoreria = hasRole('tesoreria') || hasRole('admin');
 
   const TABS = [
     { id: 'overview',      label: '🏠 Resumen' },
@@ -784,7 +784,7 @@ const AdminDashboard = () => {
     ] : []),
   ];
 
-  const [activeTab, setActiveTab] = useState(isTesoreria ? 'comprobantes' : 'overview');
+  const [activeTab, setActiveTab] = useState(hasRole('tesoreria') ? 'comprobantes' : 'overview');
   const [allRegs, setAllRegs] = useState([]);
 
   useEffect(() => {
