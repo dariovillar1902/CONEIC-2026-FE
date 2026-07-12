@@ -313,27 +313,29 @@ const DelegateDashboard = () => {
 
     const handleBatchSave = async (e) => {
         e.preventDefault();
-        let receiptUrl = batchReceiptUrl;
-        if (batchFile) {
-            const uploaded = await handleBatchFileUpload();
-            if (!uploaded) return;
-            receiptUrl = uploaded;
-        }
-
-        const enrichedAssignments = batchAssignments.map(a => ({
-            ...a,
-            paymentType: a.paymentCondition || 'No Pagó',
-        }));
-
-        const payload = {
-            delegateEmail,
-            receiptUrl,
-            description: batchDescription,
-            needsInvoice: batchNeedsInvoice,
-            assignments: enrichedAssignments,
-        };
-
+        if (batchUploading) return;
+        setBatchUploading(true);
         try {
+            let receiptUrl = batchReceiptUrl;
+            if (batchFile) {
+                const uploaded = await handleBatchFileUpload();
+                if (!uploaded) return;
+                receiptUrl = uploaded;
+            }
+
+            const enrichedAssignments = batchAssignments.map(a => ({
+                ...a,
+                paymentType: a.paymentCondition || 'No Pagó',
+            }));
+
+            const payload = {
+                delegateEmail,
+                receiptUrl,
+                description: batchDescription,
+                needsInvoice: batchNeedsInvoice,
+                assignments: enrichedAssignments,
+            };
+
             let res;
             if (editingBatchId) {
                 res = await fetch(`${API}/api/paymentbatches/${editingBatchId}`, {
@@ -359,7 +361,6 @@ const DelegateDashboard = () => {
                     : [saved, ...prev]);
             }
 
-            // Update attendees payment conditions locally from assignments
             setAttendees(prev => prev.map(a => {
                 const assignment = enrichedAssignments.find(
                     x => String(x.registrationId) === String(a.id)
@@ -370,6 +371,8 @@ const DelegateDashboard = () => {
             setIsBatchModalOpen(false);
         } catch (err) {
             alert(`Error al guardar el comprobante: ${err.message}`);
+        } finally {
+            setBatchUploading(false);
         }
     };
 
