@@ -694,6 +694,9 @@ const DelegateDashboard = () => {
                                 )}
                             </div>
                             <div className="flex gap-2 shrink-0">
+                                {!batch.isValidated && (
+                                    <button onClick={() => openBatchModal(batch)} className="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition font-bold">Editar</button>
+                                )}
                                 <button onClick={() => handleBatchDelete(batch.id)} className="text-xs text-red-500 border border-red-200 px-2 py-1 rounded hover:bg-red-50 transition font-bold">Eliminar</button>
                             </div>
                         </div>
