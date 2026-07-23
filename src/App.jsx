@@ -20,6 +20,7 @@ import FaqPage from './pages/FaqPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import SupportPage from './pages/SupportPage';
 import CommitteePage from './pages/CommitteePage';
+import ManualPortenoPage from './pages/ManualPortenoPage';
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
       { path: 'subcomisiones', element: <SubcommitteesPage /> },
       { path: 'faq', element: <FaqPage /> },
       { path: 'committee', element: <CommitteePage /> },
+      { path: 'manual-porteno', element: <ManualPortenoPage /> },
     ]
   },
   // Change-password: accessible to any logged-in user
