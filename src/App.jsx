@@ -14,7 +14,7 @@ import AssistantDashboard from './pages/AssistantDashboard';
 import GalleryPage from './pages/GalleryPage';
 import GamesPage from './pages/GamesPage';
 import AboutPage from './pages/AboutPage';
-import { SchedulePage, VenuesPage, ActivitiesPage, RegistrationPage, RegistrationPage2, RegistrationInternationalPage } from './pages/Wrappers';
+import { SchedulePage, VenuesPage, ActivitiesPage, RegistrationPage, RegistrationPage2, RegistrationInternationalPage, RegistrationInternationalPage2 } from './pages/Wrappers';
 import SubcommitteesPage from './pages/SubcommitteesPage';
 import FaqPage from './pages/FaqPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
@@ -36,6 +36,7 @@ const router = createBrowserRouter([
       { path: 'registration', element: <RegistrationPage /> },
       { path: 'registration2', element: <RegistrationPage2 /> },
       { path: 'registration-international', element: <RegistrationInternationalPage /> },
+      { path: 'registration-international2', element: <RegistrationInternationalPage2 /> },
       { path: 'gallery', element: <GalleryPage /> },
       { path: 'games', element: <GamesPage /> },
       { path: 'about', element: <AboutPage /> },
