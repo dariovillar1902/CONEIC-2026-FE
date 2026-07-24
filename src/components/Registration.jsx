@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import {
     ALL_FACULTIES_BY_REGION,
     ARGENTINIAN_PROVINCES,
-    INTERNATIONAL_COUNTRIES,
 } from '../data/filiales.js';
 
 // ─── Stage & Phase Configuration ─────────────────────────────────────────────
@@ -53,17 +52,27 @@ const getCurrentPhase = (today) => {
 };
 
 // ─── Validation ───────────────────────────────────────────────────────────────
-const validateFields = (data, isOtra, province, isInternacional, selectedCountry, certificateFile) => {
+const validateFields = (data, isOtra, province, international, intl, certificateFile) => {
     const errs = {};
     if (!data.name.trim()) errs.name = 'El nombre es requerido.';
     if (!data.lastname.trim()) errs.lastname = 'El apellido es requerido.';
-    const dniDigits = data.dni.replace(/\D/g, '');
-    if (!/^\d{7,8}$/.test(dniDigits)) errs.dni = 'El DNI debe tener 7 u 8 dígitos.';
+    if (international) {
+        if (!data.dni.trim()) errs.dni = 'Ingresá tu N° de Cédula/DNI/ID.';
+    } else {
+        const dniDigits = data.dni.replace(/\D/g, '');
+        if (!/^\d{7,8}$/.test(dniDigits)) errs.dni = 'El DNI debe tener 7 u 8 dígitos.';
+    }
     if (!data.phone.trim()) errs.phone = 'El celular es requerido.';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = 'Ingresá un email válido.';
-    if (!data.faculty) errs.faculty = 'Seleccioná una facultad o delegación.';
-    if (isOtra && !province) errs.province = 'Seleccioná tu provincia.';
-    if (isInternacional && !selectedCountry) errs.country = 'Seleccioná tu país.';
+    if (international) {
+        if (!intl.country.trim()) errs.intlCountry = 'Ingresá tu país.';
+        if (!intl.city.trim()) errs.intlCity = 'Ingresá tu ciudad.';
+        if (!intl.university.trim()) errs.intlUniversity = 'Ingresá tu universidad.';
+        if (!intl.attendanceConfidence) errs.attendanceConfidence = 'Seleccioná una opción.';
+    } else {
+        if (!data.faculty) errs.faculty = 'Seleccioná una facultad o delegación.';
+        if (isOtra && !province) errs.province = 'Seleccioná tu provincia.';
+    }
     if (!data.bloodType) errs.bloodType = 'El grupo sanguíneo es requerido.';
     if (!data.medicalConditions?.trim()) errs.medicalConditions = 'Ingresá tus afecciones médicas o "Ninguna" si no tenés.';
     if (!data.emergencyContactName.trim()) errs.emergencyContactName = 'El nombre del contacto de emergencia es requerido.';
@@ -202,7 +211,7 @@ const PhaseBanner = ({ phase, stage }) => {
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-const Registration = ({ forceOpen = false }) => {
+const Registration = ({ forceOpen = false, international = false }) => {
     const form = useRef();
     const today = new Date();
     const { stage: currentStage, phase: currentPhase } = forceOpen
@@ -217,13 +226,16 @@ const Registration = ({ forceOpen = false }) => {
     const [isDuplicate, setIsDuplicate] = useState(false);
     const [selectedFaculty, setSelectedFaculty] = useState('');
     const [selectedProvince, setSelectedProvince] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState('');
     const [dietarySelection, setDietarySelection] = useState('');
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [interestedInMaccaferri, setInterestedInMaccaferri] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
+    const [intlCountry, setIntlCountry] = useState('');
+    const [intlCity, setIntlCity] = useState('');
+    const [intlUniversity, setIntlUniversity] = useState('');
+    const [attendanceConfidence, setAttendanceConfidence] = useState('');
 
     const dietaryOptions = [
         'Sin restricciones',
@@ -238,10 +250,6 @@ const Registration = ({ forceOpen = false }) => {
     ];
 
     const isOtra = selectedFaculty === 'Otra';
-    const isInternacional = selectedFaculty === 'Internacional';
-
-    // International registrations are disabled until stage 3
-    const INTERNATIONAL_DISABLED = true;
 
     const effectiveStage = currentStage;
 
@@ -249,16 +257,17 @@ const Registration = ({ forceOpen = false }) => {
     const [delegationInfo, setDelegationInfo] = useState(null);
 
     useEffect(() => {
-        if (isInternacional) { setDelegationInfo(null); return; }
-        const faculty = isOtra
-            ? (selectedProvince ? `Otra (${selectedProvince})` : null)
-            : (selectedFaculty || null);
+        const faculty = international
+            ? 'Internacional'
+            : isOtra
+                ? (selectedProvince ? `Otra (${selectedProvince})` : null)
+                : (selectedFaculty || null);
         if (!faculty) { setDelegationInfo(null); return; }
         fetch(`${import.meta.env.VITE_API_URL}/api/registrations/directory?faculty=${encodeURIComponent(faculty)}`)
             .then(r => r.ok ? r.json() : null)
             .then(data => setDelegationInfo(data))
             .catch(() => setDelegationInfo(null));
-    }, [selectedFaculty, isOtra, isInternacional, selectedProvince]);
+    }, [selectedFaculty, isOtra, international, selectedProvince]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -280,8 +289,8 @@ const Registration = ({ forceOpen = false }) => {
             { name, lastname, dni, phone, email, faculty: selectedFaculty, bloodType, medicalConditions, emergencyContactName, emergencyContactPhone },
             isOtra,
             selectedProvince,
-            isInternacional,
-            selectedCountry,
+            international,
+            { country: intlCountry, city: intlCity, university: intlUniversity, attendanceConfidence },
             certificateFile,
         );
         setErrors(errs);
@@ -299,7 +308,7 @@ const Registration = ({ forceOpen = false }) => {
         setIsDuplicate(false);
 
         // Faculty value: "Otra (Provincia)" when isOtra, always 'Internacional' when international
-        const facultyValue = isInternacional ? 'Internacional' : isOtra ? `Otra (${selectedProvince})` : selectedFaculty;
+        const facultyValue = international ? 'Internacional' : isOtra ? `Otra (${selectedProvince})` : selectedFaculty;
 
         try {
             // Upload certificate if provided — pass student info for meaningful blob name
@@ -341,11 +350,16 @@ const Registration = ({ forceOpen = false }) => {
                     emergencyContactPhone,
                     stageName:             currentStage?.label ?? 'Demo',
                     price:                 effectiveStage?.priceFull ?? 0,
-                    interestedInMaccaferri,
+                    interestedInMaccaferri: currentStage?.id === 2 ? false : interestedInMaccaferri,
                     certificateFileName,
                     dietaryRestrictions:   dietarySelection === 'Otro'
                         ? (form.current.user_dietary_other?.value || 'Otro')
                         : dietarySelection || null,
+                    isInternational: international,
+                    country:         international ? intlCountry : null,
+                    city:            international ? intlCity : null,
+                    university:      international ? intlUniversity : null,
+                    attendanceConfidence: international ? attendanceConfidence : null,
                 }),
             });
 
@@ -397,12 +411,15 @@ const Registration = ({ forceOpen = false }) => {
         setIsFormOpen(false);
         setSelectedFaculty('');
         setSelectedProvince('');
-        setSelectedCountry('');
         setInterestedInMaccaferri(false);
         setCertificateFile(null);
         setErrors({});
         setSubmitted(false);
         setTermsAccepted(false);
+        setIntlCountry('');
+        setIntlCity('');
+        setIntlUniversity('');
+        setAttendanceConfidence('');
     };
 
     if (isSuccess) {
@@ -646,29 +663,32 @@ const Registration = ({ forceOpen = false }) => {
                                 </div>
                                 <div className="group">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
-                                        DNI (Sin puntos) <Req />
+                                        {international ? 'N° de Cédula/DNI/ID' : 'DNI (Sin puntos)'} <Req />
                                     </label>
                                     <input
                                         name="user_dni"
                                         type="text"
-                                        inputMode="numeric"
+                                        inputMode={international ? 'text' : 'numeric'}
                                         className={fieldCls(errors, submitted, 'dni')}
-                                        placeholder="12345678"
+                                        placeholder={international ? 'Ej. AB123456' : '12345678'}
                                         data-field-error={submitted && !!errors.dni}
                                     />
                                     <FieldError msg={submitted ? errors.dni : ''} />
                                 </div>
                                 <div className="group">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
-                                        Celular (+54 9...) <Req />
+                                        {international ? 'Celular (con código de tu país)' : 'Celular (+54 9...)'} <Req />
                                     </label>
                                     <input
                                         name="user_phone"
                                         type="tel"
                                         className={fieldCls(errors, submitted, 'phone')}
-                                        placeholder="+54 9 11 1234 5678"
+                                        placeholder={international ? '+1 305 123 4567' : '+54 9 11 1234 5678'}
                                         data-field-error={submitted && !!errors.phone}
                                     />
+                                    {international && (
+                                        <p className="text-xs text-gray-400 mt-1">Incluí el código de tu país completo (ej. +1, +34, +55…).</p>
+                                    )}
                                     <FieldError msg={submitted ? errors.phone : ''} />
                                 </div>
                             </div>
@@ -717,7 +737,8 @@ const Registration = ({ forceOpen = false }) => {
                                     <FieldError msg={submitted ? errors.certificateFile : ''} />
                                 </div>
 
-                                {/* Faculty selector — full width */}
+                                {/* Faculty selector — full width — national students only */}
+                                {!international && (
                                 <div className="group md:col-span-2">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
                                         Delegación / Facultad <Req />
@@ -729,7 +750,6 @@ const Registration = ({ forceOpen = false }) => {
                                             onChange={e => {
                                                 setSelectedFaculty(e.target.value);
                                                 setSelectedProvince('');
-                                                setSelectedCountry('');
                                             }}
                                             className={fieldCls(errors, submitted, 'faculty', 'appearance-none cursor-pointer')}
                                         >
@@ -781,50 +801,6 @@ const Registration = ({ forceOpen = false }) => {
                                         </div>
                                     )}
 
-                                    {/* Alert shown when international is selected and registrations are disabled */}
-                                    {isInternacional && INTERNATIONAL_DISABLED && (
-                                        <div className="mt-3 bg-amber-50 border border-amber-300 rounded-xl p-4 flex gap-3">
-                                            <span className="text-amber-500 text-xl shrink-0">⚠️</span>
-                                            <div>
-                                                <p className="text-sm font-bold text-amber-800 font-subtitle mb-1">
-                                                    Inscripciones internacionales aún no habilitadas
-                                                </p>
-                                                <p className="text-xs text-amber-700 leading-relaxed">
-                                                    La inscripción para estudiantes internacionales se habilitará más adelante, con prioridad para los estudiantes nacionales.
-                                                    ¡Volvé a consultar próximamente!
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Country selector — appears only when "Internacional" is selected */}
-                                    {isInternacional && !INTERNATIONAL_DISABLED && (
-                                        <div className="mt-3" data-field-error={submitted && !!errors.country}>
-                                            <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest">
-                                                País <Req />
-                                            </label>
-                                            <div className="relative">
-                                                <select
-                                                    name="user_country"
-                                                    value={selectedCountry}
-                                                    onChange={e => setSelectedCountry(e.target.value)}
-                                                    className={fieldCls(errors, submitted, 'country', 'appearance-none cursor-pointer')}
-                                                >
-                                                    <option value="">Seleccionar país...</option>
-                                                    {INTERNATIONAL_COUNTRIES.map(c => (
-                                                        <option key={c} value={c}>{c}</option>
-                                                    ))}
-                                                </select>
-                                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <FieldError msg={submitted ? errors.country : ''} />
-                                        </div>
-                                    )}
-
                                     {/* ── Conocé tu delegación ──────────────────────────── */}
                                     {delegationInfo && (
                                         <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
@@ -846,8 +822,92 @@ const Registration = ({ forceOpen = false }) => {
                                         </div>
                                     )}
                                 </div>
+                                )}
 
-                                {/* Desafío Barreras de Maccaferri */}
+                                {/* Origen — estudiantes internacionales: país, ciudad, universidad (texto libre) */}
+                                {international && (
+                                <>
+                                    <div className="group" data-field-error={submitted && !!errors.intlCountry}>
+                                        <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                            País <Req />
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={intlCountry}
+                                            onChange={e => setIntlCountry(e.target.value)}
+                                            className={fieldCls(errors, submitted, 'intlCountry')}
+                                            placeholder="Ej. México"
+                                        />
+                                        <FieldError msg={submitted ? errors.intlCountry : ''} />
+                                    </div>
+                                    <div className="group" data-field-error={submitted && !!errors.intlCity}>
+                                        <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                            Ciudad <Req />
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={intlCity}
+                                            onChange={e => setIntlCity(e.target.value)}
+                                            className={fieldCls(errors, submitted, 'intlCity')}
+                                            placeholder="Ej. Ciudad de México"
+                                        />
+                                        <FieldError msg={submitted ? errors.intlCity : ''} />
+                                    </div>
+                                    <div className="group md:col-span-2" data-field-error={submitted && !!errors.intlUniversity}>
+                                        <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                            Universidad <Req />
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={intlUniversity}
+                                            onChange={e => setIntlUniversity(e.target.value)}
+                                            className={fieldCls(errors, submitted, 'intlUniversity')}
+                                            placeholder="Nombre de tu universidad"
+                                        />
+                                        <FieldError msg={submitted ? errors.intlUniversity : ''} />
+                                    </div>
+                                    <div className="group md:col-span-2" data-field-error={submitted && !!errors.attendanceConfidence}>
+                                        <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
+                                            ¿Qué tan seguro/a estás de que vas a poder asistir? <Req />
+                                        </label>
+                                        <div className="relative">
+                                            <select
+                                                value={attendanceConfidence}
+                                                onChange={e => setAttendanceConfidence(e.target.value)}
+                                                className={fieldCls(errors, submitted, 'attendanceConfidence', 'appearance-none cursor-pointer')}
+                                            >
+                                                <option value="">Seleccionar...</option>
+                                                <option>Muy seguro/a</option>
+                                                <option>Bastante seguro/a</option>
+                                                <option>Poco seguro/a (depende de visa, pasaje, etc.)</option>
+                                                <option>Aún no lo sé</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </div>
+                                        </div>
+                                        <FieldError msg={submitted ? errors.attendanceConfidence : ''} />
+                                    </div>
+
+                                    {delegationInfo && (
+                                        <div className="md:col-span-2 rounded-xl border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
+                                            <span className="text-2xl leading-none mt-0.5">🏛️</span>
+                                            <div className="text-sm text-blue-800 space-y-1">
+                                                <p className="font-bold text-blue-900">Contacto para estudiantes internacionales</p>
+                                                <p>
+                                                    Delegación: <strong className="text-institutional">{delegationInfo.delegationName}</strong>
+                                                </p>
+                                                {delegationInfo.contacts?.map(c => (
+                                                    <p key={c.name} className="text-blue-700">• {c.name}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                                )}
+
+                                {/* Desafío Barreras de Maccaferri — no aplica en la 2ª Etapa */}
+                                {currentStage?.id !== 2 && (
                                 <div className="md:col-span-2">
                                     <label className="flex items-start gap-3 cursor-pointer group select-none">
                                         <input
@@ -862,6 +922,7 @@ const Registration = ({ forceOpen = false }) => {
                                         </span>
                                     </label>
                                 </div>
+                                )}
                             </div>
                         </div>
 
@@ -891,9 +952,17 @@ const Registration = ({ forceOpen = false }) => {
                                 </div>
                                 <div className="group">
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
-                                        Obra Social / Prepaga
+                                        Obra Social / Prepaga{international ? ' / Asistencia al Viajero' : ''}
                                     </label>
-                                    <input name="user_insurance" type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white" placeholder="Ej. OSDE / Swiss Medical / Ninguna" />
+                                    <input
+                                        name="user_insurance"
+                                        type="text"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none transition-all font-body text-gray-800 placeholder-gray-300 hover:bg-white"
+                                        placeholder={international ? 'Ej. Asistencia al viajero / Ninguna' : 'Ej. OSDE / Swiss Medical / Ninguna'}
+                                    />
+                                    {international && (
+                                        <p className="text-xs text-gray-400 mt-1">Incluí tu asistencia al viajero, si tenés contratada una.</p>
+                                    )}
                                 </div>
                                 <div className="group md:col-span-2" data-field-error={submitted && !!errors.medicalConditions}>
                                     <label className="block text-xs font-bold text-gray-500 mb-1 font-subtitle uppercase tracking-widest group-focus-within:text-primary-blue transition-colors">
@@ -982,8 +1051,8 @@ const Registration = ({ forceOpen = false }) => {
 
                         <button
                             type="submit"
-                            disabled={isSubmitting || (isInternacional && INTERNATIONAL_DISABLED)}
-                            className={`group w-full bg-gradient-to-r from-primary-red to-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all transform hover:-translate-y-1 font-title tracking-wider uppercase relative overflow-hidden ${isSubmitting || (isInternacional && INTERNATIONAL_DISABLED) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={isSubmitting}
+                            className={`group w-full bg-gradient-to-r from-primary-red to-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-red-900/20 transition-all transform hover:-translate-y-1 font-title tracking-wider uppercase relative overflow-hidden ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                             <span className="relative z-10 flex items-center justify-center gap-2">
