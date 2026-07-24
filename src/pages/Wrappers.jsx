@@ -212,3 +212,9 @@ export const RegistrationInternationalPage = () => (
   </div>
 );
 
+export const RegistrationInternationalPage2 = () => (
+  <div className="pt-24 min-h-screen bg-complementary-light">
+    <Registration international forceOpen />
+  </div>
+);
+
