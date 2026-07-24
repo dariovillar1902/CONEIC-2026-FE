@@ -175,15 +175,40 @@ export const ActivitiesPage = () => (
 /* ─── Inscripciones ─────────────────────────────────────────────────── */
 import Registration from '../components/Registration';
 
+const InternationalNotice = () => (
+  <div className="max-w-3xl mx-auto px-4 mb-6">
+    <div className="bg-institutional/5 border border-institutional/20 rounded-xl px-5 py-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
+      <span className="text-2xl">🌎</span>
+      <p className="text-sm text-gray-700 flex-1">
+        Si sos <strong className="text-institutional">estudiante internacional</strong>, inscribite en nuestro formulario dedicado.
+      </p>
+      <a
+        href="/registration-international"
+        className="shrink-0 bg-institutional text-white text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-full hover:opacity-90 transition"
+      >
+        Inscribite acá
+      </a>
+    </div>
+  </div>
+);
+
 export const RegistrationPage = () => (
   <div className="pt-24 min-h-screen bg-complementary-light">
+    <InternationalNotice />
     <Registration />
   </div>
 );
 
 export const RegistrationPage2 = () => (
   <div className="pt-24 min-h-screen bg-complementary-light">
+    <InternationalNotice />
     <Registration forceOpen />
+  </div>
+);
+
+export const RegistrationInternationalPage = () => (
+  <div className="pt-24 min-h-screen bg-complementary-light">
+    <Registration international />
   </div>
 );
 
