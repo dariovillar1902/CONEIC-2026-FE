@@ -229,7 +229,6 @@ const Registration = ({ forceOpen = false, international = false }) => {
     const [dietarySelection, setDietarySelection] = useState('');
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
-    const [interestedInMaccaferri, setInterestedInMaccaferri] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [intlCountry, setIntlCountry] = useState('');
@@ -350,7 +349,7 @@ const Registration = ({ forceOpen = false, international = false }) => {
                     emergencyContactPhone,
                     stageName:             currentStage?.label ?? 'Demo',
                     price:                 effectiveStage?.priceFull ?? 0,
-                    interestedInMaccaferri: currentStage?.id === 2 ? false : interestedInMaccaferri,
+                    interestedInMaccaferri: false,
                     certificateFileName,
                     dietaryRestrictions:   dietarySelection === 'Otro'
                         ? (form.current.user_dietary_other?.value || 'Otro')
@@ -411,7 +410,6 @@ const Registration = ({ forceOpen = false, international = false }) => {
         setIsFormOpen(false);
         setSelectedFaculty('');
         setSelectedProvince('');
-        setInterestedInMaccaferri(false);
         setCertificateFile(null);
         setErrors({});
         setSubmitted(false);
@@ -906,23 +904,6 @@ const Registration = ({ forceOpen = false, international = false }) => {
                                 </>
                                 )}
 
-                                {/* Desafío Barreras de Maccaferri — no aplica en la 2ª Etapa */}
-                                {currentStage?.id !== 2 && (
-                                <div className="md:col-span-2">
-                                    <label className="flex items-start gap-3 cursor-pointer group select-none">
-                                        <input
-                                            type="checkbox"
-                                            checked={interestedInMaccaferri}
-                                            onChange={e => setInterestedInMaccaferri(e.target.checked)}
-                                            className="w-4 h-4 mt-0.5 accent-primary-blue shrink-0"
-                                        />
-                                        <span className="text-sm text-gray-700 leading-relaxed">
-                                            Estoy interesado/a en participar del{' '}
-                                            <strong className="text-institutional">Desafío Barreras de Maccaferri</strong>
-                                        </span>
-                                    </label>
-                                </div>
-                                )}
                             </div>
                         </div>
 
