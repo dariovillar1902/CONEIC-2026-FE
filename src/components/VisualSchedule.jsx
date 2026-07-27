@@ -36,7 +36,7 @@ const SCHEDULE = [
   [
     { name: 'Charlas Magistrales',             location: 'Auditorio Belgrano' },
     { name: 'Solidarias – Compromiso Social',  location: '' },
-    { name: 'Asamblea ANEIC + Recreativa',     location: '' },
+    { name: 'Asamblea ANEIC + Recreativa',     location: 'UTN Campus' },
     { name: 'Acto de Cierre',                  location: 'Auditorio Belgrano' },
   ],
 ];

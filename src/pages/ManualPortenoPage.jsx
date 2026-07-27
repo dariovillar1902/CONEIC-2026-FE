@@ -145,11 +145,32 @@ function formatDate(iso) {
 }
 
 /** Comment thread anchored to a single section — Word-style margin comment. */
-function SectionCommentPanel({ sectionId, comments, user, onAdd }) {
+function SectionCommentPanel({ sectionId, comments, user, onAdd, onDelete }) {
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  function canDelete(comment) {
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+    return user.email?.toLowerCase() === comment.authorEmail?.toLowerCase();
+  }
+
+  async function handleDelete(comment) {
+    if (!window.confirm('¿Borrar este comentario?')) return;
+    setDeletingId(comment.id);
+    try {
+      const res = await fetch(
+        `${API}/api/manual-comments/${comment.id}?requesterEmail=${encodeURIComponent(user.email)}`,
+        { method: 'DELETE' }
+      );
+      if (res.ok) onDelete(comment.id);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -201,7 +222,20 @@ function SectionCommentPanel({ sectionId, comments, user, onAdd }) {
             <div key={c.id} className="bg-white border border-amber-100 rounded-lg px-3 py-2">
               <div className="flex items-center justify-between mb-0.5">
                 <span className="font-bold text-xs text-gray-800">{c.authorName}</span>
-                <span className="text-[10px] text-gray-400">{formatDate(c.createdAt)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-400">{formatDate(c.createdAt)}</span>
+                  {canDelete(c) && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(c)}
+                      disabled={deletingId === c.id}
+                      title="Borrar comentario"
+                      className="text-gray-300 hover:text-red-500 transition disabled:opacity-40 text-xs leading-none"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="text-xs text-gray-600 leading-relaxed">{c.content}</p>
             </div>
@@ -248,7 +282,7 @@ function SectionCommentPanel({ sectionId, comments, user, onAdd }) {
   );
 }
 
-function SectionRow({ section, comments, user, onAdd }) {
+function SectionRow({ section, comments, user, onAdd, onDelete }) {
   return (
     <div className="grid lg:grid-cols-[1fr_260px] gap-4 items-start">
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
@@ -273,6 +307,7 @@ function SectionRow({ section, comments, user, onAdd }) {
         comments={comments}
         user={user}
         onAdd={onAdd}
+        onDelete={onDelete}
       />
     </div>
   );
@@ -301,6 +336,13 @@ export default function ManualPortenoPage() {
     setCommentsBySection(prev => ({
       ...prev,
       [sectionId]: [comment, ...(prev[sectionId] || [])],
+    }));
+  }
+
+  function handleDelete(sectionId, commentId) {
+    setCommentsBySection(prev => ({
+      ...prev,
+      [sectionId]: (prev[sectionId] || []).filter(c => c.id !== commentId),
     }));
   }
 
@@ -334,6 +376,7 @@ export default function ManualPortenoPage() {
               comments={commentsBySection[section.id] || []}
               user={user}
               onAdd={comment => handleAdd(section.id, comment)}
+              onDelete={commentId => handleDelete(section.id, commentId)}
             />
           ))
         )}
