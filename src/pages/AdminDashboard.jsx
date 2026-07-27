@@ -372,9 +372,10 @@ const RegistrationsPanel = () => {
             onChange={e => setFilterStage(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-institutional/40"
           >
-            <option value="all">Ambas etapas</option>
-            <option value="Primera Etapa">Primera Etapa</option>
-            <option value="Segunda Etapa">Segunda Etapa</option>
+            <option value="all">Todas las etapas</option>
+            <option value="1ª Etapa">1ª Etapa</option>
+            <option value="2ª Etapa">2ª Etapa</option>
+            <option value="3ª Etapa">3ª Etapa</option>
           </select>
         </div>
         <div className="flex items-center gap-3 justify-between">
