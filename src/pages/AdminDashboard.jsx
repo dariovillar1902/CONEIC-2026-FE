@@ -206,6 +206,7 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
 
 /* ─── Sub-panel: Inscripciones ──────────────────────────────────────── */
 const RegistrationsPanel = () => {
+  const { user } = useAuth();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState(null);
@@ -216,6 +217,36 @@ const RegistrationsPanel = () => {
   const [updatingId, setUpdatingId]       = useState(null);
   const [exporting, setExporting]         = useState(false);
   const [editingReg, setEditingReg]       = useState(null);
+  const [enablingPaused, setEnablingPaused] = useState(false);
+  const [togglingPause, setTogglingPause] = useState(false);
+
+  const fetchEnablingPaused = async () => {
+    try {
+      const res = await fetch(`${API}/api/app-settings/EnablingPaused`);
+      if (res.ok) {
+        const { value } = await res.json();
+        setEnablingPaused(value === 'true');
+      }
+    } catch { /* keep previous value */ }
+  };
+
+  const togglePause = async () => {
+    setTogglingPause(true);
+    const next = !enablingPaused;
+    try {
+      const res = await fetch(`${API}/api/app-settings/EnablingPaused`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: next ? 'true' : 'false', requesterEmail: user?.email }),
+      });
+      if (!res.ok) throw new Error();
+      setEnablingPaused(next);
+    } catch {
+      alert('No se pudo cambiar el estado de habilitación de cupos.');
+    } finally {
+      setTogglingPause(false);
+    }
+  };
 
   const fetchRegistrations = async () => {
     setLoading(true);
@@ -232,7 +263,7 @@ const RegistrationsPanel = () => {
     }
   };
 
-  useEffect(() => { fetchRegistrations(); }, []);
+  useEffect(() => { fetchRegistrations(); fetchEnablingPaused(); }, []);
 
   /* Unique sorted delegations for filter dropdown */
   const delegations = useMemo(
@@ -337,6 +368,32 @@ const RegistrationsPanel = () => {
 
   return (
     <div className="space-y-6">
+      {/* Pausa de habilitación de cupos */}
+      <div className={`rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border ${enablingPaused ? 'bg-amber-50 border-amber-300' : 'bg-green-50 border-green-200'}`}>
+        <div className="flex items-start gap-3">
+          <span className="text-xl shrink-0">{enablingPaused ? '⏸️' : '▶️'}</span>
+          <div>
+            <p className={`text-sm font-bold ${enablingPaused ? 'text-amber-800' : 'text-green-800'}`}>
+              Habilitación de cupos: {enablingPaused ? 'Pausada' : 'Activa'}
+            </p>
+            <p className={`text-xs leading-relaxed ${enablingPaused ? 'text-amber-700' : 'text-green-700'}`}>
+              {enablingPaused
+                ? 'Los delegados no pueden habilitar nuevos cupos hasta que reactivés esta opción.'
+                : 'Los delegados pueden habilitar cupos con normalidad.'}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={togglePause}
+          disabled={togglingPause}
+          className={`shrink-0 px-5 py-2 rounded-lg font-bold text-sm transition disabled:opacity-50 ${
+            enablingPaused ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-amber-500 text-white hover:bg-amber-600'
+          }`}
+        >
+          {togglingPause ? 'Guardando…' : enablingPaused ? 'Reactivar habilitación' : 'Pausar habilitación'}
+        </button>
+      </div>
+
       {/* Toolbar */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row gap-3 flex-grow flex-wrap">

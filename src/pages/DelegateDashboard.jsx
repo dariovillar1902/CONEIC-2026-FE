@@ -90,16 +90,18 @@ const DelegateDashboard = () => {
     const managedFaculties = user?.managedFaculties ?? [];
     const filial = user?.filial ?? null;
     const [quota, setQuota] = useState(user?.quota ?? 0);
+    const [enablingPaused, setEnablingPaused] = useState(false);
 
     // ── Fetch ─────────────────────────────────────────────────────────
     const fetchData = async () => {
         if (!delegateEmail) return;
         setLoading(true);
         try {
-            const [regRes, batchRes, quotaRes] = await Promise.all([
+            const [regRes, batchRes, quotaRes, pausedRes] = await Promise.all([
                 fetch(`${API}/api/registrations/delegate?email=${encodeURIComponent(delegateEmail)}`),
                 fetch(`${API}/api/paymentbatches/delegate?email=${encodeURIComponent(delegateEmail)}`),
                 fetch(`${API}/api/registrations/delegate/quota?email=${encodeURIComponent(delegateEmail)}`),
+                fetch(`${API}/api/app-settings/EnablingPaused`),
             ]);
             if (!regRes.ok) throw new Error('Error fetching registrations');
             setAttendees(await regRes.json());
@@ -107,6 +109,10 @@ const DelegateDashboard = () => {
             if (quotaRes.ok) {
                 const { quota: q } = await quotaRes.json();
                 setQuota(q);
+            }
+            if (pausedRes.ok) {
+                const { value } = await pausedRes.json();
+                setEnablingPaused(value === 'true');
             }
         } catch {
             setError('No se pudieron cargar los datos.');
@@ -167,6 +173,8 @@ const DelegateDashboard = () => {
 
     /** Marks a change as pending (checkbox / select). Does NOT hit the API. */
     const queuePaymentChange = (id, isEnabled, paymentCondition) => {
+        const wasEnabled = pendingPaymentChanges[id]?.isEnabled ?? attendees.find(a => a.id === id)?.isEnabled ?? false;
+        if (isEnabled && !wasEnabled && enablingPaused) return;
         // Count how many will be enabled after this change (committed + pending)
         if (isEnabled && quota > 0) {
             const pendingEnabled = attendees.filter(a => {
@@ -511,6 +519,19 @@ const DelegateDashboard = () => {
                 </div>
             </div>
 
+            {/* Aviso de pausa */}
+            {enablingPaused && (
+                <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
+                    <span className="text-amber-500 text-xl shrink-0">⏸️</span>
+                    <div>
+                        <p className="text-sm font-bold text-amber-800">Habilitación de cupos pausada</p>
+                        <p className="text-xs text-amber-700 leading-relaxed">
+                            El Comité Organizador pausó temporalmente la habilitación de nuevos cupos mientras se redistribuyen los sobrantes de la etapa anterior. Ya podrás habilitar gente en cuanto se reactive.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Toolbar */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center">
                 <div className="relative w-full md:w-64">
@@ -574,7 +595,10 @@ const DelegateDashboard = () => {
                                 <td className="px-4 py-3 text-center">
                                     {(() => {
                                         const isChecked = pendingPaymentChanges[person.id]?.isEnabled ?? person.isEnabled ?? false;
-                                        const isDisabled = quotaReached && !isChecked;
+                                        const isDisabled = (quotaReached || enablingPaused) && !isChecked;
+                                        const title = !isChecked && enablingPaused
+                                            ? 'La habilitación de cupos está pausada temporalmente'
+                                            : isDisabled ? `Cupo agotado (${enabledCount}/${quota})` : undefined;
                                         return (
                                             <input
                                                 type="checkbox"
@@ -585,7 +609,7 @@ const DelegateDashboard = () => {
                                                     e.target.checked,
                                                     person.paymentCondition ?? ''
                                                 )}
-                                                title={isDisabled ? `Cupo agotado (${enabledCount}/${quota})` : undefined}
+                                                title={title}
                                                 className={`h-5 w-5 rounded border-gray-300 focus:ring-green-500 ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'text-green-600 cursor-pointer'}`}
                                             />
                                         );
