@@ -1,5 +1,6 @@
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 
+// Habilitado en producción desde 2026-08-03 (secret VITE_APPINSIGHTS_CONNECTION_STRING).
 /**
  * Azure Application Insights — telemetría del frontend.
  *
