@@ -27,9 +27,9 @@ const STAGES = [
     {
         id: 3,
         label: '3ª Etapa',
-        preRegistration: { start: d(2026, 8, 31), end: dEnd(2026, 9,  4) },
-        delegatePhase:   { start: d(2026, 9,  7), end: dEnd(2026, 9, 13) },
-        paymentPhase:    { start: d(2026, 9, 14), end: dEnd(2026, 9, 16) },
+        preRegistration: { start: d(2026, 8, 17), end: dEnd(2026, 8, 21) },
+        delegatePhase:   { start: d(2026, 8, 23), end: dEnd(2026, 8, 26) },
+        paymentPhase:    { start: d(2026, 8, 27), end: dEnd(2026, 8, 28) },
     },
 ];
 
@@ -106,7 +106,7 @@ const RegistrationTimeline = ({ today }) => (
             Cronograma — Fechas preliminares
         </p>
         <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-center">
-            {STAGES.slice(0, 2).map((stage, si) => (
+            {STAGES.slice(0, 3).map((stage, si) => (
                 <div key={stage.id} className="flex items-start md:flex-1">
                     {si > 0 && (
                         <div className="hidden md:flex items-center self-stretch px-2">
