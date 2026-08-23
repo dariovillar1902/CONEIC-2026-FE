@@ -33,7 +33,7 @@ const SPONSORS_PLATA = [
     },
     {
         name: 'Maccaferri',
-        logoUrl: 'https://www.maccaferri.com/wp-content/themes/maccaferri/src/images/header/logo-maccaferri.png',
+        logoUrl: '/assets/sponsors/logo-maccaferri.png',
         url: 'https://www.maccaferri.com/latam',
         cardBg: 'bg-[#1a6b6b]',
     },
@@ -42,6 +42,15 @@ const SPONSORS_PLATA = [
         logoUrl: '/assets/sponsors/logo-mch.png',
         url: 'https://mch-srl.com.ar/',
         cardBg: 'bg-[#1a1a2e]',
+    },
+];
+
+const SPONSORS_BRONCE = [
+    {
+        name: 'Salbo',
+        logoUrl: '/assets/sponsors/logo-salbo.jpeg',
+        url: 'https://www.instagram.com/salbomateriales/',
+        cardBg: 'bg-white',
     },
 ];
 
@@ -88,6 +97,22 @@ const ENDORSERS = [
         logoUrl: '/assets/avales/logo-cpic.png',
         logoBg: 'bg-white',
         description: 'Organismo que ejerce el gobierno de la matrícula de los profesionales de la ingeniería civil y disciplinas afines. Su misión es garantizar la excelencia, la ética y la responsabilidad en el ejercicio profesional, velando por la seguridad pública, el resguardo ambiental y el desarrollo sostenible en la planificación y ejecución de las obras.',
+    },
+    {
+        shortName: 'INTI',
+        fullName: 'Instituto Nacional de Tecnología Industrial',
+        url: 'https://www.inti.gob.ar',
+        logoUrl: '/assets/avales/logo-inti.png',
+        logoBg: 'bg-white',
+        description: 'Organismo estatal referente en investigación, desarrollo tecnológico y servicios de asistencia técnica para la industria argentina. Trabaja junto al sector productivo y académico impulsando la innovación, la calidad y la transferencia de tecnología en las distintas cadenas de valor del país.',
+    },
+    {
+        shortName: 'CADHE',
+        fullName: 'Cámara Argentina del Hormigón Elaborado',
+        url: 'https://www.cadhe.org.ar',
+        logoUrl: '/assets/avales/logo-cadhe.png',
+        logoBg: 'bg-white',
+        description: 'Entidad que nuclea a las empresas productoras de hormigón elaborado en todo el país. Promueve la calidad, la normalización técnica y las buenas prácticas del sector, acompañando el desarrollo de la industria de la construcción argentina.',
     },
 ];
 
@@ -471,6 +496,14 @@ const SponsorsTab = () => (
             <TierDivider label="Plata" className="text-gray-400" />
             <div className="flex flex-wrap justify-center gap-8 items-center">
                 {SPONSORS_PLATA.map((s) => <SponsorCard key={s.name} s={s} />)}
+            </div>
+        </div>
+
+        {/* Bronce tier */}
+        <div className="mb-14">
+            <TierDivider label="Bronce" className="text-orange-500" />
+            <div className="flex flex-wrap justify-center gap-8 items-center">
+                {SPONSORS_BRONCE.map((s) => <SponsorCard key={s.name} s={s} />)}
             </div>
         </div>
 

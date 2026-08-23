@@ -36,8 +36,17 @@ const STAGES = [
 const fmt = (date) => date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
 const isBetween = (date, range) => date >= range.start && date <= range.end;
 
+// ⚠️ Extraoficial: la preinscripción de la 3ª Etapa sigue mostrando el 21/8
+// como fecha de cierre (no tocar STAGES[2].preRegistration.end), pero se
+// mantiene abierta más allá de esa fecha (incluye internacionales) hasta que
+// se indique lo contrario. Poner en false para cerrarla de verdad.
+const STAGE3_PREREGISTRATION_SILENTLY_EXTENDED = true;
+
 const getCurrentPhase = (today) => {
     for (const stage of STAGES) {
+        if (stage.id === 3 && STAGE3_PREREGISTRATION_SILENTLY_EXTENDED && today > stage.preRegistration.end) {
+            return { stage, phase: 'preRegistration' };
+        }
         if (isBetween(today, stage.preRegistration)) return { stage, phase: 'preRegistration' };
         if (isBetween(today, stage.delegatePhase))   return { stage, phase: 'delegate' };
         if (isBetween(today, stage.paymentPhase))    return { stage, phase: 'payment' };
