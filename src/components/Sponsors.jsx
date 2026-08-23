@@ -24,7 +24,7 @@ const SPONSORS_PLATA = [
     },
     {
         name: 'Maccaferri',
-        logoUrl: 'https://www.maccaferri.com/wp-content/themes/maccaferri/src/images/header/logo-maccaferri.png',
+        logoUrl: '/assets/sponsors/logo-maccaferri.png',
         url: 'https://www.maccaferri.com/latam',
         cardBg: 'bg-[#1a6b6b]',
     },
@@ -33,6 +33,15 @@ const SPONSORS_PLATA = [
         logoUrl: '/assets/sponsors/logo-mch.png',
         url: 'https://mch-srl.com.ar/',
         cardBg: 'bg-[#1a1a2e]',
+    },
+];
+
+const SPONSORS_BRONCE = [
+    {
+        name: 'Salbo',
+        logoUrl: '/assets/sponsors/logo-salbo.jpeg',
+        url: 'https://www.instagram.com/salbomateriales/',
+        cardBg: 'bg-white',
     },
 ];
 
@@ -122,6 +131,16 @@ const Sponsors = () => (
                 <TierLabel label="Plata" color="bg-gray-100 text-gray-500 border-gray-300" />
                 <div className="flex flex-wrap justify-center gap-8 items-center">
                     {SPONSORS_PLATA.map((s) => (
+                        <SponsorCard key={s.name} sponsor={s} />
+                    ))}
+                </div>
+            </div>
+
+            {/* Bronce */}
+            <div className="mb-14">
+                <TierLabel label="Bronce" color="bg-orange-100 text-orange-700 border-orange-300" />
+                <div className="flex flex-wrap justify-center gap-8 items-center">
+                    {SPONSORS_BRONCE.map((s) => (
                         <SponsorCard key={s.name} sponsor={s} />
                     ))}
                 </div>
