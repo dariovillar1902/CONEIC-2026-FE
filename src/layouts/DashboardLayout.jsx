@@ -47,7 +47,6 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
                             {(user.role === 'admin' || user.role === 'tesoreria') && (
                                 <>
                                     <Link to="/admin" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Dashboard Integrado</Link>
-                                    {user.role === 'admin' && <Link to="/admin/scanner" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Escáner QR</Link>}
                                     {user.role === 'admin' && <Link to="/admin/users" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Usuarios</Link>}
                                 </>
                             )}

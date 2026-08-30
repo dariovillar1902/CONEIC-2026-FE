@@ -7,8 +7,8 @@ import DashboardLayout from './layouts/DashboardLayout';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
-import AdminScannerPage from './pages/AdminScannerPage';
 import AdminUsersPage from './pages/AdminUsersPage';
+import CheckInScannerPage from './pages/CheckInScannerPage';
 import DelegateDashboard from './pages/DelegateDashboard';
 import AssistantDashboard from './pages/AssistantDashboard';
 import GalleryPage from './pages/GalleryPage';
@@ -60,8 +60,16 @@ const router = createBrowserRouter([
     element: <DashboardLayout allowedRoles={['admin', 'tesoreria']} />,
     children: [
       { index: true, element: <AdminDashboard /> },
-      { path: 'scanner', element: <AdminScannerPage /> },
       { path: 'users', element: <AdminUsersPage /> },
+    ]
+  },
+  // Toma de asistencia (QR + fallback manual) — sin enlazar en ningún menú a
+  // propósito, solo accesible por quien tenga este link. Admin-only.
+  {
+    path: '/admin/checkin-k9x2mq7f',
+    element: <DashboardLayout allowedRoles={['admin']} />,
+    children: [
+      { index: true, element: <CheckInScannerPage /> },
     ]
   },
   {
