@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsersPage from './pages/AdminUsersPage';
 import CheckInScannerPage from './pages/CheckInScannerPage';
+import ActivitySelectionPage from './pages/ActivitySelectionPage';
 import DelegateDashboard from './pages/DelegateDashboard';
 import AssistantDashboard from './pages/AssistantDashboard';
 import GalleryPage from './pages/GalleryPage';
@@ -70,6 +71,16 @@ const router = createBrowserRouter([
     element: <DashboardLayout allowedRoles={['admin']} />,
     children: [
       { index: true, element: <CheckInScannerPage /> },
+    ]
+  },
+  // Elección de Actividades (demo) — sin enlazar en ningún menú a propósito,
+  // solo accesible por quien tenga este link. Cualquier usuario logueado
+  // puede probarlo (empezando por cuentas admin).
+  {
+    path: '/actividades-demo-h4n8w2',
+    element: <DashboardLayout allowedRoles={['admin', 'tesoreria', 'delegate', 'assistant']} />,
+    children: [
+      { index: true, element: <ActivitySelectionPage /> },
     ]
   },
   {
