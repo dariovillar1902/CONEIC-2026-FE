@@ -7,7 +7,6 @@ const API_URL = import.meta.env.VITE_API_URL;
 // eligiendo a la vez) — una falla transitoria de red/lock no debe leerse
 // como "la página no funciona".
 const apiWithRetry = async (path, opts, { retries = 3, onRetry } = {}) => {
-    let lastError = null;
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
             const res = await fetch(`${API_URL}${path}`, opts);
@@ -18,8 +17,7 @@ const apiWithRetry = async (path, opts, { retries = 3, onRetry } = {}) => {
                 continue;
             }
             return { ok: res.ok, status: res.status, data };
-        } catch (e) {
-            lastError = e;
+        } catch {
             if (attempt < retries) {
                 onRetry?.(attempt + 1);
                 await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
@@ -35,60 +33,101 @@ const CATEGORY_LABEL = {
     TallerCharla: 'Talleres y Charlas Simultáneas',
 };
 
-const OptionCard = ({ option, picked, onPick, disabled }) => {
+// ── Tarjeta compacta: foto chica + código + título. El detalle va en el popup. ──
+const OptionCard = ({ option, picked, onOpen, disabled }) => {
     const full = option.taken >= option.capacity && !picked;
     return (
         <button
-            onClick={() => !full && !disabled && onPick(option.id)}
-            disabled={full || disabled}
-            className={`text-left rounded-xl border-2 p-4 transition flex flex-col gap-2 h-full
-                ${picked ? 'border-institutional bg-institutional/5 shadow-md' : 'border-gray-200 bg-white hover:border-gray-300'}
-                ${full ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            onClick={() => onOpen(option)}
+            disabled={disabled}
+            className={`text-left rounded-lg border-2 overflow-hidden transition bg-white flex flex-col
+                ${picked ? 'border-institutional shadow-md' : 'border-gray-200 hover:border-gray-300'}
+                ${disabled ? 'opacity-60' : 'cursor-pointer'}`}
         >
-            <div className="flex items-start justify-between gap-2">
-                <span className="text-[11px] font-mono font-bold text-gray-400">{option.code}</span>
-                {picked && <span className="text-xs font-bold bg-institutional text-white px-2 py-0.5 rounded-full shrink-0">Elegida</span>}
+            <div className="relative aspect-[4/3] bg-gray-100">
+                {option.imageUrl && (
+                    <img src={option.imageUrl} alt={option.title} className="w-full h-full object-cover" loading="lazy" />
+                )}
+                {picked && (
+                    <span className="absolute top-1.5 right-1.5 text-[10px] font-bold bg-institutional text-white px-1.5 py-0.5 rounded-full">
+                        Elegida
+                    </span>
+                )}
+                {full && (
+                    <span className="absolute top-1.5 left-1.5 text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">
+                        Sin cupo
+                    </span>
+                )}
             </div>
-            <p className="font-bold text-gray-800 leading-snug">{option.title}</p>
-            {option.speaker && <p className="text-xs text-gray-500 font-semibold">{option.speaker}</p>}
-            {option.description && <p className="text-sm text-gray-500 flex-grow">{option.description}</p>}
-            <div className="mt-auto pt-2">
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                        className={`h-full rounded-full ${full ? 'bg-red-400' : 'bg-complementary-gold'}`}
-                        style={{ width: `${Math.min(100, (option.taken / option.capacity) * 100)}%` }}
-                    />
-                </div>
-                <p className="text-[11px] text-gray-400 mt-1">
-                    {full ? 'Cupo completo' : `${option.taken} / ${option.capacity} cupos`}
-                </p>
+            <div className="p-2">
+                <span className="text-[10px] font-mono font-bold text-gray-400">{option.code}</span>
+                <p className="text-sm font-bold text-gray-800 leading-snug line-clamp-2">{option.title}</p>
             </div>
         </button>
     );
 };
 
-const Stepper = ({ blocks, stepIndex }) => (
-    <div className="flex items-center gap-2 mb-6">
-        {blocks.map((b, i) => (
-            <div key={b.id} className="flex items-center gap-2 flex-1">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                    ${i < stepIndex ? 'bg-institutional text-white' : i === stepIndex ? 'bg-complementary-gold text-white' : 'bg-gray-200 text-gray-500'}`}>
-                    {i < stepIndex ? '✓' : i + 1}
+// ── Popup de detalle: foto grande, descripción completa, cupo, elegir ────────
+const OptionModal = ({ option, picked, onClose, onChoose, choosing }) => {
+    if (!option) return null;
+    const full = option.taken >= option.capacity && !picked;
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4" onClick={onClose}>
+            <div
+                className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="relative aspect-[16/10] bg-gray-100">
+                    {option.imageUrl && <img src={option.imageUrl} alt={option.title} className="w-full h-full object-cover" />}
+                    <button
+                        onClick={onClose}
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center text-lg hover:bg-black/70 transition"
+                        aria-label="Cerrar"
+                    >
+                        ×
+                    </button>
                 </div>
-                <span className={`text-xs font-bold hidden sm:block ${i === stepIndex ? 'text-institutional' : 'text-gray-400'}`}>
-                    {CATEGORY_LABEL[b.category] ?? b.name}
-                </span>
-                {i < blocks.length - 1 && <div className="h-px flex-1 bg-gray-200" />}
+                <div className="p-5">
+                    <span className="text-[11px] font-mono font-bold text-gray-400">{option.code}</span>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">{option.title}</h3>
+                    {option.speaker && <p className="text-sm text-gray-500 font-semibold mb-2">{option.speaker}</p>}
+                    {option.description && <p className="text-sm text-gray-600 leading-relaxed mb-4">{option.description}</p>}
+
+                    <div className="mb-4">
+                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                                className={`h-full rounded-full ${full ? 'bg-red-400' : 'bg-complementary-gold'}`}
+                                style={{ width: `${Math.min(100, (option.taken / option.capacity) * 100)}%` }}
+                            />
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                            {full ? 'Cupo completo' : `${option.taken} / ${option.capacity} cupos`}
+                        </p>
+                    </div>
+
+                    {picked ? (
+                        <div className="w-full bg-institutional/10 text-institutional font-bold py-3 rounded-lg text-center">
+                            Ya es tu elección
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => onChoose(option.id)}
+                            disabled={full || choosing}
+                            className="w-full bg-institutional text-white font-bold py-3 rounded-lg hover:opacity-90 transition disabled:opacity-40"
+                        >
+                            {choosing ? 'Guardando...' : full ? 'Sin cupo' : 'Elegir esta visita'}
+                        </button>
+                    )}
+                </div>
             </div>
-        ))}
-    </div>
-);
+        </div>
+    );
+};
 
 const ActivitySelectionPage = () => {
     const { user } = useAuth();
     const [blocks, setBlocks] = useState(null);
     const [status, setStatus] = useState(null);
-    const [stepIndex, setStepIndex] = useState(0);
     const [pendingChoice, setPendingChoice] = useState(null);
     const [mode, setMode] = useState('loading'); // 'loading' | 'wizard' | 'review' | 'confirmed'
     const [saving, setSaving] = useState(false);
@@ -96,6 +135,7 @@ const ActivitySelectionPage = () => {
     const [error, setError] = useState(null);
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
     const [confirmSaving, setConfirmSaving] = useState(false);
+    const [openOption, setOpenOption] = useState(null);
     const initialized = useRef(false);
 
     const load = useCallback(async () => {
@@ -119,30 +159,15 @@ const ActivitySelectionPage = () => {
                 setMode('confirmed');
                 return;
             }
-            const firstMissing = result.blocksData.findIndex((b) => b.yourSelectionActivityId == null);
-            if (firstMissing === -1) {
-                setMode('review');
-            } else {
-                setStepIndex(firstMissing);
-                setPendingChoice(result.blocksData[firstMissing]?.yourSelectionActivityId ?? null);
-                setMode('wizard');
-            }
+            const allDone = result.blocksData.every((b) => b.yourSelectionActivityId != null);
+            setMode(allDone ? 'review' : 'wizard');
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const currentBlock = blocks?.[stepIndex];
-    const isLastStep = blocks && stepIndex === blocks.length - 1;
+    const block = blocks?.[0];
 
-    const goToStep = (index) => {
-        setStepIndex(index);
-        setPendingChoice(blocks[index]?.yourSelectionActivityId ?? null);
-        setMode('wizard');
-        setError(null);
-    };
-
-    const saveAndContinue = async () => {
-        if (!currentBlock || pendingChoice == null) return;
+    const choose = async (activityId) => {
         setSaving(true);
         setError(null);
         setRetryNotice(null);
@@ -152,7 +177,7 @@ const ActivitySelectionPage = () => {
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email, activityId: pendingChoice }),
+                body: JSON.stringify({ email: user.email, activityId }),
             },
             { onRetry: (n) => setRetryNotice(`Hay mucha gente eligiendo a la vez — reintentando (${n})...`) },
         );
@@ -166,21 +191,15 @@ const ActivitySelectionPage = () => {
             return;
         }
 
-        const fresh = await load();
+        await load();
         setSaving(false);
-
-        if (isLastStep) {
-            setMode('review');
-        } else {
-            const nextIndex = stepIndex + 1;
-            setStepIndex(nextIndex);
-            setPendingChoice(fresh?.blocksData?.[nextIndex]?.yourSelectionActivityId ?? null);
-        }
+        setOpenOption(null);
+        setMode('review');
     };
 
     const openConfirmModal = () => {
         const allDone = blocks?.every((b) => b.yourSelectionActivityId != null);
-        if (!allDone) { setError('Todavía falta elegir una actividad en algún bloque.'); return; }
+        if (!allDone) { setError('Todavía falta elegir la visita técnica.'); return; }
         setConfirmModalOpen(true);
     };
 
@@ -221,8 +240,7 @@ const ActivitySelectionPage = () => {
             <span className="text-xs font-bold uppercase tracking-widest text-complementary-gold">Demo — no pública</span>
             <h1 className="text-3xl font-bold text-institutional font-title">Elección de Actividades</h1>
             <p className="text-sm text-gray-500 mt-1 max-w-2xl">
-                Página de prueba, pensada para mostrar cómo elegiría sus actividades un/a asistente. Los contenidos, cupos y agrupaciones son
-                provisorios — todavía faltan definir bloques horarios y capacidades reales con Académica y GyP.
+                Página de prueba, pensada para mostrar cómo elegiría su visita técnica un/a asistente. Cupos y horarios son provisorios.
             </p>
             <p className="text-xs text-gray-400 mt-1">Probando como: <span className="font-mono">{user?.email}</span></p>
         </div>
@@ -255,29 +273,21 @@ const ActivitySelectionPage = () => {
     }
 
     if (mode === 'review') {
+        const chosen = block?.options.find((o) => o.id === block.yourSelectionActivityId);
         return (
             <div className="max-w-3xl mx-auto p-4">
                 <Header />
                 {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">{error}</div>}
                 <h2 className="font-bold text-gray-700 mb-3">Revisá tu selección antes de confirmar</h2>
-                <div className="space-y-3 mb-8">
-                    {blocks.map((b) => {
-                        const chosen = b.options.find((o) => o.id === b.yourSelectionActivityId);
-                        return (
-                            <div key={b.id} className="bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center gap-4">
-                                <div>
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{CATEGORY_LABEL[b.category] ?? b.name}</p>
-                                    <p className="font-bold text-gray-800">{chosen ? `${chosen.code} — ${chosen.title}` : '—'}</p>
-                                </div>
-                                <button
-                                    onClick={() => goToStep(blocks.indexOf(b))}
-                                    className="text-sm font-bold text-institutional underline shrink-0"
-                                >
-                                    Cambiar
-                                </button>
-                            </div>
-                        );
-                    })}
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex gap-4 items-center mb-8 p-3">
+                    {chosen?.imageUrl && <img src={chosen.imageUrl} alt={chosen.title} className="w-24 h-20 object-cover rounded-lg shrink-0" />}
+                    <div className="flex-grow min-w-0">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Visita Técnica</p>
+                        <p className="font-bold text-gray-800 truncate">{chosen ? `${chosen.code} — ${chosen.title}` : '—'}</p>
+                    </div>
+                    <button onClick={() => setMode('wizard')} className="text-sm font-bold text-institutional underline shrink-0">
+                        Cambiar
+                    </button>
                 </div>
                 <button
                     onClick={openConfirmModal}
@@ -292,7 +302,7 @@ const ActivitySelectionPage = () => {
                         <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
                             <p className="font-bold text-xl text-gray-800 mb-2">¿Confirmar selección?</p>
                             <p className="text-sm text-gray-500 mb-6">
-                                Una vez confirmada, no vas a poder cambiar las actividades elegidas. Revisá bien antes de continuar.
+                                Una vez confirmada, no vas a poder cambiar la visita elegida. Revisá bien antes de continuar.
                             </p>
                             {retryNotice && <p className="text-xs text-amber-600 mb-3">{retryNotice}</p>}
                             <div className="flex gap-3">
@@ -322,48 +332,39 @@ const ActivitySelectionPage = () => {
     return (
         <div className="max-w-6xl mx-auto p-4">
             <Header />
-            <Stepper blocks={blocks} stepIndex={stepIndex} />
 
             {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">{error}</div>}
             {retryNotice && <div className="bg-amber-50 border border-amber-200 text-amber-700 text-sm rounded-lg px-4 py-3 mb-4">{retryNotice}</div>}
 
-            <section className="mb-8">
-                <div className="flex items-center gap-3 mb-1">
-                    <h2 className="text-xl font-bold text-institutional">{CATEGORY_LABEL[currentBlock.category] ?? currentBlock.name}</h2>
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Elegí 1</span>
-                </div>
-                {currentBlock.note && <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4 max-w-2xl">{currentBlock.note}</p>}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {currentBlock.options.map((opt) => (
-                        <OptionCard
-                            key={opt.id}
-                            option={opt}
-                            picked={pendingChoice === opt.id}
-                            onPick={setPendingChoice}
-                            disabled={saving}
-                        />
-                    ))}
-                </div>
-            </section>
+            {block && (
+                <section>
+                    <div className="flex items-center gap-3 mb-1">
+                        <h2 className="text-xl font-bold text-institutional">{CATEGORY_LABEL[block.category] ?? block.name}</h2>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Elegí 1</span>
+                    </div>
+                    {block.note && <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4 max-w-2xl">{block.note}</p>}
+                    <p className="text-xs text-gray-400 mb-4">Tocá una tarjeta para ver el detalle y elegirla.</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        {block.options.map((opt) => (
+                            <OptionCard
+                                key={opt.id}
+                                option={opt}
+                                picked={pendingChoice === opt.id || block.yourSelectionActivityId === opt.id}
+                                onOpen={setOpenOption}
+                                disabled={saving}
+                            />
+                        ))}
+                    </div>
+                </section>
+            )}
 
-            <section className="mb-12">
-                <div className="flex items-center gap-3 mb-1">
-                    <h2 className="text-xl font-bold text-institutional">Actividades de Compromiso Social</h2>
-                </div>
-                <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-6 text-center text-gray-400 text-sm max-w-md">
-                    Próximamente — todavía se está definiendo el contenido de esta sección.
-                </div>
-            </section>
-
-            <div className="sticky bottom-4">
-                <button
-                    onClick={saveAndContinue}
-                    disabled={pendingChoice == null || saving}
-                    className="w-full bg-institutional text-white font-bold py-4 rounded-xl hover:opacity-90 transition text-lg shadow-lg disabled:opacity-40"
-                >
-                    {saving ? 'Guardando...' : isLastStep ? 'Guardar' : 'Guardar y continuar'}
-                </button>
-            </div>
+            <OptionModal
+                option={openOption}
+                picked={openOption && block?.yourSelectionActivityId === openOption.id}
+                onClose={() => setOpenOption(null)}
+                onChoose={(id) => { setPendingChoice(id); choose(id); }}
+                choosing={saving}
+            />
         </div>
     );
 };
