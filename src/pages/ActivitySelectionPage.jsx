@@ -44,9 +44,9 @@ const OptionCard = ({ option, picked, onOpen, disabled }) => {
                 ${picked ? 'border-institutional shadow-md' : 'border-gray-200 hover:border-gray-300'}
                 ${disabled ? 'opacity-60' : 'cursor-pointer'}`}
         >
-            <div className="relative aspect-[4/3] bg-gray-100">
+            <div className="relative h-28 sm:h-32 bg-gray-100">
                 {option.imageUrl && (
-                    <img src={option.imageUrl} alt={option.title} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={option.imageUrl} alt={option.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                 )}
                 {picked && (
                     <span className="absolute top-1.5 right-1.5 text-[10px] font-bold bg-institutional text-white px-1.5 py-0.5 rounded-full">
@@ -77,8 +77,8 @@ const OptionModal = ({ option, picked, onClose, onChoose, choosing }) => {
                 className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-xl"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="relative aspect-[16/10] bg-gray-100">
-                    {option.imageUrl && <img src={option.imageUrl} alt={option.title} className="w-full h-full object-cover" />}
+                <div className="relative h-56 sm:h-64 bg-gray-100">
+                    {option.imageUrl && <img src={option.imageUrl} alt={option.title} className="absolute inset-0 w-full h-full object-cover" />}
                     <button
                         onClick={onClose}
                         className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center text-lg hover:bg-black/70 transition"
