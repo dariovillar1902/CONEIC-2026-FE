@@ -13,6 +13,12 @@ const SPONSORS_ORO = [
         url: 'https://penetron.com.ar/',
         cardBg: 'bg-[#2a2a2a]',
     },
+    {
+        name: 'Evel',
+        logoUrl: '/assets/sponsors/logo-evel.png',
+        url: 'http://evel.com.ar/',
+        cardBg: 'bg-white',
+    },
 ];
 
 const SPONSORS_PLATA = [
