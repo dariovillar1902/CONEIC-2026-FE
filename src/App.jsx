@@ -73,12 +73,11 @@ const router = createBrowserRouter([
       { index: true, element: <CheckInScannerPage /> },
     ]
   },
-  // Elección de Actividades (demo) — sin enlazar en ningún menú a propósito,
-  // solo accesible por quien tenga este link. Cualquier usuario logueado
-  // puede probarlo (empezando por cuentas admin).
+  // Elección de Actividades (demo) — visible en el panel solo para admins
+  // por ahora ("piloto"); nadie más tiene acceso todavía.
   {
     path: '/actividades-demo-h4n8w2',
-    element: <DashboardLayout allowedRoles={['admin', 'tesoreria', 'delegate', 'assistant']} />,
+    element: <DashboardLayout allowedRoles={['admin']} />,
     children: [
       { index: true, element: <ActivitySelectionPage /> },
     ]
