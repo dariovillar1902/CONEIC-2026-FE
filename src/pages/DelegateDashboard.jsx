@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const API = import.meta.env.VITE_API_URL;
@@ -508,7 +509,7 @@ const DelegateDashboard = () => {
                         </p>
                     )}
                 </div>
-                <div className="flex gap-3">
+                <div className="flex items-end gap-3">
                     <StatCard label="Total"      value={attendees.length} />
                     <StatCard
                         label="Habilitados"
@@ -516,6 +517,12 @@ const DelegateDashboard = () => {
                         color={quotaReached ? 'text-red-600' : 'text-green-600'}
                     />
                     <StatCard label="Con pago"    value={paidCount}       color="text-blue-600" />
+                    <Link
+                        to="/actividades-demo-h4n8w2"
+                        className="px-4 py-2 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-sm text-gray-700 hover:text-primary-blue transition"
+                    >
+                        Elección de Actividades
+                    </Link>
                 </div>
             </div>
 
