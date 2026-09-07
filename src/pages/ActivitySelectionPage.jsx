@@ -68,7 +68,9 @@ const OptionCard = ({ option, picked, onOpen, disabled }) => {
 };
 
 // ── Popup de detalle: foto grande, descripción completa, cupo, elegir ────────
-const OptionModal = ({ option, picked, onClose, onChoose, choosing }) => {
+// `readOnly` = ya confirmaste tu selección definitiva: podés seguir mirando el
+// detalle de cualquier visita, pero no hay botón para elegir ninguna.
+const OptionModal = ({ option, picked, onClose, onChoose, choosing, readOnly = false }) => {
     if (!option) return null;
     const full = option.taken >= option.capacity && !picked;
     return (
@@ -107,8 +109,12 @@ const OptionModal = ({ option, picked, onClose, onChoose, choosing }) => {
 
                     {picked ? (
                         <div className="w-full bg-institutional/10 text-institutional font-bold py-3 rounded-lg text-center">
-                            Ya es tu elección
+                            {readOnly ? 'Tu elección confirmada' : 'Ya es tu elección'}
                         </div>
+                    ) : readOnly ? (
+                        <p className="text-xs text-gray-400 text-center">
+                            Tu selección ya está confirmada — esto es solo a modo informativo.
+                        </p>
                     ) : (
                         <button
                             onClick={() => onChoose(option.id)}
@@ -248,26 +254,56 @@ const ActivitySelectionPage = () => {
 
     if (mode === 'confirmed') {
         return (
-            <div className="max-w-3xl mx-auto p-4">
+            <div className="max-w-6xl mx-auto p-4">
                 <Header />
-                <div className="bg-green-50 border border-green-300 rounded-xl p-6 text-center mb-8">
-                    <p className="text-4xl mb-2">✅</p>
-                    <p className="font-bold text-green-800 text-lg">Tu selección quedó confirmada</p>
-                    <p className="text-sm text-green-700 mt-1">Ya no se puede modificar.</p>
-                </div>
-                <div className="space-y-3">
-                    {status?.selections?.map((s) => (
-                        <div key={s.blockId} className="bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center">
-                            <div>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                                    {CATEGORY_LABEL[blocks.find((b) => b.id === s.blockId)?.category] ?? `Bloque ${s.blockId}`}
-                                </p>
-                                <p className="font-bold text-gray-800">{s.activityCode} — {s.activityTitle}</p>
+                <div className="max-w-3xl mx-auto">
+                    <div className="bg-green-50 border border-green-300 rounded-xl p-6 text-center mb-8">
+                        <p className="text-4xl mb-2">✅</p>
+                        <p className="font-bold text-green-800 text-lg">Tu selección quedó confirmada</p>
+                        <p className="text-sm text-green-700 mt-1">Ya no se puede modificar.</p>
+                    </div>
+                    <div className="space-y-3">
+                        {status?.selections?.map((s) => (
+                            <div key={s.blockId} className="bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center">
+                                <div>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        {CATEGORY_LABEL[blocks.find((b) => b.id === s.blockId)?.category] ?? `Bloque ${s.blockId}`}
+                                    </p>
+                                    <p className="font-bold text-gray-800">{s.activityCode} — {s.activityTitle}</p>
+                                </div>
+                                <span className="text-xs text-gray-400 shrink-0">{new Date(s.confirmedAt).toLocaleString('es-AR')}</span>
                             </div>
-                            <span className="text-xs text-gray-400 shrink-0">{new Date(s.confirmedAt).toLocaleString('es-AR')}</span>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
+
+                {block && (
+                    <section className="mt-10">
+                        <div className="flex items-center gap-3 mb-1">
+                            <h2 className="text-xl font-bold text-institutional">{CATEGORY_LABEL[block.category] ?? block.name}</h2>
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Solo consulta</span>
+                        </div>
+                        <p className="text-xs text-gray-400 mb-4">Podés seguir mirando el resto de las visitas, aunque ya no se puede cambiar tu elección.</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                            {block.options.map((opt) => (
+                                <OptionCard
+                                    key={opt.id}
+                                    option={opt}
+                                    picked={block.yourSelectionActivityId === opt.id}
+                                    onOpen={setOpenOption}
+                                    disabled={false}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                <OptionModal
+                    option={openOption}
+                    picked={openOption && block?.yourSelectionActivityId === openOption.id}
+                    onClose={() => setOpenOption(null)}
+                    readOnly
+                />
             </div>
         );
     }
