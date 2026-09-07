@@ -42,6 +42,11 @@ const isBetween = (date, range) => date >= range.start && date <= range.end;
 // se indique lo contrario. Poner en false para cerrarla de verdad.
 const STAGE3_PREREGISTRATION_SILENTLY_EXTENDED = true;
 
+// Cierre definitivo de inscripciones (cierra la 3ª Etapa para siempre, incluidos
+// los links "forceOpen" de respaldo que normalmente ignoran las fechas de STAGES).
+// En true: nadie puede inscribirse más, en ningún formulario.
+const REGISTRATION_HARD_CLOSED = true;
+
 const getCurrentPhase = (today) => {
     for (const stage of STAGES) {
         if (stage.id === 3 && STAGE3_PREREGISTRATION_SILENTLY_EXTENDED && today > stage.preRegistration.end) {
@@ -223,9 +228,11 @@ const PhaseBanner = ({ phase, stage }) => {
 const Registration = ({ forceOpen = false, international = false }) => {
     const form = useRef();
     const today = new Date();
-    const { stage: currentStage, phase: currentPhase } = forceOpen
-        ? { stage: STAGES[0], phase: 'preRegistration' }
-        : getCurrentPhase(today);
+    const { stage: currentStage, phase: currentPhase } = REGISTRATION_HARD_CLOSED
+        ? { stage: null, phase: 'closed' }
+        : forceOpen
+            ? { stage: STAGES[0], phase: 'preRegistration' }
+            : getCurrentPhase(today);
     const [isFormOpen, setIsFormOpen] = useState(false);
 
     const [file, setFile] = useState(null);
