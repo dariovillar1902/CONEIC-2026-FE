@@ -75,12 +75,11 @@ const router = createBrowserRouter([
       { index: true, element: <CheckInScannerPage /> },
     ]
   },
-  // Elección de Actividades (demo) — visible en el panel para admins y
-  // delegados por ahora ("piloto"); los inscriptos asistentes todavía no
-  // tienen acceso.
+  // Elección de Actividades — instancia definitiva: solo para asistentes
+  // (inscriptos). Admin, tesorería y delegados no eligen actividades.
   {
     path: '/actividades-demo-h4n8w2',
-    element: <DashboardLayout allowedRoles={['admin', 'delegate']} />,
+    element: <DashboardLayout allowedRoles={['assistant']} />,
     children: [
       { index: true, element: <ActivitySelectionPage /> },
     ]
