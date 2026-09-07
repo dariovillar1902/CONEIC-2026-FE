@@ -243,12 +243,10 @@ const ActivitySelectionPage = () => {
 
     const Header = () => (
         <div className="mb-6">
-            <span className="text-xs font-bold uppercase tracking-widest text-complementary-gold">Demo — no pública</span>
             <h1 className="text-3xl font-bold text-institutional font-title">Elección de Actividades</h1>
             <p className="text-sm text-gray-500 mt-1 max-w-2xl">
-                Página de prueba, pensada para mostrar cómo elegiría su visita técnica un/a asistente. Cupos y horarios son provisorios.
+                Elegí tu visita técnica para el CONEIC XVIII. Una vez que confirmes tu elección definitiva, no vas a poder cambiarla.
             </p>
-            <p className="text-xs text-gray-400 mt-1">Probando como: <span className="font-mono">{user?.email}</span></p>
         </div>
     );
 
