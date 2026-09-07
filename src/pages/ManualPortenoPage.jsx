@@ -2,142 +2,467 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const API = import.meta.env.VITE_API_URL;
+const IMG = '/assets/manual-porteno';
 
+// ─── Modelo de contenido — replica 1 a 1 el Word "Manual del Porteño v2" ─────
+// Tipos de bloque: p (párrafo), list (viñetas), subhead (subtítulo interno),
+// img (imagen con caption opcional), table (tabla simple), callout (recuadro
+// destacado tipo tip/warning), link (enlace suelto).
 const SECTIONS = [
   {
     id: 'transporte',
+    num: '1',
     emoji: '🚇',
-    title: 'Transporte Público',
-    content: [
-      {
-        subtitle: 'SUBE',
-        text: 'La tarjeta SUBE es obligatoria para pagar el transporte en Buenos Aires. Podés cargarla en kioscos, farmacias, estaciones de subte y terminales de colectivo. Se compra en el correo o en puntos habilitados (~$2.000).'
-      },
-      {
-        subtitle: 'Subterráneo (Subte)',
-        text: 'Seis líneas (A, B, C, D, E, H) que cubren el centro y zonas clave. Precio aprox. $1.414 por viaje con SUBE. Horario: ~5:30 a 22:30 aprox. Las líneas más útiles para CONEIC: Línea D → Sede Belgrano (estación José Hernández), Línea B → UTN FRBA Medrano (estación Medrano), Línea E → UTN FRBA Campus (estación Plaza de los Virreyes).'
-      },
-      {
-        subtitle: 'Colectivos',
-        text: 'Más de 200 líneas cubren toda la ciudad y el Gran Buenos Aires. Precio: ~$800–$1.300 con SUBE. Apps recomendadas: Cuándo Llega y Moovit para ver recorridos y tiempos en tiempo real.'
-      },
-      {
-        subtitle: 'Trenes',
-        text: 'Líneas Mitre, Sarmiento y Roca para llegar al conurbano bonaerense. También usá SUBE.'
-      }
-    ]
+    title: 'Cómo moverse en transporte público',
+    blocks: [
+      { type: 'p', text: 'Buenos Aires cuenta con una de las redes de transporte público más completas de Latinoamérica.' },
+      { type: 'p', text: 'Con un poco de práctica, vas a poder llegar a cualquier punto de la ciudad de forma rápida y sencilla, sin necesidad de gastar de más en taxis o remises (aunque siempre tenés buenas aplicaciones de viaje como alternativa 😉).' },
+
+      { type: 'subhead', text: '1.1 ¿Cómo se paga?' },
+      { type: 'callout', tone: 'warning', text: '¡NO está permitido el pago en efectivo!' },
+      { type: 'p', text: 'Por lo que a continuación te dejamos las alternativas para pagar:' },
+      { type: 'list', items: [
+        'Tarjeta SUBE (obligatoria para los trenes, no para el subte)',
+        'Tarjeta de Débito o Crédito (contactless)',
+        'QR desde App de Billeteras Virtuales y Bancos (Mercado Pago, Naranja X, Modo, etc.)',
+      ] },
+      { type: 'link', emoji: '🎬', text: '¿Querés saber cómo pagar con QR? Mirá este breve video explicativo sobre códigos QR en el transporte', href: 'https://www.facebook.com/GCBA/videos/1364843794570607/' },
+      { type: 'imgRow', images: [
+        { src: `${IMG}/qr-paso1.png`, alt: 'Pasos para pagar el colectivo con QR' },
+        { src: `${IMG}/qr-paso2.png`, alt: 'Validador SUBE aceptando el pago' },
+      ] },
+
+      { type: 'subhead', text: 'Todo sobre la SUBE (Sistema Único de Boleto Electrónico)' },
+      { type: 'p', text: 'Es una de las opciones para usar el subte, los colectivos (buses) y trenes.' },
+      { type: 'p', text: '¿Dónde conseguirla? En cualquier kiosco habilitado con el logo SUBE o en algunas sucursales del Correo OCA.' },
+      { type: 'p', text: '¿Dónde cargarla? En cajeros automáticos, kioscos, estaciones de subte o de forma online mediante billeteras virtuales y home banking.' },
+      { type: 'callout', tone: 'tip', text: 'Cargá siempre más saldo del que pensás usar. En hora pico los kioscos tienen fila y no es raro quedarse sin saldo justo cuando más lo necesitás.' },
+      { type: 'callout', tone: 'warning', text: 'Importante sobre las cargas virtuales: Si cargás por app o banco, recordá que tenés que acreditar el saldo antes de viajar. Podés hacerlo de tres formas:' },
+      { type: 'list', items: [
+        'Directo en el colectivo: Al subir, avisale al chofer "Te pido acreditar la carga" para que active la acreditación en la validadora, apoyás la tarjeta y una vez acreditada, pagás tu boleto normalmente.',
+        'Con el celular apoyándolo en la parte trasera (si tu teléfono tiene tecnología NFC y usás la app oficial de SUBE).',
+        'En las terminales automáticas ubicadas en estaciones de tren y subte.',
+      ] },
+
+      { type: 'subhead', text: '1.2 El Subte (Metro)' },
+      { type: 'p', text: 'Es la forma más rápida y práctica de moverse por el centro y las zonas céntricas de la ciudad.' },
+      { type: 'p', text: 'Horarios: de lunes a sábado de 5:30 a 22:30 hs (los domingos cuentan con horario reducido)' },
+      { type: 'callout', tone: 'warning', text: 'Hora pico (¡evitala si podés!): de 8:00 a 9:30 hs y de 17:30 a 19:30 hs.' },
+      { type: 'p', text: 'SIEMPRE: Cuidá tus pertenencias y ponete la mochila adelante.' },
+      { type: 'link', text: 'Página web oficial del SUBTE de la Ciudad', href: 'https://buenosaires.gob.ar/gcaba_historico/subte' },
+      { type: 'callout', tone: 'info', text: 'Tarifa del subte (2026): $1.753 por viaje con SUBE registrada / $2.541 con SUBE no registrada.' },
+
+      { type: 'subhead', text: 'Líneas de SUBTE' },
+      { type: 'table', headers: ['Línea', 'Recorrido principal [Cabeceras]'], rows: [
+        ['🩵 Línea A (celeste)', 'Plaza de Mayo (Monserrat)'],
+        ['❤️ Línea B (roja)', 'L.N. Alem (San Nicolás) — Juan Manuel de Rosas (Villa Urquiza)'],
+        ['💙 Línea C (azul)', 'Retiro (Retiro) — Constitución (Constitución) (eje norte-sur)'],
+        ['💚 Línea D (verde oscuro)', 'Catedral (San Nicolás) — Congreso de Tucumán (Belgrano)'],
+        ['💜 Línea E (violeta)', 'Retiro (Retiro) — Plaza de los Virreyes (Flores)'],
+        ['💛 Línea H (amarillo)', 'Hospitales (Parque Patricios) — Facultad de Derecho (Recoleta)'],
+      ] },
+      { type: 'img', src: `${IMG}/mapa-subte.png`, alt: 'Mapa de red del Subte de Buenos Aires', href: 'https://buenosaires.gob.ar/gcaba_historico/subte/mapa-del-subte-y-combinaciones' },
+      { type: 'subhead', text: 'Mapa Turístico' },
+      { type: 'img', src: `${IMG}/mapa-turistico.png`, alt: 'Mapa turístico ilustrado del Subte de Buenos Aires (Emova)', href: 'https://emova.com.ar/index.php/mapas/#gallery-6a9f18b7738e3' },
+
+      { type: 'subhead', text: '1.3 Los Bondis (Buses/Colectivos)' },
+      { type: 'p', text: 'Buenos Aires cuenta con más de 200 líneas de colectivos que cubren cada rincón de la ciudad.' },
+      { type: 'p', text: 'Son ideales porque te dejan más cerca de tu destino final que el subte (¡aunque el tránsito en hora pico puede hacerlos un poco más lentos!).' },
+      { type: 'p', text: '¿Cómo se paga? Con tarjeta SUBE, pago contactless (tarjetas de débito/crédito o celular) o escaneando el código QR desde billeteras virtuales (Mercado Pago, MODO, etc.).' },
+      { type: 'p', text: 'Recordá que no se acepta efectivo bajo ningún punto de vista.' },
+      { type: 'callout', tone: 'info', text: 'Tarifas: Varían según la distancia recorrida (aprox. entre $888 y $1.138 para tramos habituales).' },
+
+      { type: 'subhead', text: '📱 Apps clave' },
+      { type: 'table', headers: ['App', 'Para qué sirve'], rows: [
+        ['Google Maps', 'La más completa para armar rutas en tiempo real combinando colectivo, subte, tren y caminatas. Siempre actualizada.'],
+        ['Moovit', 'Excelente alternativa local que muestra las próximas salidas con minutos exactos y alertas de servicio.'],
+        ['Cuando Subo / Cuándo Llega (GCBA)', 'Aplicaciones oficiales para ver en vivo la ubicación y llegada de los colectivos a cada parada. (Ojo: si figura como "horario programado", puede tener demoras).'],
+      ] },
+
+      { type: 'subhead', text: '1.4 Trenes' },
+      { type: 'p', text: 'Los trenes metropolitanos conectan CABA con el Gran Buenos Aires. Si te hospedás en la zona metropolitana o querés hacer un viaje cruzando distancias largas, son una excelente opción.' },
+      { type: 'callout', tone: 'warning', text: '¡Atención! Por el momento, las líneas de tren SOLO aceptan Tarjeta SUBE.' },
+      { type: 'p', text: 'La regla de oro: Tenés que apoyar la tarjeta al subir y también al bajar. Si olvidás marcar al salir, el sistema te descontará el valor máximo del ramal.' },
+      { type: 'p', text: 'Tarifa estimada (2026): varía desde los $480 (SUBE registrada) o $960 (sin registrar) hasta los $790 o $1.580 respectivamente, según la distancia del recorrido.' },
+      { type: 'link', text: 'Página web oficial de la Red de Trenes', href: 'https://www.argentina.gob.ar/transporte/trenes-argentinos/horarios-tarifas-y-recorridos/areametropolitana' },
+
+      { type: 'subhead', text: 'Líneas de Tren' },
+      { type: 'link', text: 'Ver mapa de trenes AMBA en PDF (Argentina.gob.ar)', href: 'https://www.argentina.gob.ar/sites/default/files/mapa_trenes_amba_y_media_distancia_web_2982025.pdf' },
+      { type: 'img', src: `${IMG}/mapa-trenes.png`, alt: 'Mapa de la red de trenes del AMBA' },
+      { type: 'subhead', text: 'Ubicación de las Cabeceras de Líneas de Tren (CABA)' },
+      { type: 'img', src: `${IMG}/mapa-sedes-trenes.png`, alt: 'Ubicación de las sedes del congreso y estaciones de tren cercanas (Retiro, Constitución, Sáenz)' },
+    ],
   },
+
   {
     id: 'apps',
+    num: '2',
     emoji: '📱',
-    title: 'Apps Esenciales',
-    content: [
-      {
-        subtitle: 'Navegación y transporte',
-        text: 'Google Maps — navegación general, rutas en transporte público. Moovit — rutas de colectivo y subte con tiempos en tiempo real. Cuando Subo / Cuándo Llega — para saber exactamente cuándo llega tu colectivo a la parada.'
-      },
-      {
-        subtitle: 'Viajes en auto',
-        text: 'Uber, Cabify y DiDi — funcionan bien en CABA. BA Taxi — la app oficial del Gobierno de la Ciudad para taxis con taxímetro oficial.'
-      },
-      {
-        subtitle: 'Movilidad sustentable',
-        text: 'EcoBici — bicicletas públicas gratuitas del GCBA (requiere registro previo). Lime y Grin — monopatines eléctricos por zona.'
-      }
-    ]
+    title: 'Apps esenciales para moverse',
+    blocks: [
+      { type: 'p', text: 'Bajate estas apps antes de llegar. Todas son gratuitas y te van a salvar más de una vez.' },
+
+      { type: 'subhead', text: '2.1 Apps de transporte público' },
+      { type: 'table', headers: ['App', 'Para qué sirve'], rows: [
+        ['Google Maps', 'La más completa para armar rutas en tiempo real combinando colectivo, subte, tren y caminatas. Siempre actualizada.'],
+        ['Moovit', 'Excelente alternativa local que muestra las próximas salidas con minutos exactos y alertas de servicio.'],
+        ['Cuando Subo / Cuándo Llega (GCBA)', 'Aplicaciones oficiales para ver en vivo la ubicación y llegada de los colectivos a cada parada. (Ojo: si figura como "horario programado", puede tener demoras).'],
+      ] },
+
+      { type: 'subhead', text: '2.2 Apps de autos y taxis' },
+      { type: 'p', text: 'Si el transporte público no te cierra (lluvia, horario tarde, mucho equipaje), estas son las opciones:' },
+      { type: 'table', headers: ['App / Servicio', 'Descripción y precios estimados'], rows: [
+        ['Uber', 'Muy utilizado. Precio dinámico según la demanda. Podés pagar con tarjeta, billetera virtual (Mercado Pago) o efectivo. (Un viaje promedio de 5 km en el centro ronda entre los $6.000 y $15.000)'],
+        ['Cabify', 'Suele ofrecer vehículos de muy buena calidad y cuenta con descuentos especiales para usuarios nuevos.'],
+        ['Didi', 'Suele tener tarifas más económicas y permite proponer un precio dentro de un rango aceptado por la app.'],
+        ['BA Taxi (oficial GCBA) / Taxi Tradicional (calle)', 'Taxis tradicionales (amarillos y negros) con taxímetro. Evita estafas con falsos taxis.'],
+      ] },
+      { type: 'table', headers: ['Tarifa', 'Valor'], rows: [
+        ['Diurna (6:00 a 22:00 hs)', 'Bajada de bandera $1.920 + ficha de $200 cada 200 metros o minuto de espera.'],
+        ['Nocturna (22:00 a 6:00 hs)', 'Incremento del 20% (bajada de bandera $2.300 + ficha de $230).'],
+      ] },
+      { type: 'callout', tone: 'warning', text: 'Cuidado con los taxis no oficiales: Nunca subas a autos que se ofrezcan en el aeropuerto o en la calle sin taxímetro ni app. Siempre usá las apps o los taxis oficiales amarillo-negro.' },
+
+      { type: 'subhead', text: '2.3 Bicis y scooters' },
+      { type: 'subhead', text: '🚲 EcoBici (por Tembici)' },
+      { type: 'p', text: 'Sistema público y gratuito de bicicletas de la ciudad.' },
+      { type: 'p', text: '¿Cómo funciona? Te registrás previamente en la web o app oficial.' },
+      { type: 'link', text: 'ecobici.buenosaires.gob.ar', href: 'http://ecobici.buenosaires.gob.ar' },
+      { type: 'p', text: 'Tarifa: Tenés viajes gratuitos de hasta 45 minutos (de lunes a viernes) o 60 minutos (fines de semana), con la posibilidad de hacer renovaciones ilimitadas dejando pasar unos minutos entre viaje y viaje.' },
+      { type: 'callout', tone: 'tip', text: 'Buenos Aires cuenta con una red larguísima de ciclovías protegidas que atraviesan toda la ciudad. Si te animás a pedalear, es una de las formas más rápidas y lindas de conocer los barrios sin lidiar con el tráfico.' },
+      { type: 'subhead', text: '⚡️ Scooters Eléctricos' },
+      { type: 'p', text: 'En algunas zonas específicas podés encontrar monopatines eléctricos de libre uso que se alquilan por minuto escaneando un código QR desde aplicaciones móviles.' },
+    ],
   },
-  {
-    id: 'costos',
-    emoji: '💰',
-    title: 'Costos Estimados',
-    content: [
-      {
-        subtitle: 'Transporte',
-        text: 'Subte: ~$1.414 por viaje · Colectivo: ~$800–$1.300 · Taxi/Uber (viaje corto): $4.000–$8.000 · Remis desde Ezeiza al centro: $40.000–$60.000 · EcoBici: gratuito'
-      },
-      {
-        subtitle: 'Gastronomía',
-        text: 'Medialunas en café: $800–$2.000 · Empanadas (unidad): $1.500–$2.500 · Choripán: $3.000–$5.000 · Milanesa con papas: $8.000–$15.000 · Helado (1/4 kg): $4.000–$6.000 · Pizza por porción: $3.000–$5.000'
-      },
-      {
-        subtitle: 'Pagos',
-        text: 'Se acepta tarjeta casi en todos lados. El efectivo es útil en puestos de feria y kioscos. Muchos locales aceptan QR (Mercado Pago). Evitá cambiar dólares en la calle.'
-      }
-    ]
-  },
+
   {
     id: 'sedes',
+    num: '3',
     emoji: '📍',
-    title: 'Cómo Llegar a las Sedes',
-    content: [
-      {
-        subtitle: 'Auditorio Belgrano — Virrey Loreto 2348',
-        text: 'Subte Línea D → estación José Hernández (a 5 min a pie). Colectivos: 59, 60, 63, 107, 130 entre otros. Fácil acceso desde el centro tomando la D hacia Congreso de Tucumán.'
-      },
-      {
-        subtitle: 'UTN FRBA Medrano — Av. Medrano 951',
-        text: 'Subte Línea B → estación Medrano (salida directa a la facultad). Colectivos: 26, 34, 39, 55, 140. Barrio de Almagro, muy bien conectado.'
-      },
-      {
-        subtitle: 'UTN FRBA Campus — Mozart 2300',
-        text: 'Subte Línea E → estación Plaza de los Virreyes (5 min a pie). Colectivos: 2, 7, 36, 45, 97. Barrio de Flores Sur.'
-      }
-    ]
+    title: 'Cómo llegar a las sedes',
+    blocks: [
+      { type: 'subhead', text: '3.1 Auditorio de Belgrano' },
+      { type: 'p', text: '📍 Dirección: Virrey Loreto 2348, Belgrano (zona norte de CABA).', href: 'https://maps.app.goo.gl/w1Rq2oUTDYipcBcbA' },
+      { type: 'callout', tone: 'warning', text: 'Zona comercial/residencial, en movimiento constante.' },
+      { type: 'p', text: '📅 Días de asistencia: martes 13/10 y viernes 16/10.' },
+      { type: 'subhead', text: 'En Subte' },
+      { type: 'p', text: 'Línea D: baja en la Estación José Hernández. Camina 2 cuadras.' },
+      { type: 'subhead', text: 'En Bondi' },
+      { type: 'list', items: [
+        'Por Av. Cabildo (frente al auditorio o a 1-2 cuadras). Líneas 41, 59, 67, 152, 161, 168.',
+        'Por Av. Luis María Campos (a 7 cuadras). Líneas 15, 29, 57, 60, 64, 118.',
+      ] },
+      { type: 'callout', tone: 'tip', text: 'Preguntale al chofer o chequeá en Google Maps, varias líneas tienen más de un ramal, así que es importante que te asegures de que te estás tomando el correcto.' },
+      { type: 'p', text: 'Por ejemplo, desde Palermo (si te hospedas ahí): colectivo 60 o Línea D.' },
+      { type: 'p', text: 'Por ejemplo, desde el Centro / Microcentro: Línea D desde Catedral, directo a Belgrano.' },
+      { type: 'img', src: `${IMG}/mapa-auditorio-belgrano.png`, alt: 'Ubicación del Auditorio Belgrano en el mapa' },
+
+      { type: 'subhead', text: '3.2 UTN FRBA – Sede Medrano' },
+      { type: 'p', text: '📍 Dirección: Medrano 951, Almagro' },
+      { type: 'callout', tone: 'warning', text: 'Zona comercial/residencial, céntrica, muy activa de día.' },
+      { type: 'p', text: '📅 Día de asistencia: miércoles 14/10.' },
+      { type: 'subhead', text: 'En Subte' },
+      { type: 'p', text: 'Línea B: baja en la Estación Medrano, a solo 5 cuadras de la facultad. Es la opción más práctica.' },
+      { type: 'callout', tone: 'warning', text: 'Actualmente, la Estación Medrano está cerrada por obras de renovación integral. En caso de que siga cerrada al momento en que estés en CABA, te recomendamos bajar en la Estación Ángel Gallardo (zona más tranquila y residencial) y luego caminar hasta la facultad (aprox. 1.5 km ~ 20 min).' },
+      { type: 'subhead', text: 'En Bondi' },
+      { type: 'list', items: [
+        'Por Av. Córdoba (a 1-2 cuadras): 106, 109, 140.',
+        'Por la Av. Medrano (a 1-2 cuadras): 26, 151, 160.',
+        'Por Av. Corrientes (a 5-6 cuadras): 24, 71, 92, 124, 127, 168.',
+      ] },
+      { type: 'img', src: `${IMG}/mapa-utn-medrano.png`, alt: 'Ubicación de UTN FRBA Sede Medrano en el mapa' },
+
+      { type: 'subhead', text: '3.3 UTN FRBA – Sede Campus' },
+      { type: 'p', text: '📍 Dirección: Mozart 2300, Villa Lugano' },
+      { type: 'callout', tone: 'warning', text: 'Zona residencial e industrial, con movimiento acotado fuera del predio universitario.' },
+      { type: 'p', text: '📅 Día de asistencia: miércoles 14/10 por la tarde y jueves 15/10 para la Recreativa.' },
+      { type: 'callout', tone: 'tip', text: 'Combinación Recomendada: Subte (Línea E) + Bondi (Línea 7, cartel rojo: ramal "Barrio Samoré"). Tomá la Línea E hasta la estación Plaza de los Virreyes y ahí combiná con el colectivo 7 (ramal Barrio Samoré - cartel rojo; la parada está en Av. Eva Perón 3077 aprox.)' },
+      { type: 'subhead', text: 'En Bondi' },
+      { type: 'p', text: 'Desde Once: Línea 101 - ramal "Barrio Samoré" (cartel blanco)' },
+      { type: 'img', src: `${IMG}/bondi-101.png`, alt: 'Colectivo Línea 101 ramal Barrio Samoré' },
+      { type: 'p', text: 'Desde Microcentro: Línea 7 - ramal "Barrio Samoré" (cartel rojo)' },
+      { type: 'img', src: `${IMG}/bondi-7.png`, alt: 'Colectivo Línea 7 ramal Barrio Samoré' },
+      { type: 'p', text: 'Desde Plaza Italia / Palermo: Línea 145 - ramal "Villa Celina/UTN"' },
+      { type: 'img', src: `${IMG}/bondi-145.png`, alt: 'Colectivo Línea 145 ramal Villa Celina/UTN' },
+      { type: 'p', text: 'Desde Belgrano: Línea 114' },
+      { type: 'p', text: 'Desde Chacarita: Línea 47' },
+    ],
   },
+
   {
-    id: 'seguridad',
-    emoji: '🛡️',
-    title: 'Seguridad y Tips',
-    content: [
-      {
-        subtitle: 'Seguridad general',
-        text: 'Buenos Aires es una gran ciudad: mantené el celular guardado en transporte público. Evitá mostrar objetos de valor. El centro, Palermo, Recoleta y Belgrano son zonas seguras y turísticas. No aceptes ayuda de desconocidos en los cajeros automáticos.'
-      },
-      {
-        subtitle: 'Clima y ropa',
-        text: 'Agosto en Buenos Aires puede ser frío (5–15°C). Llevá abrigo, especialmente para la noche. Las lluvias son frecuentes en el invierno porteño.'
-      },
-      {
-        subtitle: 'WiFi',
-        text: 'La red BA WiFi del GCBA es gratuita en plazas, parques y espacios públicos de toda la ciudad. También en el subte hay señal en estaciones. Los bares y cafés casi siempre tienen WiFi libre.'
-      }
-    ]
+    id: 'cerca-de-las-sedes',
+    num: '4',
+    emoji: '🧭',
+    title: '¿Qué hay cerca de las sedes?',
+    blocks: [
+      { type: 'subhead', text: '4.1 Auditorio Belgrano (Virrey Loreto 2348)' },
+      { type: 'list', items: [
+        'Gran variedad de cafeterías, heladerías y restaurantes sobre Av. Cabildo y calles aledañas.',
+        'Supermercados, farmacias, kioscos y bancos a pocas cuadras.',
+        'El Barrio Chino (10-15 minutos caminando), ideal para pasear o comer.',
+        'Barrancas de Belgrano, uno de los parques más tradicionales de la ciudad.',
+      ] },
+      { type: 'callout', tone: 'info', text: 'Seguridad: Es una zona considerada segura y con mucho movimiento. Como en cualquier gran ciudad, se recomienda cuidar las pertenencias, especialmente en avenidas y transporte público.' },
+
+      { type: 'subhead', text: '4.2 UTN Sede Medrano (Medrano 951)' },
+      { type: 'p', text: 'Está ubicada en un barrio muy conectado y con mucha vida estudiantil. Durante el día hay gran circulación de personas y comercios.' },
+      { type: 'list', items: [
+        'Numerosos bares, cafeterías y pizzerías para almorzar o merendar.',
+        'Supermercados, kioscos, farmacias y cajeros automáticos.',
+        'Plaza Almagro, a unas pocas cuadras, ideal para descansar.',
+        'Alto Palermo (centro comercial) a unos 20 minutos caminando o pocos minutos en colectivo.',
+        "Fast food: McDonald's, KFC, Mostaza",
+        'Parque Centenario a pocas cuadras (hacia la zona de Ángel Gallardo), perfecto para caminar o descansar un rato.',
+      ] },
+      { type: 'callout', tone: 'info', text: 'Seguridad: Es una zona con bastante movimiento durante gran parte del día. Por la noche conviene circular por avenidas principales (Medrano, Córdoba, Corrientes) y evitar calles muy desiertas.' },
+
+      { type: 'subhead', text: '4.3 UTN Sede Campus' },
+      { type: 'p', text: 'A diferencia de las otras sedes, el Campus se encuentra en una zona más residencial e industrial. Dentro del predio universitario hay seguridad y muy buenas instalaciones.' },
+      { type: 'p', text: 'El campus cuenta con buffet / comedor universitario y áreas de descanso, ideales para resolver el almuerzo sin necesidad de salir. Cuenta con kiosco y buffet dentro; además, hay una panadería en la esquina.' },
+      { type: 'p', text: 'En los alrededores: Parque de la Ciudad, Parque Olímpico de Buenos Aires y Parque Indoamericano (uno de los espacios verdes más grandes de la ciudad).' },
+      { type: 'callout', tone: 'info', text: 'Seguridad: Dentro del Campus la seguridad es muy buena. En los alrededores, especialmente de noche, se recomienda permanecer sobre los recorridos principales, utilizar transporte público o aplicaciones de viaje para entrar y salir, y evitar caminar largas distancias fuera del predio.' },
+    ],
   },
+
+  {
+    id: 'tips',
+    num: '5',
+    emoji: '💡',
+    title: 'Tips esenciales del viajero porteño',
+    blocks: [
+      { type: 'subhead', text: '5.1 Seguridad' },
+      { type: 'list', items: [
+        'Guardá el celular en el bolsillo de adelante del pantalón o en una mochila con cierre adelante, nunca a la vista en la calle.',
+        'En el subte en hora pico, ponete la mochila adelante.',
+        'En general, CABA es una ciudad bastante segura para el turismo, especialmente Palermo, Recoleta, San Telmo, Belgrano y el Microcentro de día.',
+        'Tené especial cuidado en los colectivos/trenes/subtes cuando se abren las puertas. Guarda tus pertenencias o estate atento.',
+      ] },
+      { type: 'img', src: `${IMG}/mapa-riesgo-urbano.png`, alt: 'Ilustración de riesgo y atención urbana por comuna — mapa ilustrativo y orientativo' },
+
+      { type: 'subhead', text: '5.2 Dinero y pagos' },
+      { type: 'list', items: [
+        'La mayoría de los comercios, restaurantes y supermercados aceptan tarjeta de débito y crédito, transferencias y pagos con apps (Mercado Pago, Modo, Cuenta DNI)',
+        'Los mercados de pulgas (San Telmo, por ejemplo) suelen ser efectivo.',
+        'Los cajeros automáticos tienen un límite de extracción diario. Si venís del exterior, avisale a tu banco para evitar bloqueos.',
+        'No cambies divisas (usd, euros, etc.) en la calle: es ilegal y peligroso. Usá casas de cambio habilitadas o tu tarjeta de débito.',
+      ] },
+
+      { type: 'subhead', text: '5.3 Costumbres porteñas' },
+      { type: 'list', items: [
+        'Los horarios son más tardíos que en el interior: se almuerza de 13 a 14 hs y se comienza a cenar a las 21 hs.',
+        'Las panaderías y "kioscos" son omnipresentes: son un recurso infinito para agua, snacks, carga de SUBE y todo lo que necesites.',
+        'Aquí, según el barrio, los locales abren de corrido todo el día (no cortan para la siesta).',
+      ] },
+
+      { type: 'subhead', text: '5.4 Wi-Fi y conectividad' },
+      { type: 'list', items: [
+        'Hay Wi-Fi gratuito en plazas, estaciones de subte y muchos espacios públicos (red "BA WiFi").',
+        'Si venís de otra provincia con chip de tu operador, verificá la cobertura. Claro, Movistar y Personal tienen buena señal en toda la ciudad.',
+      ] },
+    ],
+  },
+
   {
     id: 'fin-de-semana',
+    num: '6',
     emoji: '🏙️',
-    title: 'El Fin de Semana en Buenos Aires',
-    content: [
-      {
-        subtitle: 'Barrios que no podés perderte',
-        text: 'San Telmo (feria dominical y arquitectura colonial) · La Boca (Caminito, colores y tango) · Palermo (bares, restaurantes, parques y museos) · Recoleta (el cementerio, el MALBA y el CCK) · Puerto Madero (puerto renovado y costanera) · Almagro (barrio cultural y bohemio)'
-      },
-      {
-        subtitle: 'Cultura gratuita',
-        text: 'CCK (Centro Cultural Kirchner) — gratis, arquitectura espectacular y eventos. MALBA — descuento para estudiantes. Museo Nacional de Bellas Artes — gratuito. Planetario Galileo Galilei — entrada libre al parque. Teatro Colón — visitas guiadas con costo accesible.'
-      },
-      {
-        subtitle: 'Gastronomía porteña',
-        text: 'No te vayas sin probar: empanadas porteñas · choripán en la Costanera · milanesa con papas · medialunas en café con leche · helado artesanal · pizza al molde estilo porteño. Lugares imperdibles: El Federal (San Telmo), Mercado de San Telmo, la calle Corrientes para pizza y teatro a cualquier hora.'
-      }
-    ]
+    title: 'Qué hacer si tenés el fin de semana libre',
+    blocks: [
+      { type: 'p', text: 'Si te quedás el fin de semana, aprovechalo. ¡CABA tiene una agenda cultural y gastronómica increíble!' },
+      { type: 'link', text: 'Página oficial de Ciudad de Buenos Aires', href: 'https://turismo.buenosaires.gob.ar/es' },
+
+      { type: 'subhead', text: '6.1 Barrios para conocer' },
+      { type: 'table', headers: ['Barrio', 'Por qué vale la pena'], rows: [
+        ['San Telmo', 'El barrio más antiguo. Feria artesanal los domingos en Plaza Dorrego. Bares históricos, tango, mercado de antigüedades.'],
+        ['La Boca', 'El Caminito, conventillos coloridos y la Bombonera. Recomendación: visitarlo solo de día y mantenerse en el circuito turístico principal.'],
+        ['Palermo Soho / Hollywood', 'El epicentro de la movida joven. Diseño, boutiques, cafés de especialidad, restaurantes vanguardistas y cercanía a los parques.'],
+        ['Recoleta', 'Arquitectura de estilo francés, el icónico Cementerio, el MALBA y cafés históricos como La Biela.'],
+        ['Puerto Madero', 'Diques modernos junto al río, el Puente de la Mujer y caminatas hacia la Reserva Ecológica y la Costanera Sur.'],
+        ['Almagro / Villa Crespo', 'Barrios auténticos y residenciales, con una gran movida de bodegones, cafés de especialidad y menos masividad turística.'],
+      ] },
+
+      { type: 'subhead', text: '6.2 Cultura gratuita o casi' },
+      { type: 'list', items: [
+        'Palacio Libertad (ex Centro Cultural Kirchner): Imponente edificio en el Microcentro con muestras, conciertos y una cúpula con vista panorámica. Entrada gratuita.',
+        'MALBA (Museo de Arte Latinoamericano de Buenos Aires). Ubicado en Palermo, cuenta con una sólida colección de arte moderno y latinoamericano.',
+        'Museo Nacional de Bellas Artes (MNBA): Situado en Recoleta, con entrada libre y gratuita y una colección de arte internacional y argentino de primer nivel.',
+        'Planetario Galileo Galilei: En los Bosques de Palermo, rodeado de lagos, con funciones astronómicas y espectáculos inmersivos muy recomendables.',
+        'Teatro Colón: Una de las casas de ópera más importantes del mundo. Se pueden contratar visitas guiadas para conocer su impresionante sala y arquitectura.',
+        'Hipódromo de Palermo. Predio histórico en la zona norte, ideal para caminatas y polo.',
+        'El Rosedal, Lagos y Bosques de Palermo. El pulmón verde más grande y concurrido de la ciudad para pasear al aire libre o en bicicleta.',
+        'Centro Cultural Recoleta. Espacio joven y dinámico con muestras de arte urbano, talleres, música y exposiciones gratuitas.',
+      ] },
+      { type: 'link', text: '¿No sabés qué hacer? Consultá la web oficial del GCBA "Qué hacer esta semana"', href: 'https://turismo.buenosaires.gob.ar/es/article/que-hacer-esta-semana' },
+
+      { type: 'subhead', text: '6.3 Gastronomía porteña imperdible' },
+      { type: 'list', items: [
+        'Empanadas: encontrás de todo tipo según el local.',
+        'Choripán: el sándwich nacional. Buscá los puestos en La Costanera o en ferias.',
+        'Milanesa napolitana: infaltable en cualquier resto de barrio, bodegones! Enorme y contundente.',
+        'Medialunas: el croissant argento. Imprescindibles en el desayuno.',
+        'Pizza porteña: más gruesa que la italiana, con mucho queso.',
+      ] },
+      { type: 'callout', tone: 'tip', text: '⚡️ ¿A la piedra o en molde? Discordia eterna entre barrios. (Guerrín, Banchero, El Cuartito, Las Cuartetas)' },
+
+      { type: 'subhead', text: '6.4 Dónde tomar algo' },
+      { type: 'list', items: [
+        'Bares notables: Buenos Aires cuenta con cafés declarados Patrimonio Cultural. Lugares con historia y atmósfera única como El Federal (San Telmo), El Gato Negro (Corrientes) o La Biela (Recoleta).',
+        'La Avenida Corrientes, conocida como "la calle que nunca duerme", combina librerías abiertas hasta tarde, teatros históricos y pizzerías míticas.',
+        'Mercado de San Telmo: Una galería histórica repleta de puestos de comida al paso, antigüedades y tragos. Ideal para almorzar o recorrer el domingo (horario habitual: 10 a 17 hs)',
+      ] },
+    ],
   },
+
+  {
+    id: 'apps-comida',
+    num: '7',
+    emoji: '🍔',
+    title: 'Apps de comida',
+    blocks: [
+      { type: 'subhead', text: '🛵 PedidosYa' },
+      { type: 'p', text: 'Es la aplicación de delivery más utilizada de Argentina. Permite pedir comida de miles de restaurantes, supermercados, farmacias, kioscos y hasta artículos de almacén. También ofrece promociones frecuentes, especialmente pagando con determinados medios de pago.' },
+      { type: 'p', text: 'Ideal para: pedir almuerzos, cenas, bebidas o hacer compras rápidas sin salir del alojamiento.' },
+
+      { type: 'subhead', text: '🟢 Rappi' },
+      { type: 'p', text: 'Muy similar a PedidosYa, aunque con menor presencia en algunos barrios. Además de comida, ofrece envíos, compras en supermercados, farmacias y otros comercios. En algunas zonas puede tener promociones o restaurantes exclusivos.' },
+      { type: 'p', text: 'Ideal para: comparar precios y tiempos de entrega con PedidosYa antes de hacer un pedido.' },
+
+      { type: 'subhead', text: "🍔 McDonald's, Burger King y Mostaza" },
+      { type: 'p', text: 'Las principales cadenas de comida rápida cuentan con aplicaciones propias. Desde ellas se pueden acceder a descuentos exclusivos, cupones y promociones que muchas veces no aparecen en las aplicaciones de delivery.' },
+      { type: 'p', text: 'Podés pedir en el local con cupones o pedir por delivery, disponibilidad según la zona.' },
+      { type: 'p', text: 'Ideal para: conseguir combos a mejor precio si hay un local cercano.' },
+
+      { type: 'subhead', text: '💡 Recomendación' },
+      { type: 'p', text: 'Antes de realizar un pedido, vale la pena comparar entre PedidosYa, Rappi y la aplicación oficial del restaurante. Es común encontrar diferencias en el precio del producto, el costo de envío o promociones que pueden hacer ahorrar dinero.' },
+      { type: 'p', text: 'Además, muchos restaurantes ofrecen descuentos especiales para el primer pedido o al pagar con determinadas tarjetas o billeteras virtuales.' },
+    ],
+  },
+
   {
     id: 'emergencias',
+    num: '9',
     emoji: '🆘',
-    title: 'Números de Emergencia',
-    content: [
-      {
-        subtitle: 'Números clave',
-        text: '911 — Policía, ambulancias y bomberos · 107 — SAME (Sistema de Atención Médica de Emergencias) · 0800-999-2838 — Turismo Buenos Aires (atención a turistas) · 147 — Atención GCBA (reclamos y consultas al gobierno porteño)'
-      },
-      {
-        subtitle: 'Farmacias',
-        text: 'Hay farmacias de turno las 24 hs en toda la ciudad. Búscalas en Google Maps o preguntá en cualquier farmacia cercana por la "farmacia de turno".'
-      }
-    ]
-  }
+    title: 'Números útiles y emergencias',
+    blocks: [
+      { type: 'table', headers: ['Servicio', 'Número / Contacto'], rows: [
+        ['Emergencias (Policía, Ambulancia, Bomberos)', '911'],
+        ['SAME (emergencias médicas de CABA)', '107'],
+        ['Turismo BA – Información (gratuito)', '0800-999-2838'],
+        ['Subte – Atención al cliente', '0800-555-1616'],
+        ['Línea 147 – Atención ciudadana GCBA', '147'],
+        ['Chat Booty, Ciudad de Buenos Aires', '+54 9 11 5050'],
+      ] },
+      { type: 'links', items: [
+        { text: 'Turismo CABA — Página Turismo BA', href: 'https://turismo.buenosaires.gob.ar/es' },
+        { text: 'Linda BA — Instagram Linda BA', href: 'https://www.instagram.com/lindaenvivo' },
+        { text: 'Página web Linda BA', href: 'https://linda.buenosaires.gob.ar/' },
+      ] },
+      { type: 'callout', tone: 'tip', text: 'Guardá en tu teléfono el número del lugar donde te hospedás y de algún contacto local. Ante cualquier problema, el 911 siempre responde.' },
+    ],
+  },
 ];
+
+const CALLOUT_STYLES = {
+  tip: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+  warning: 'bg-amber-50 border-amber-200 text-amber-900',
+  info: 'bg-sky-50 border-sky-200 text-sky-900',
+};
+
+function Block({ block }) {
+  switch (block.type) {
+    case 'p':
+      return block.href ? (
+        <a href={block.href} target="_blank" rel="noopener noreferrer" className="text-gray-700 text-sm leading-relaxed hover:underline block">
+          {block.text}
+        </a>
+      ) : (
+        <p className="text-gray-700 text-sm leading-relaxed">{block.text}</p>
+      );
+    case 'subhead':
+      return <h3 className="text-complementary-gold font-bold text-sm uppercase tracking-wide mt-2">{block.text}</h3>;
+    case 'list':
+      return (
+        <ul className="list-disc list-outside pl-5 space-y-1.5">
+          {block.items.map((it, i) => (
+            <li key={i} className="text-gray-700 text-sm leading-relaxed">{it}</li>
+          ))}
+        </ul>
+      );
+    case 'callout': {
+      const icon = block.tone === 'warning' ? '⚠️' : block.tone === 'tip' ? '💡' : 'ℹ️';
+      return (
+        <div className={`border rounded-lg px-4 py-3 text-sm leading-relaxed flex gap-2 ${CALLOUT_STYLES[block.tone] || CALLOUT_STYLES.info}`}>
+          <span className="shrink-0">{icon}</span>
+          <span>{block.text}</span>
+        </div>
+      );
+    }
+    case 'link':
+      return (
+        <a href={block.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold text-institutional hover:underline">
+          {block.emoji && <span>{block.emoji}</span>}
+          <span>{block.text}</span>
+        </a>
+      );
+    case 'links':
+      return (
+        <ul className="space-y-1">
+          {block.items.map((it, i) => (
+            <li key={i}>
+              <a href={it.href} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-institutional hover:underline">
+                {it.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      );
+    case 'img':
+      return (
+        <figure className="my-1">
+          {block.href ? (
+            <a href={block.href} target="_blank" rel="noopener noreferrer">
+              <img src={block.src} alt={block.alt} loading="lazy" className="w-full rounded-xl border border-gray-200" />
+            </a>
+          ) : (
+            <img src={block.src} alt={block.alt} loading="lazy" className="w-full rounded-xl border border-gray-200" />
+          )}
+        </figure>
+      );
+    case 'imgRow':
+      return (
+        <div className="grid grid-cols-2 gap-3">
+          {block.images.map((im, i) => (
+            <img key={i} src={im.src} alt={im.alt} loading="lazy" className="w-full rounded-xl border border-gray-200" />
+          ))}
+        </div>
+      );
+    case 'table':
+      return (
+        <div className="overflow-x-auto border border-gray-200 rounded-xl">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                {block.headers.map((h, i) => (
+                  <th key={i} className="text-left font-bold text-gray-600 px-4 py-2 uppercase text-xs tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {block.rows.map((row, ri) => (
+                <tr key={ri}>
+                  {row.map((cell, ci) => (
+                    <td key={ci} className="px-4 py-2.5 text-gray-700 align-top">{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    default:
+      return null;
+  }
+}
 
 function formatDate(iso) {
   const d = new Date(iso);
@@ -288,16 +613,11 @@ function SectionRow({ section, comments, user, onAdd, onDelete }) {
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="bg-institutional px-6 py-4 flex items-center gap-3">
           <span className="text-2xl">{section.emoji}</span>
-          <h2 className="text-white font-title text-xl font-bold">{section.title}</h2>
+          <h2 className="text-white font-title text-xl font-bold">{section.num}. {section.title}</h2>
         </div>
-        <div className="px-6 py-5 space-y-4">
-          {section.content.map((item, i) => (
-            <div key={i}>
-              <h3 className="text-complementary-gold font-bold text-sm uppercase tracking-wide mb-1">
-                {item.subtitle}
-              </h3>
-              <p className="text-gray-700 text-sm leading-relaxed">{item.text}</p>
-            </div>
+        <div className="px-6 py-5 space-y-3">
+          {section.blocks.map((block, i) => (
+            <Block key={i} block={block} />
           ))}
         </div>
       </div>
@@ -357,7 +677,7 @@ export default function ManualPortenoPage() {
           Manual del Porteño
         </h1>
         <p className="text-white/80 text-lg max-w-xl mx-auto font-body">
-          Todo lo que necesitás saber para moverte, comer y disfrutar Buenos Aires durante el congreso.
+          Guía práctica para moverse por Buenos Aires — dirigida a estudiantes y visitantes del interior y el exterior del país. Edición 2026.
         </p>
         <p className="text-white/60 text-xs mt-4 font-body">
           💬 Los comentarios de la comunidad están junto a cada sección.
@@ -380,6 +700,10 @@ export default function ManualPortenoPage() {
             />
           ))
         )}
+
+        <p className="text-center text-gray-400 text-sm pt-4">
+          ¡Bienvenido/a a Buenos Aires! 🧉 🏙️ 🚇 🎭 🍕
+        </p>
       </div>
     </div>
   );
