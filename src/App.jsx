@@ -6,6 +6,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 // Pages
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsersPage from './pages/AdminUsersPage';
 import CheckInScannerPage from './pages/CheckInScannerPage';
@@ -30,6 +31,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'login', element: <LoginPage /> },
+      { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'schedule', element: <SchedulePage /> },
       { path: 'venues', element: <VenuesPage /> },
       { path: 'sponsors', element: <SupportPage /> },
