@@ -40,18 +40,16 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
             </header>
 
             <div className="flex flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 gap-8">
-                {/* Sidebar — todos los roles tienen su propio set de links */}
+                {/* Sidebar — todos los roles tienen su propio set de links. La
+                    Elección de Actividades es solo para asistentes (inscriptos):
+                    admin, tesorería y delegados no eligen. */}
                 <aside className="hidden md:block w-64 flex-shrink-0">
                     <nav className="space-y-2 sticky top-24">
                         {(user.role === 'admin' || user.role === 'tesoreria') && (
                             <>
                                 <Link to="/admin" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Dashboard Integrado</Link>
                                 {user.role === 'admin' && <Link to="/admin/users" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Usuarios</Link>}
-                                <Link to="/actividades-demo-h4n8w2" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Elección de Actividades</Link>
                             </>
-                        )}
-                        {user.role === 'delegate' && (
-                            <Link to="/actividades-demo-h4n8w2" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Elección de Actividades</Link>
                         )}
                         {user.role === 'assistant' && (
                             <>

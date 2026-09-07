@@ -75,11 +75,11 @@ const router = createBrowserRouter([
       { index: true, element: <CheckInScannerPage /> },
     ]
   },
-  // Elección de Actividades — abierta a todos los roles logueados
-  // (admin, tesorería, delegados y asistentes).
+  // Elección de Actividades — instancia definitiva: solo para asistentes
+  // (inscriptos). Admin, tesorería y delegados no eligen actividades.
   {
     path: '/actividades-demo-h4n8w2',
-    element: <DashboardLayout allowedRoles={['admin', 'tesoreria', 'delegate', 'assistant']} />,
+    element: <DashboardLayout allowedRoles={['assistant']} />,
     children: [
       { index: true, element: <ActivitySelectionPage /> },
     ]
