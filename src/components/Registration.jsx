@@ -45,7 +45,7 @@ const STAGE3_PREREGISTRATION_SILENTLY_EXTENDED = true;
 // Cierre definitivo de inscripciones (cierra la 3ª Etapa para siempre, incluidos
 // los links "forceOpen" de respaldo que normalmente ignoran las fechas de STAGES).
 // En true: nadie puede inscribirse más, en ningún formulario.
-const REGISTRATION_HARD_CLOSED = false;
+const REGISTRATION_HARD_CLOSED = true;
 
 const getCurrentPhase = (today) => {
     for (const stage of STAGES) {
