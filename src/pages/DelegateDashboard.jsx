@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ActivitySelectionsPanel from '../components/ActivitySelectionsPanel';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -666,6 +667,17 @@ const DelegateDashboard = () => {
                         )}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Elección de Actividades — visitas técnicas elegidas por tu gente */}
+            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-bold text-institutional font-title">Elección de Actividades</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">Visitas técnicas elegidas por tu delegación.</p>
+                </div>
+                <div className="p-4 md:p-6">
+                    <ActivitySelectionsPanel scope="delegate" email={delegateEmail} />
+                </div>
             </div>
 
             {/* Payment Batches */}
