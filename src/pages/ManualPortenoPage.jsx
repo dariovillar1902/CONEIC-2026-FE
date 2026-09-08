@@ -609,7 +609,7 @@ function SectionCommentPanel({ sectionId, comments, user, onAdd, onDelete }) {
 
 function SectionRow({ section, comments, user, onAdd, onDelete }) {
   return (
-    <div className="grid lg:grid-cols-[1fr_260px] gap-4 items-start">
+    <div id={section.id} className="grid lg:grid-cols-[1fr_260px] gap-4 items-start scroll-mt-24">
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="bg-institutional px-6 py-4 flex items-center gap-3">
           <span className="text-2xl">{section.emoji}</span>
@@ -630,6 +630,46 @@ function SectionRow({ section, comments, user, onAdd, onDelete }) {
         onDelete={onDelete}
       />
     </div>
+  );
+}
+
+/** Mini índice de secciones — versión sidebar fija para desktop. */
+function TableOfContents() {
+  return (
+    <nav className="hidden lg:block sticky top-24 self-start">
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-2">Índice</p>
+      <ul className="space-y-0.5">
+        {SECTIONS.map(s => (
+          <li key={s.id}>
+            <a
+              href={`#${s.id}`}
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-institutional hover:bg-white rounded-lg px-2 py-2 transition"
+            >
+              <span className="shrink-0">{s.emoji}</span>
+              <span className="leading-tight">{s.num}. {s.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+/** Mismo índice, en tira horizontal scrolleable — para mobile/tablet. */
+function TableOfContentsMobile() {
+  return (
+    <nav className="lg:hidden flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:-mx-6 sm:px-6">
+      {SECTIONS.map(s => (
+        <a
+          key={s.id}
+          href={`#${s.id}`}
+          className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-full px-3 py-1.5 hover:text-institutional hover:border-institutional transition whitespace-nowrap"
+        >
+          <span>{s.emoji}</span>
+          <span>{s.title}</span>
+        </a>
+      ))}
+    </nav>
   );
 }
 
@@ -679,31 +719,39 @@ export default function ManualPortenoPage() {
         <p className="text-white/80 text-lg max-w-xl mx-auto font-body">
           Guía práctica para moverse por Buenos Aires — dirigida a estudiantes y visitantes del interior y el exterior del país. Edición 2026.
         </p>
-        <p className="text-white/60 text-xs mt-4 font-body">
-          💬 Los comentarios de la comunidad están junto a cada sección.
+        <p className="text-white/60 text-xs mt-4 font-body max-w-xl mx-auto">
+          💬 Los comentarios de la comunidad están junto a cada sección. Podés agregar tu comentario siempre que sea respetuoso y tenga que ver con temas del Manual. Los administradores podrán borrar comentarios que no cumplan con el reglamento.
         </p>
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-8">
-        {loading ? (
-          <p className="text-gray-400 text-sm text-center">Cargando manual…</p>
-        ) : (
-          SECTIONS.map(section => (
-            <SectionRow
-              key={section.id}
-              section={section}
-              comments={commentsBySection[section.id] || []}
-              user={user}
-              onAdd={comment => handleAdd(section.id, comment)}
-              onDelete={commentId => handleDelete(section.id, commentId)}
-            />
-          ))
-        )}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+        <TableOfContentsMobile />
 
-        <p className="text-center text-gray-400 text-sm pt-4">
-          ¡Bienvenido/a a Buenos Aires! 🧉 🏙️ 🚇 🎭 🍕
-        </p>
+        <div className="mt-6 lg:mt-0 lg:grid lg:grid-cols-[200px_1fr] lg:gap-8">
+          <TableOfContents />
+
+          <div className="space-y-8 min-w-0">
+            {loading ? (
+              <p className="text-gray-400 text-sm text-center">Cargando manual…</p>
+            ) : (
+              SECTIONS.map(section => (
+                <SectionRow
+                  key={section.id}
+                  section={section}
+                  comments={commentsBySection[section.id] || []}
+                  user={user}
+                  onAdd={comment => handleAdd(section.id, comment)}
+                  onDelete={commentId => handleDelete(section.id, commentId)}
+                />
+              ))
+            )}
+
+            <p className="text-center text-gray-400 text-sm pt-4">
+              ¡Bienvenido/a a Buenos Aires! 🧉 🏙️ 🚇 🎭 🍕
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
