@@ -340,7 +340,7 @@ const SECTIONS = [
 
   {
     id: 'emergencias',
-    num: '9',
+    num: '8',
     emoji: '🆘',
     title: 'Números útiles y emergencias',
     blocks: [

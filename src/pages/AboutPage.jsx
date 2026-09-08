@@ -189,22 +189,6 @@ const AboutPage = () => {
     return (
         <div className="w-full font-body pt-20">
 
-            {/* Collaboration banner */}
-            <div className="bg-complementary-gold/15 border-b border-complementary-gold/30">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div>
-                        <h2 className="text-xl font-bold font-title text-institutional">¿Te gustaría colaborar?</h2>
-                        <p className="text-gray-600 font-body text-sm mt-1">
-                            Estamos buscando estudiantes proactivos para formar parte del comité organizador&nbsp;local.
-                        </p>
-                    </div>
-                    <a href="mailto:coneic.argentina@gmail.com"
-                        className="flex-shrink-0 bg-institutional text-white px-8 py-3 rounded-full font-bold hover:bg-primary-red transition-colors shadow-md uppercase tracking-widest text-sm">
-                        ¡Postulate Ahora!
-                    </a>
-                </div>
-            </div>
-
             {/* Hero */}
             <div className="relative bg-institutional text-white py-20 px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1612294068224-b327dfada2ac?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
