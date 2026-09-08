@@ -75,11 +75,11 @@ const router = createBrowserRouter([
       { index: true, element: <CheckInScannerPage /> },
     ]
   },
-  // Elección de Actividades — instancia definitiva: solo para asistentes
-  // (inscriptos). Admin, tesorería y delegados no eligen actividades.
+  // Elección de Actividades — CERRADA temporalmente (se reactivará más
+  // adelante). Solo admin puede entrar mientras tanto, para pruebas.
   {
     path: '/eleccion-actividades',
-    element: <DashboardLayout allowedRoles={['assistant']} />,
+    element: <DashboardLayout allowedRoles={['admin']} />,
     children: [
       { index: true, element: <ActivitySelectionPage /> },
     ]
