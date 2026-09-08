@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { formatEventDate } from '../utils/formatEventDate';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -269,7 +270,7 @@ const ActivitySelectionPage = () => {
                                     </p>
                                     <p className="font-bold text-gray-800">{s.activityCode} — {s.activityTitle}</p>
                                 </div>
-                                <span className="text-xs text-gray-400 shrink-0">{new Date(s.confirmedAt).toLocaleString('es-AR')}</span>
+                                <span className="text-xs text-gray-400 shrink-0">{formatEventDate(s.confirmedAt)}</span>
                             </div>
                         ))}
                     </div>

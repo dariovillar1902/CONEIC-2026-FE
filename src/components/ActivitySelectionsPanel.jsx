@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { parseUtc, formatEventDate } from '../utils/formatEventDate';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -63,7 +64,7 @@ const ActivitySelectionsPanel = ({ scope, email }) => {
             );
         }
         items.sort((a, b) => {
-            const diff = new Date(a.selectedAt) - new Date(b.selectedAt);
+            const diff = parseUtc(a.selectedAt) - parseUtc(b.selectedAt);
             return sortDir === 'asc' ? diff : -diff;
         });
         return items;
@@ -131,7 +132,7 @@ const ActivitySelectionsPanel = ({ scope, email }) => {
                         {filteredRows.map((r, i) => (
                             <tr key={i} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
-                                    {new Date(r.selectedAt).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                    {formatEventDate(r.selectedAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap font-bold text-gray-900">
                                     {r.lastname ?? '—'}{r.name ? `, ${r.name}` : ''}
