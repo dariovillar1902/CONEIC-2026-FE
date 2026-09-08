@@ -879,7 +879,7 @@ const AdminDashboard = () => {
 
       {activeTab === 'overview'      && <Overview registrations={allRegs} />}
       {activeTab === 'registrations' && <RegistrationsPanel />}
-      {activeTab === 'selecciones'   && <ActivitySelectionsPanel scope="admin" />}
+      {activeTab === 'selecciones'   && <ActivitySelectionsPanel scope="admin" viewerEmail={user?.email} />}
       {activeTab === 'comprobantes'  && <ComprobantesPanel />}
     </div>
   );
