@@ -78,7 +78,7 @@ const router = createBrowserRouter([
   // Elección de Actividades — instancia definitiva: solo para asistentes
   // (inscriptos). Admin, tesorería y delegados no eligen actividades.
   {
-    path: '/actividades-demo-h4n8w2',
+    path: '/eleccion-actividades',
     element: <DashboardLayout allowedRoles={['assistant']} />,
     children: [
       { index: true, element: <ActivitySelectionPage /> },
