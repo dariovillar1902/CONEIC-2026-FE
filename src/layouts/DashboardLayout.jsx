@@ -1,6 +1,26 @@
 import { Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// Links del sidebar por rol — se comparten entre la versión de escritorio
+// (aside fijo) y la de mobile (tira horizontal), para no tener que
+// mantenerlos sincronizados en dos lugares.
+const navLinksFor = (role) => {
+    if (role === 'admin' || role === 'tesoreria') {
+        return [
+            { to: '/admin', label: 'Dashboard Integrado' },
+            ...(role === 'admin' ? [{ to: '/admin/users', label: 'Usuarios' }] : []),
+        ];
+    }
+    if (role === 'assistant') {
+        return [
+            { to: '/my-ticket', label: 'Mi Entrada QR' },
+            { to: '/activities', label: 'Actividades' },
+            { to: '/eleccion-actividades', label: 'Elección de Actividades' },
+        ];
+    }
+    return [];
+};
+
 const DashboardLayout = ({ allowedRoles = [] }) => {
     const { user, logout, hasRole, loading } = useAuth();
 
@@ -13,6 +33,8 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
     if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
         return <Navigate to="/unauthorized" replace />;
     }
+
+    const navLinks = navLinksFor(user.role);
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-body">
@@ -39,25 +61,38 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
                 </div>
             </header>
 
+            {/* Nav mobile — tira horizontal scrolleable. El aside de abajo está
+                oculto en mobile (hidden md:block), así que sin esto no hay
+                forma de navegar entre secciones desde el celular. */}
+            {navLinks.length > 0 && (
+                <nav className="md:hidden flex gap-2 overflow-x-auto px-4 py-3 bg-white border-b border-gray-200">
+                    {navLinks.map(link => (
+                        <Link
+                            key={link.to}
+                            to={link.to}
+                            className="shrink-0 text-sm font-bold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full px-4 py-2 transition whitespace-nowrap"
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+            )}
+
             <div className="flex flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 gap-8">
                 {/* Sidebar — todos los roles tienen su propio set de links. La
                     Elección de Actividades es solo para asistentes (inscriptos):
                     admin, tesorería y delegados no eligen. */}
                 <aside className="hidden md:block w-64 flex-shrink-0">
                     <nav className="space-y-2 sticky top-24">
-                        {(user.role === 'admin' || user.role === 'tesoreria') && (
-                            <>
-                                <Link to="/admin" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Dashboard Integrado</Link>
-                                {user.role === 'admin' && <Link to="/admin/users" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Usuarios</Link>}
-                            </>
-                        )}
-                        {user.role === 'assistant' && (
-                            <>
-                                <Link to="/my-ticket" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Mi Entrada QR</Link>
-                                <Link to="/activities" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Actividades</Link>
-                                <Link to="/eleccion-actividades" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Elección de Actividades</Link>
-                            </>
-                        )}
+                        {navLinks.map(link => (
+                            <Link
+                                key={link.to}
+                                to={link.to}
+                                className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition"
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
                     </nav>
                 </aside>
 
