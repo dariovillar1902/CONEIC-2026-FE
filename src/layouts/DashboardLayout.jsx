@@ -55,7 +55,7 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
                             <>
                                 <Link to="/my-ticket" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Mi Entrada QR</Link>
                                 <Link to="/activities" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Actividades</Link>
-                                {/* Elección de Actividades cerrada temporalmente — se reactivará más adelante */}
+                                <Link to="/eleccion-actividades" className="block px-4 py-3 bg-white hover:bg-gray-50 rounded-lg shadow-sm border border-gray-200 font-bold text-gray-700 hover:text-primary-blue transition">Elección de Actividades</Link>
                             </>
                         )}
                     </nav>
