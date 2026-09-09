@@ -35,10 +35,16 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
 
     const canOverride = (viewerEmail ?? '').toLowerCase() === OVERRIDE_EMAIL;
     const [catalog, setCatalog] = useState([]); // opciones de todas las visitas, con cupo
-    const [overrideTarget, setOverrideTarget] = useState(null); // fila siendo reasignada
+    const [overrideTarget, setOverrideTarget] = useState(null); // fila siendo reasignada, o { email, name, lastname } si es alta nueva
     const [overrideActivityId, setOverrideActivityId] = useState('');
     const [overrideSaving, setOverrideSaving] = useState(false);
     const [overrideError, setOverrideError] = useState(null);
+
+    // Alta manual — para gente que todavía no tiene NINGUNA selección (por
+    // eso no aparece como fila en la tabla y "Reasignar" no le sirve).
+    const [allRegistrations, setAllRegistrations] = useState([]);
+    const [addModalOpen, setAddModalOpen] = useState(false);
+    const [addSearch, setAddSearch] = useState('');
 
     useEffect(() => {
         if (scope === 'delegate' && !email) return;
@@ -75,6 +81,45 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
             .catch(() => {});
     }, [canOverride, viewerEmail]);
 
+    // Lista completa de inscriptos, para poder buscar a quien todavía no
+    // eligió nada (no aparece en `rows`, que solo trae selecciones existentes).
+    useEffect(() => {
+        if (!canOverride) return;
+        fetch(`${API}/api/registrations`)
+            .then(r => r.ok ? r.json() : [])
+            .then(data => setAllRegistrations(Array.isArray(data) ? data : []))
+            .catch(() => {});
+    }, [canOverride]);
+
+    const emailsWithSelection = useMemo(() => new Set(rows.map(r => r.email.toLowerCase())), [rows]);
+
+    const addSearchResults = useMemo(() => {
+        if (!addSearch.trim()) return [];
+        const lower = addSearch.toLowerCase();
+        return allRegistrations
+            .filter(r => !emailsWithSelection.has(r.email.toLowerCase()))
+            .filter(r =>
+                r.name.toLowerCase().includes(lower) ||
+                r.lastname.toLowerCase().includes(lower) ||
+                r.email.toLowerCase().includes(lower)
+            )
+            .slice(0, 8);
+    }, [addSearch, allRegistrations, emailsWithSelection]);
+
+    const openAdd = () => {
+        setAddModalOpen(true);
+        setAddSearch('');
+        setOverrideActivityId('');
+        setOverrideError(null);
+    };
+
+    const pickAddTarget = (reg) => {
+        setOverrideTarget({ email: reg.email, name: reg.name, lastname: reg.lastname, activityCode: null, activityTitle: 'sin elegir todavía', blockId: 1 });
+        setAddModalOpen(false);
+        setOverrideActivityId('');
+        setOverrideError(null);
+    };
+
     const openOverride = (row) => {
         setOverrideTarget(row);
         setOverrideActivityId('');
@@ -99,9 +144,29 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
             if (!res.ok) throw new Error(data?.message || 'Error al reasignar.');
 
             const picked = catalog.find(o => o.id === Number(overrideActivityId));
-            setRows(prev => prev.map(r => r.email === overrideTarget.email && r.blockId === overrideTarget.blockId
-                ? { ...r, activityId: picked?.id ?? r.activityId, activityCode: picked?.code ?? r.activityCode, activityTitle: picked?.title ?? r.activityTitle }
-                : r));
+            const isNewAddition = overrideTarget.activityCode === null;
+
+            if (isNewAddition) {
+                const reg = allRegistrations.find(r => r.email.toLowerCase() === overrideTarget.email.toLowerCase());
+                setRows(prev => [{
+                    registrationId: reg?.id ?? null,
+                    name: overrideTarget.name,
+                    lastname: overrideTarget.lastname,
+                    email: overrideTarget.email,
+                    faculty: reg?.faculty ?? null,
+                    blockId: 1,
+                    activityId: picked?.id,
+                    activityCode: picked?.code,
+                    activityTitle: picked?.title,
+                    isConfirmed: true,
+                    selectedAt: new Date().toISOString(),
+                    confirmedAt: new Date().toISOString(),
+                }, ...prev]);
+            } else {
+                setRows(prev => prev.map(r => r.email === overrideTarget.email && r.blockId === overrideTarget.blockId
+                    ? { ...r, activityId: picked?.id ?? r.activityId, activityCode: picked?.code ?? r.activityCode, activityTitle: picked?.title ?? r.activityTitle, isConfirmed: true }
+                    : r));
+            }
             setOverrideTarget(null);
         } catch (e) {
             setOverrideError(e.message || 'Error al reasignar.');
@@ -182,6 +247,14 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                 >
                     Fecha {sortDir === 'asc' ? '↑ más antigua primero' : '↓ más reciente primero'}
                 </button>
+                {canOverride && (
+                    <button
+                        onClick={openAdd}
+                        className="text-xs font-bold text-white bg-institutional border border-institutional rounded-lg px-3 py-2 hover:bg-primary-red transition"
+                    >
+                        + Agregar selección manual
+                    </button>
+                )}
                 <span className="text-xs text-gray-400 font-bold ml-auto">{filteredRows.length} resultado{filteredRows.length !== 1 ? 's' : ''}</span>
             </div>
 
@@ -245,17 +318,55 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                 </table>
             </div>
 
-            {/* Modal de reasignación manual — solo directorio */}
+            {/* Modal de búsqueda — alta manual para gente sin selección todavía */}
+            {addModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-fade-in-up">
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="text-lg font-bold text-institutional">Agregar selección manual</h3>
+                            <button onClick={() => setAddModalOpen(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">Buscá a la persona por nombre o email — solo aparece gente que todavía no tiene ninguna visita elegida.</p>
+                        <input
+                            type="text"
+                            autoFocus
+                            placeholder="Nombre, apellido o email..."
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full mb-2 focus:ring-2 focus:ring-primary-blue outline-none"
+                            value={addSearch}
+                            onChange={e => setAddSearch(e.target.value)}
+                        />
+                        <div className="max-h-56 overflow-y-auto divide-y divide-gray-100 border border-gray-100 rounded-lg mb-2">
+                            {addSearchResults.map(reg => (
+                                <button
+                                    key={reg.id}
+                                    onClick={() => pickAddTarget(reg)}
+                                    className="w-full text-left px-3 py-2 hover:bg-blue-50 transition text-sm"
+                                >
+                                    <span className="font-bold text-gray-800">{reg.lastname}, {reg.name}</span>
+                                    <span className="text-gray-400 text-xs block">{reg.email} · {reg.faculty?.replace('UTN - ', '')}</span>
+                                </button>
+                            ))}
+                            {addSearch.trim() && addSearchResults.length === 0 && (
+                                <p className="text-xs text-gray-400 italic px-3 py-4 text-center">Sin resultados (o ya tiene una visita elegida).</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de reasignación / alta manual — solo directorio */}
             {overrideTarget && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-fade-in-up">
                         <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-lg font-bold text-institutional">Reasignar visita</h3>
+                            <h3 className="text-lg font-bold text-institutional">{overrideTarget.activityCode === null ? 'Elegir visita' : 'Reasignar visita'}</h3>
                             <button onClick={() => setOverrideTarget(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
                         </div>
                         <p className="text-sm text-gray-600 mb-4">
                             {overrideTarget.lastname}, {overrideTarget.name} <span className="text-gray-400">({overrideTarget.email})</span>
-                            <br />Actualmente: <span className="font-bold text-institutional">{overrideTarget.activityCode}</span> — {overrideTarget.activityTitle}
+                            {overrideTarget.activityCode && (
+                                <><br />Actualmente: <span className="font-bold text-institutional">{overrideTarget.activityCode}</span> — {overrideTarget.activityTitle}</>
+                            )}
                         </p>
 
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Nueva visita</label>
