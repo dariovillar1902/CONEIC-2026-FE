@@ -45,7 +45,10 @@ const STAGE3_PREREGISTRATION_SILENTLY_EXTENDED = true;
 // Cierre definitivo de inscripciones (cierra la 3ª Etapa para siempre, incluidos
 // los links "forceOpen" de respaldo que normalmente ignoran las fechas de STAGES).
 // En true: nadie puede inscribirse más, en ningún formulario.
-const REGISTRATION_HARD_CLOSED = true;
+//
+// Reabierto 2026-09-09 a pedido de Alva (delegada UTN) para sumar 3
+// personas más — volver a poner en true cuando ya no haga falta.
+const REGISTRATION_HARD_CLOSED = false;
 
 const getCurrentPhase = (today) => {
     for (const stage of STAGES) {

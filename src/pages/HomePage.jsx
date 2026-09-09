@@ -37,8 +37,8 @@ const HomePage = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up delay-200 mb-16">
-            <Link to="/login" className="bg-primary-red hover:bg-red-900 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-1 hover:shadow-red-900/40 hover:shadow-xl uppercase tracking-widest text-sm border-2 border-primary-red">
-              Ingresar
+            <Link to="/registration" className="bg-primary-red hover:bg-red-900 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-1 hover:shadow-red-900/40 hover:shadow-xl uppercase tracking-widest text-sm border-2 border-primary-red">
+              Inscribirse
             </Link>
             <Link to="/schedule" className="bg-transparent hover:bg-white/10 text-white px-10 py-4 rounded-full font-bold shadow-lg transition-all transform hover:-translate-y-1 backdrop-blur-sm border-2 border-white uppercase tracking-widest text-sm">
               Cronograma
