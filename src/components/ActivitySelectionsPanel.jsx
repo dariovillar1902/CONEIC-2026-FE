@@ -40,8 +40,9 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
     const [overrideSaving, setOverrideSaving] = useState(false);
     const [overrideError, setOverrideError] = useState(null);
 
-    // Alta manual — para gente que todavía no tiene NINGUNA selección (por
-    // eso no aparece como fila en la tabla y "Reasignar" no le sirve).
+    // Se usa tanto para el filtro "Ninguna" (ver quién no eligió todavía)
+    // como para la alta manual — gente que no tiene ninguna selección no
+    // aparece como fila en `rows` (que solo trae selecciones existentes).
     const [allRegistrations, setAllRegistrations] = useState([]);
     const [addModalOpen, setAddModalOpen] = useState(false);
     const [addSearch, setAddSearch] = useState('');
@@ -81,17 +82,40 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
             .catch(() => {});
     }, [canOverride, viewerEmail]);
 
-    // Lista completa de inscriptos, para poder buscar a quien todavía no
-    // eligió nada (no aparece en `rows`, que solo trae selecciones existentes).
+    // Lista completa de inscriptos (misma cobertura que `rows`: todos para
+    // admin, solo la propia delegación para delegados), para el filtro
+    // "Ninguna" y para poder buscar a quien todavía no eligió nada.
     useEffect(() => {
-        if (!canOverride) return;
-        fetch(`${API}/api/registrations`)
+        if (scope === 'delegate' && !email) return;
+        const url = scope === 'admin'
+            ? `${API}/api/registrations`
+            : `${API}/api/registrations/delegate?email=${encodeURIComponent(email)}`;
+        fetch(url)
             .then(r => r.ok ? r.json() : [])
             .then(data => setAllRegistrations(Array.isArray(data) ? data : []))
             .catch(() => {});
-    }, [canOverride]);
+    }, [scope, email]);
 
     const emailsWithSelection = useMemo(() => new Set(rows.map(r => r.email.toLowerCase())), [rows]);
+
+    // Filas "virtuales" para quienes todavía no eligieron ninguna visita —
+    // no vienen de /activityselection, se arman acá a partir del padrón.
+    const noSelectionRows = useMemo(() => allRegistrations
+        .filter(r => !emailsWithSelection.has(r.email.toLowerCase()))
+        .map(r => ({
+            registrationId: r.id,
+            name: r.name,
+            lastname: r.lastname,
+            email: r.email,
+            faculty: r.faculty,
+            blockId: 1,
+            activityId: null,
+            activityCode: null,
+            activityTitle: null,
+            isConfirmed: false,
+            selectedAt: null,
+            confirmedAt: null,
+        })), [allRegistrations, emailsWithSelection]);
 
     const addSearchResults = useMemo(() => {
         if (!addSearch.trim()) return [];
@@ -182,13 +206,15 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
     }, [rows]);
 
     const facultyOptions = useMemo(() => {
-        const set = new Set(rows.map(r => r.faculty).filter(Boolean));
+        const set = new Set([...rows, ...noSelectionRows].map(r => r.faculty).filter(Boolean));
         return [...set].sort((a, b) => a.localeCompare(b));
-    }, [rows]);
+    }, [rows, noSelectionRows]);
+
+    const NO_SELECTION_VALUE = '__ninguna__';
 
     const filteredRows = useMemo(() => {
-        let items = [...rows];
-        if (activityFilter) items = items.filter(r => r.activityCode === activityFilter);
+        let items = activityFilter === NO_SELECTION_VALUE ? [...noSelectionRows] : [...rows];
+        if (activityFilter && activityFilter !== NO_SELECTION_VALUE) items = items.filter(r => r.activityCode === activityFilter);
         if (facultyFilter) items = items.filter(r => r.faculty === facultyFilter);
         if (searchTerm) {
             const lower = searchTerm.toLowerCase();
@@ -203,7 +229,7 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
             return sortDir === 'asc' ? diff : -diff;
         });
         return items;
-    }, [rows, activityFilter, facultyFilter, searchTerm, sortDir]);
+    }, [rows, noSelectionRows, activityFilter, facultyFilter, searchTerm, sortDir]);
 
     if (loading) return <div className="text-center py-12 text-gray-400">Cargando selecciones...</div>;
     if (error)   return <div className="text-red-600 text-center py-12">{error}</div>;
@@ -225,6 +251,7 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                     onChange={e => setActivityFilter(e.target.value)}
                 >
                     <option value="">Todas las visitas</option>
+                    <option value={NO_SELECTION_VALUE}>Ninguna (sin elegir todavía)</option>
                     {activityOptions.map(([code, title]) => (
                         <option key={code} value={code}>{code} — {title}</option>
                     ))}
@@ -276,7 +303,7 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                         {filteredRows.map((r, i) => (
                             <tr key={i} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
-                                    {formatEventDate(r.selectedAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                    {r.selectedAt ? formatEventDate(r.selectedAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap font-bold text-gray-900">
                                     {r.lastname ?? '—'}{r.name ? `, ${r.name}` : ''}
@@ -286,13 +313,17 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                                     {r.faculty?.replace('UTN - ', '') ?? '—'}
                                 </td>
                                 <td className="px-4 py-3 text-gray-700">
-                                    <span className="font-bold text-institutional">{r.activityCode}</span> — {r.activityTitle}
+                                    {r.activityCode ? (
+                                        <><span className="font-bold text-institutional">{r.activityCode}</span> — {r.activityTitle}</>
+                                    ) : (
+                                        <span className="text-gray-400 italic">Sin elegir</span>
+                                    )}
                                 </td>
                                 <td className="px-4 py-3 text-center">
                                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
-                                        r.isConfirmed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        !r.activityCode ? 'bg-gray-100 text-gray-500' : r.isConfirmed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                     }`}>
-                                        {r.isConfirmed ? 'Confirmada' : 'Borrador'}
+                                        {!r.activityCode ? 'Sin elegir' : r.isConfirmed ? 'Confirmada' : 'Borrador'}
                                     </span>
                                 </td>
                                 {canOverride && (
@@ -301,7 +332,7 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                                             onClick={() => openOverride(r)}
                                             className="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition font-bold"
                                         >
-                                            Reasignar
+                                            {r.activityCode ? 'Reasignar' : 'Elegir'}
                                         </button>
                                     </td>
                                 )}
