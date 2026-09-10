@@ -15,6 +15,8 @@ const navLinksFor = (role) => {
         return [
             { to: '/my-ticket', label: 'Mi Entrada QR' },
             { to: '/activities', label: 'Actividades' },
+            // Ventana 8-10/9 cerrada: el link sigue visible pero la página
+            // ahora es de solo lectura (no se puede elegir/cambiar visita).
             { to: '/eleccion-actividades', label: 'Elección de Actividades' },
         ];
     }
@@ -80,8 +82,8 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
 
             <div className="flex flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 gap-8">
                 {/* Sidebar — todos los roles tienen su propio set de links. La
-                    Elección de Actividades es solo para asistentes (inscriptos):
-                    admin, tesorería y delegados no eligen. */}
+                    Elección de Actividades es solo para asistentes (inscriptos);
+                    ya cerró la ventana de selección, ahora es de solo lectura. */}
                 <aside className="hidden md:block w-64 flex-shrink-0">
                     <nav className="space-y-2 sticky top-24">
                         {navLinks.map(link => (

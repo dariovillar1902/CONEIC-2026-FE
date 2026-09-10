@@ -34,6 +34,10 @@ const CATEGORY_LABEL = {
     TallerCharla: 'Talleres y Charlas Simultáneas',
 };
 
+// Ventana de elección (8-10/9) ya cerró: la página queda de solo lectura
+// para todos, hayan confirmado su elección definitiva o no.
+const SELECTION_WINDOW_CLOSED = true;
+
 // ── Tarjeta compacta: foto chica + código + título. El detalle va en el popup. ──
 const OptionCard = ({ option, picked, onOpen, disabled }) => {
     const full = option.taken >= option.capacity && !picked;
@@ -161,6 +165,7 @@ const ActivitySelectionPage = () => {
         initialized.current = true;
         (async () => {
             const result = await load();
+            if (SELECTION_WINDOW_CLOSED) { setMode('confirmed'); return; }
             if (!result?.blocksData) { setMode('wizard'); return; }
             if (result.statusData?.isConfirmed) {
                 setMode('confirmed');
@@ -252,14 +257,26 @@ const ActivitySelectionPage = () => {
     );
 
     if (mode === 'confirmed') {
+        const wasConfirmed = status?.isConfirmed;
+        const hadPick = block?.yourSelectionActivityId != null;
+        const banner = wasConfirmed
+            ? { tone: 'green', icon: '✅', title: 'Tu selección quedó confirmada', subtitle: 'Ya no se puede modificar.' }
+            : hadPick
+                ? { tone: 'amber', icon: '🔒', title: 'La ventana de elección ya cerró', subtitle: 'Tu última elección quedó guardada, pero ya no se puede cambiar.' }
+                : { tone: 'gray', icon: '🔒', title: 'La ventana de elección ya cerró', subtitle: 'No llegaste a elegir una visita.' };
+        const toneClasses = {
+            green: { box: 'bg-green-50 border-green-300', title: 'text-green-800', subtitle: 'text-green-700' },
+            amber: { box: 'bg-amber-50 border-amber-300', title: 'text-amber-800', subtitle: 'text-amber-700' },
+            gray: { box: 'bg-gray-50 border-gray-300', title: 'text-gray-800', subtitle: 'text-gray-500' },
+        }[banner.tone];
         return (
             <div className="max-w-6xl mx-auto p-4">
                 <Header />
                 <div className="max-w-3xl mx-auto">
-                    <div className="bg-green-50 border border-green-300 rounded-xl p-6 text-center mb-8">
-                        <p className="text-4xl mb-2">✅</p>
-                        <p className="font-bold text-green-800 text-lg">Tu selección quedó confirmada</p>
-                        <p className="text-sm text-green-700 mt-1">Ya no se puede modificar.</p>
+                    <div className={`${toneClasses.box} border rounded-xl p-6 text-center mb-8`}>
+                        <p className="text-4xl mb-2">{banner.icon}</p>
+                        <p className={`font-bold text-lg ${toneClasses.title}`}>{banner.title}</p>
+                        <p className={`text-sm mt-1 ${toneClasses.subtitle}`}>{banner.subtitle}</p>
                     </div>
                     <div className="space-y-3">
                         {status?.selections?.map((s) => (

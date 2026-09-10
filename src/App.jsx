@@ -75,8 +75,8 @@ const router = createBrowserRouter([
       { index: true, element: <CheckInScannerPage /> },
     ]
   },
-  // Elección de Actividades — ABIERTA (ventana 8-10/9). Solo asistentes
-  // (inscriptos) eligen; admin, tesorería y delegados no.
+  // Elección de Actividades — CERRADA (venció la ventana 8-10/9). Sigue
+  // accesible para asistentes pero en modo solo lectura (ver ActivitySelectionPage).
   {
     path: '/eleccion-actividades',
     element: <DashboardLayout allowedRoles={['assistant']} />,
