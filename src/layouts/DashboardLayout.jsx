@@ -8,7 +8,12 @@ const navLinksFor = (role) => {
     if (role === 'admin' || role === 'tesoreria') {
         return [
             { to: '/admin', label: 'Dashboard Integrado' },
-            ...(role === 'admin' ? [{ to: '/admin/users', label: 'Usuarios' }] : []),
+            ...(role === 'admin' ? [
+                { to: '/admin/users', label: 'Usuarios' },
+                // Habilitado por ahora SOLO para admin (ver App.jsx) mientras
+                // se prueba la elección de talleres/simultáneas/solidarias.
+                { to: '/admin/talleres', label: 'Talleres y Solidarias' },
+            ] : []),
         ];
     }
     if (role === 'assistant') {

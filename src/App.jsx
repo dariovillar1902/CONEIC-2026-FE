@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsersPage from './pages/AdminUsersPage';
+import TalleresSelectionPage from './pages/TalleresSelectionPage';
 import CheckInScannerPage from './pages/CheckInScannerPage';
 import ActivitySelectionPage from './pages/ActivitySelectionPage';
 import DelegateDashboard from './pages/DelegateDashboard';
@@ -64,6 +65,15 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <AdminDashboard /> },
       { path: 'users', element: <AdminUsersPage /> },
+    ]
+  },
+  // Talleres, Simultáneas y Solidarias — habilitado por ahora SOLO para
+  // admin (no tesorería, no delegados, no asistentes) mientras se prueba.
+  {
+    path: '/admin/talleres',
+    element: <DashboardLayout allowedRoles={['admin']} />,
+    children: [
+      { index: true, element: <TalleresSelectionPage /> },
     ]
   },
   // Toma de asistencia (QR + fallback manual) — sin enlazar en ningún menú a
