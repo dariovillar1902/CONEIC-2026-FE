@@ -4,6 +4,11 @@ import { useAuth } from '../context/AuthContext';
 // Links del sidebar por rol — se comparten entre la versión de escritorio
 // (aside fijo) y la de mobile (tira horizontal), para no tener que
 // mantenerlos sincronizados en dos lugares.
+// El Manual del Porteño ya es público (ver App.jsx, vive bajo MainLayout sin
+// gating de rol) — este link es solo para que cualquier usuario logueado lo
+// tenga a mano en el menú, sea cual sea su rol.
+const MANUAL_PORTENO_LINK = { to: '/manual-porteno', label: 'Manual del Porteño' };
+
 const navLinksFor = (role) => {
     if (role === 'admin' || role === 'tesoreria') {
         return [
@@ -14,6 +19,7 @@ const navLinksFor = (role) => {
                 // se prueba la elección de talleres/simultáneas/solidarias.
                 { to: '/admin/talleres', label: 'Talleres y Solidarias' },
             ] : []),
+            MANUAL_PORTENO_LINK,
         ];
     }
     if (role === 'assistant') {
@@ -23,7 +29,11 @@ const navLinksFor = (role) => {
             // Ventana 8-10/9 cerrada: el link sigue visible pero la página
             // ahora es de solo lectura (no se puede elegir/cambiar visita).
             { to: '/eleccion-actividades', label: 'Elección de Actividades' },
+            MANUAL_PORTENO_LINK,
         ];
+    }
+    if (role === 'delegate') {
+        return [MANUAL_PORTENO_LINK];
     }
     return [];
 };

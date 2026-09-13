@@ -100,6 +100,17 @@ export const SchedulePage = () => (
         </div>
       </div>
 
+      {/* Manual del Porteño */}
+      <Link
+        to="/manual-porteno"
+        className="flex items-center justify-between gap-3 bg-complementary-gold/15 hover:bg-complementary-gold/25 border border-complementary-gold/40 rounded-xl px-5 py-3 mb-8 transition"
+      >
+        <span className="text-sm text-institutional font-body">
+          🧉 <span className="font-bold">Manual del Porteño</span> — guía práctica para moverse por Buenos Aires.
+        </span>
+        <span className="text-xs font-bold text-institutional uppercase tracking-widest underline shrink-0">Ver →</span>
+      </Link>
+
       <VisualSchedule />
 
       {/* Concurso de Ponencias Estudiantiles */}

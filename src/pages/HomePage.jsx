@@ -89,6 +89,21 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Manual del Porteño — banner de disponibilidad */}
+      <section className="px-4 mt-12">
+        <Link
+          to="/manual-porteno"
+          className="max-w-6xl mx-auto flex flex-wrap items-center justify-center sm:justify-between gap-3 bg-complementary-gold/15 hover:bg-complementary-gold/25 border border-complementary-gold/40 rounded-2xl px-6 py-4 transition text-center sm:text-left"
+        >
+          <p className="text-sm sm:text-base text-institutional font-body">
+            🧉 <span className="font-bold">¡Ya está disponible el Manual del Porteño!</span> Guía práctica para moverse por Buenos Aires.
+          </p>
+          <span className="text-xs font-bold text-institutional uppercase tracking-widest underline shrink-0">
+            Ver Manual →
+          </span>
+        </Link>
+      </section>
+
       <Sponsors />
     </>
   );
