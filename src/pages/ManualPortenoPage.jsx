@@ -379,7 +379,11 @@ function Block({ block }) {
         <p className="text-gray-700 text-sm leading-relaxed">{block.text}</p>
       );
     case 'subhead':
-      return <h3 className="text-complementary-gold font-bold text-sm uppercase tracking-wide mt-2">{block.text}</h3>;
+      return (
+        <h3 className="text-[#870a28] bg-[#870a28]/10 font-bold text-sm uppercase tracking-wide mt-2 px-3 py-2 rounded-lg">
+          {block.text}
+        </h3>
+      );
     case 'list':
       return (
         <ul className="list-disc list-outside pl-5 space-y-1.5">
