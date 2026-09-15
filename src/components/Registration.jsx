@@ -778,6 +778,9 @@ const Registration = ({ forceOpen = false, international = false }) => {
                                                     ))}
                                                 </optgroup>
                                             ))}
+                                            <optgroup label="Comité Organizador">
+                                                <option value="Comité Organizador">Comité Organizador (CONEIC)</option>
+                                            </optgroup>
                                             <optgroup label="Otra">
                                                 <option value="Otra">Otra (indicar provincia)</option>
                                             </optgroup>
