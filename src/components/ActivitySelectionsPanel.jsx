@@ -67,7 +67,7 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
     // Catálogo completo de visitas (con cupo), solo lo necesita quien puede reasignar.
     useEffect(() => {
         if (!canOverride) return;
-        fetch(`${API}/api/activityselection/blocks?email=${encodeURIComponent(viewerEmail)}`)
+        fetch(`${API}/api/activityselection/blocks?email=${encodeURIComponent(viewerEmail)}&includeInactive=true`)
             .then(r => r.ok ? r.json() : [])
             .then(blocks => {
                 const options = (blocks ?? []).flatMap(b => (b.options ?? []).map(o => ({
@@ -76,6 +76,7 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                     title: o.title,
                     capacity: o.capacity,
                     taken: o.taken,
+                    blockName: b.name,
                 })));
                 setCatalog(options);
             })
@@ -407,10 +408,19 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                             onChange={e => setOverrideActivityId(e.target.value)}
                         >
                             <option value="">— Elegir —</option>
-                            {catalog.map(o => (
-                                <option key={o.id} value={o.id}>
-                                    {o.code} — {o.title} ({o.taken}/{o.capacity}{o.taken >= o.capacity ? ' · lleno, se agranda cupo' : ''})
-                                </option>
+                            {Object.entries(
+                                catalog.reduce((groups, o) => {
+                                    (groups[o.blockName] ??= []).push(o);
+                                    return groups;
+                                }, {})
+                            ).map(([blockName, opts]) => (
+                                <optgroup key={blockName} label={blockName}>
+                                    {opts.map(o => (
+                                        <option key={o.id} value={o.id}>
+                                            {o.code} — {o.title} ({o.taken}/{o.capacity}{o.taken >= o.capacity ? ' · lleno, se agranda cupo' : ''})
+                                        </option>
+                                    ))}
+                                </optgroup>
                             ))}
                         </select>
                         <p className="text-xs text-gray-400 mb-4">
