@@ -68,9 +68,10 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
     useEffect(() => {
         if (!canOverride) return;
         fetch(`${API}/api/activityselection/blocks?email=${encodeURIComponent(viewerEmail)}&includeInactive=true`)
-            .then(r => r.ok ? r.json() : [])
-            .then(blocks => {
-                const options = (blocks ?? []).flatMap(b => (b.options ?? []).map(o => ({
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                const blocks = data?.blocks ?? [];
+                const options = blocks.flatMap(b => (b.options ?? []).map(o => ({
                     id: o.id,
                     code: o.code,
                     title: o.title,

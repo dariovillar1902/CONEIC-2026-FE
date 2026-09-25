@@ -155,9 +155,10 @@ const ActivitySelectionPage = () => {
             apiWithRetry(`/api/activityselection/blocks?email=${encodeURIComponent(user.email)}`),
             apiWithRetry(`/api/activityselection/status?email=${encodeURIComponent(user.email)}`),
         ]);
-        if (blocksRes.ok) setBlocks(blocksRes.data);
+        const blocksData = blocksRes.data?.blocks ?? null;
+        if (blocksRes.ok) setBlocks(blocksData);
         if (statusRes.ok) setStatus(statusRes.data);
-        return { blocksData: blocksRes.data, statusData: statusRes.data };
+        return { blocksData, statusData: statusRes.data };
     }, [user]);
 
     useEffect(() => {

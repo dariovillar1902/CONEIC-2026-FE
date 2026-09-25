@@ -114,6 +114,7 @@ const OptionModal = ({ option, picked, onClose, onChoose, choosing, readOnly = f
 const TalleresSelectionPage = () => {
     const { user } = useAuth();
     const [blocks, setBlocks] = useState(null);
+    const [windowInfo, setWindowInfo] = useState(null); // { isWindowOpen, windowOpensAt, windowClosesAt }
     const [status, setStatus] = useState(null);
     const [activeCategory, setActiveCategory] = useState('Taller');
     const [showSummary, setShowSummary] = useState(false);
@@ -131,9 +132,17 @@ const TalleresSelectionPage = () => {
             apiWithRetry(`/api/activityselection/blocks?email=${encodeURIComponent(user.email)}`),
             apiWithRetry(`/api/activityselection/status?email=${encodeURIComponent(user.email)}`),
         ]);
-        if (blocksRes.ok) setBlocks(blocksRes.data);
+        const blocksData = blocksRes.data?.blocks ?? null;
+        if (blocksRes.ok) {
+            setBlocks(blocksData);
+            setWindowInfo({
+                isWindowOpen: blocksRes.data?.isWindowOpen ?? false,
+                windowOpensAt: blocksRes.data?.windowOpensAt,
+                windowClosesAt: blocksRes.data?.windowClosesAt,
+            });
+        }
         if (statusRes.ok) setStatus(statusRes.data);
-        return { blocksData: blocksRes.data, statusData: statusRes.data };
+        return { blocksData, statusData: statusRes.data };
     }, [user]);
 
     useEffect(() => {
@@ -146,11 +155,30 @@ const TalleresSelectionPage = () => {
     const orderedBlocks = (blocks ?? []).slice().sort(
         (a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)
     );
-    const currentBlock = orderedBlocks.find((b) => b.category === activeCategory);
+    const tallerBlock = orderedBlocks.find((b) => b.category === 'Taller');
+    const simultaneaBlock = orderedBlocks.find((b) => b.category === 'Simultanea');
+    const chosenTaller = tallerBlock?.options.find((o) => o.id === tallerBlock.yourSelectionActivityId);
+    const chosenFamily = chosenTaller?.family ?? null;
+
+    // La Simultánea queda bloqueada hasta elegir Taller, y solo se muestran
+    // las opciones de su misma Familia (Guía de Elección v1).
+    const currentBlock = activeCategory === 'Simultanea' && simultaneaBlock
+        ? { ...simultaneaBlock, options: simultaneaBlock.options.filter((o) => o.family === chosenFamily) }
+        : orderedBlocks.find((b) => b.category === activeCategory);
+    const simultaneaLocked = activeCategory === 'Simultanea' && !chosenTaller;
+
     const allDone = orderedBlocks.length > 0 && orderedBlocks.every((b) => b.yourSelectionActivityId != null);
     const isConfirmed = !!status?.isConfirmed;
+    const isWindowOpen = windowInfo?.isWindowOpen ?? false;
 
     const choose = async (activityId) => {
+        // Si estoy cambiando de Taller a otra Familia y ya tenía una Charla
+        // Simultánea elegida, el backend la va a descartar (no es de la
+        // misma Familia) — avisamos antes de guardar el borrador.
+        const willResetSimultanea = activeCategory === 'Taller'
+            && simultaneaBlock?.yourSelectionActivityId != null
+            && tallerBlock?.options.find((o) => o.id === activityId)?.family !== chosenFamily;
+
         setSaving(true);
         setError(null);
         setRetryNotice(null);
@@ -177,9 +205,13 @@ const TalleresSelectionPage = () => {
         await load();
         setSaving(false);
         setOpenOption(null);
+        if (willResetSimultanea) {
+            setError('Cambiaste de familia de taller — tu charla simultánea anterior ya no corresponde y se reinició. Elegí una nueva.');
+        }
     };
 
     const openConfirmModal = () => {
+        if (!isWindowOpen) { setError('La ventana de elección no está abierta.'); return; }
         if (!allDone) { setError('Todavía falta elegir en alguna categoría.'); return; }
         setError(null);
         setConfirmModalOpen(true);
@@ -220,8 +252,19 @@ const TalleresSelectionPage = () => {
             <p className="text-sm text-gray-500 mt-1 max-w-2xl">
                 Elegí una opción de cada categoría. Se guarda como borrador hasta que confirmes la selección definitiva — después no se puede cambiar.
             </p>
-            <div className="mt-2 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-                🔒 Vista interna — solo administradores
+            <div className="mt-2 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+                    🔒 Vista interna — solo administradores
+                </span>
+                {windowInfo && (
+                    <span className={`inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border ${
+                        isWindowOpen ? 'text-green-700 bg-green-50 border-green-200' : 'text-gray-500 bg-gray-50 border-gray-200'
+                    }`}>
+                        {isWindowOpen
+                            ? `Ventana abierta hasta ${formatEventDate(windowInfo.windowClosesAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`
+                            : `Ventana cerrada — abre ${formatEventDate(windowInfo.windowOpensAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`}
+                    </span>
+                )}
             </div>
         </div>
     );
@@ -366,23 +409,41 @@ const TalleresSelectionPage = () => {
 
             {/* Tabs */}
             <div className="flex gap-2 mb-6 border-b border-gray-200">
-                {orderedBlocks.map((b) => (
-                    <button
-                        key={b.id}
-                        onClick={() => setActiveCategory(b.category)}
-                        className={`px-4 py-2 font-bold text-sm uppercase tracking-wide transition border-b-2 -mb-px flex items-center gap-2 ${
-                            activeCategory === b.category ? 'border-institutional text-institutional' : 'border-transparent text-gray-500 hover:text-institutional'
-                        }`}
-                    >
-                        {CATEGORY_LABEL[b.category] ?? b.name}
-                        {b.yourSelectionActivityId != null && <span className="text-green-500">✓</span>}
-                    </button>
-                ))}
+                {orderedBlocks.map((b) => {
+                    const locked = b.category === 'Simultanea' && !chosenTaller;
+                    return (
+                        <button
+                            key={b.id}
+                            onClick={() => setActiveCategory(b.category)}
+                            className={`px-4 py-2 font-bold text-sm uppercase tracking-wide transition border-b-2 -mb-px flex items-center gap-2 ${
+                                activeCategory === b.category ? 'border-institutional text-institutional' : 'border-transparent text-gray-500 hover:text-institutional'
+                            }`}
+                        >
+                            {CATEGORY_LABEL[b.category] ?? b.name}
+                            {locked && <span title="Elegí un taller primero">🔒</span>}
+                            {!locked && b.yourSelectionActivityId != null && <span className="text-green-500">✓</span>}
+                        </button>
+                    );
+                })}
             </div>
 
-            {currentBlock && (
+            {simultaneaLocked ? (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-500 text-sm">
+                    Primero elegí un <strong>Taller</strong> — al elegirlo se habilitan las charlas simultáneas de su misma familia.
+                </div>
+            ) : currentBlock && (
                 <section>
-                    <p className="text-xs text-gray-400 mb-4">Tocá una tarjeta para ver el detalle y elegirla — elegí 1 de esta categoría.</p>
+                    <p className="text-xs text-gray-400 mb-4">
+                        Tocá una tarjeta para ver el detalle y elegirla — elegí 1 de esta categoría.
+                        {activeCategory === 'Simultanea' && chosenTaller && (
+                            <> Mostrando solo las charlas de la misma familia que <strong>{chosenTaller.code} — {chosenTaller.title}</strong>.</>
+                        )}
+                    </p>
+                    {currentBlock.options.length === 0 && activeCategory === 'Simultanea' && (
+                        <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+                            No hay charlas cargadas para esta familia todavía.
+                        </p>
+                    )}
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                         {currentBlock.options.map((opt) => (
                             <OptionCard
@@ -390,7 +451,7 @@ const TalleresSelectionPage = () => {
                                 option={opt}
                                 picked={currentBlock.yourSelectionActivityId === opt.id}
                                 onOpen={setOpenOption}
-                                disabled={saving}
+                                disabled={saving || !isWindowOpen}
                             />
                         ))}
                     </div>
