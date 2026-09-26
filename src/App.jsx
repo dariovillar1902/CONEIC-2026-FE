@@ -24,6 +24,7 @@ import ChangePasswordPage from './pages/ChangePasswordPage';
 import SupportPage from './pages/SupportPage';
 import CommitteePage from './pages/CommitteePage';
 import ManualPortenoPage from './pages/ManualPortenoPage';
+import BirthDateGate from './components/BirthDateGate';
 
 const router = createBrowserRouter([
   {
@@ -73,7 +74,7 @@ const router = createBrowserRouter([
     path: '/admin/talleres',
     element: <DashboardLayout allowedRoles={['admin']} />,
     children: [
-      { index: true, element: <TalleresSelectionPage /> },
+      { index: true, element: <BirthDateGate><TalleresSelectionPage /></BirthDateGate> },
     ]
   },
   // Toma de asistencia (QR + fallback manual) — sin enlazar en ningún menú a

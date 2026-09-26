@@ -206,6 +206,16 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
 };
 
 /* ─── Sub-panel: Inscripciones ──────────────────────────────────────── */
+// Única cuenta habilitada para habilitar/marcar como pagado a cualquier
+// inscripto sin restricción de cupo ni de facultad — pedido explícito del
+// equipo (grupo de WhatsApp, 2026-09-22): "similar a lo que pueden hacer
+// los delegados pero sin límite de cupos ni filtro por delegación". Debe
+// coincidir con DirectorioOverrideEmail en el backend (no hay ese chequeo
+// específico del lado del server para este flujo — PATCH /payment ya es
+// irrestricto si no se manda delegateEmail — así que la restricción real
+// vive acá, en quién ve el botón).
+const DIRECTORIO_EMAIL = 'directorio@coneic2026.com.ar';
+
 const RegistrationsPanel = () => {
   const { user } = useAuth();
   const [registrations, setRegistrations] = useState([]);
@@ -220,6 +230,8 @@ const RegistrationsPanel = () => {
   const [editingReg, setEditingReg]       = useState(null);
   const [enablingPaused, setEnablingPaused] = useState(false);
   const [togglingPause, setTogglingPause] = useState(false);
+
+  const canOverrideEnable = (user?.email ?? '').toLowerCase() === DIRECTORIO_EMAIL;
 
   const fetchEnablingPaused = async () => {
     try {
@@ -293,6 +305,39 @@ const RegistrationsPanel = () => {
       );
 
       // Emails enviados automáticamente por la API (Azure Communication Services)
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  /* Habilitar + marcar pagado, sin límite de cupo ni filtro de delegación
+     (excepción de directorio) — crea usuario y manda el mail de confirmación. */
+  const enableAndMarkPaid = async (reg) => {
+    if (!window.confirm(`¿Habilitar y marcar como pagado a ${reg.name} ${reg.lastname}?\n\nSe le va a crear un usuario y se le va a mandar el mail de confirmación con la contraseña.`)) return;
+    setUpdatingId(reg.id);
+    try {
+      const paymentRes = await fetch(`${API}/api/registrations/${reg.id}/payment`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isEnabled: true, paymentCondition: 'Pagó Completo' }),
+      });
+      if (!paymentRes.ok) throw new Error((await paymentRes.json().catch(() => null))?.error ?? 'No se pudo habilitar.');
+
+      const statusRes = await fetch(`${API}/api/registrations/${reg.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify('Paid'),
+      });
+      if (!statusRes.ok) throw new Error('No se pudo marcar como pagado.');
+      const data = await statusRes.json();
+      const updatedReg = { ...(data.registration ?? data), isEnabled: true, paymentCondition: 'Pagó Completo' };
+
+      setRegistrations(prev => prev.map(r => r.id === reg.id ? updatedReg : r));
+      if (data.generatedPassword) {
+        alert(`Listo. Usuario creado — contraseña: ${data.generatedPassword}\n(también se le mandó por mail)`);
+      }
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
@@ -516,12 +561,24 @@ const RegistrationsPanel = () => {
                       {r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-AR') : '—'}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => setEditingReg(r)}
-                        className="text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition font-bold whitespace-nowrap"
-                      >
-                        Editar
-                      </button>
+                      <div className="flex gap-1.5">
+                        <button
+                          onClick={() => setEditingReg(r)}
+                          className="text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition font-bold whitespace-nowrap"
+                        >
+                          Editar
+                        </button>
+                        {canOverrideEnable && (!r.isEnabled || r.status !== 'Paid') && (
+                          <button
+                            onClick={() => enableAndMarkPaid(r)}
+                            disabled={updatingId === r.id}
+                            className="text-xs text-white bg-institutional border border-institutional px-2 py-1 rounded hover:bg-primary-red transition font-bold whitespace-nowrap disabled:opacity-50"
+                            title="Habilitar y marcar pagado, sin límite de cupo ni filtro de delegación"
+                          >
+                            {updatingId === r.id ? '...' : 'Habilitar y pagar'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
