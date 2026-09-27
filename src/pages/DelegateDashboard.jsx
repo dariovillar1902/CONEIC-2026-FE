@@ -393,6 +393,7 @@ const DelegateDashboard = () => {
             name:                  fd.get('name'),
             lastname:              fd.get('lastname'),
             dni:                   fd.get('dni'),
+            birthDate:             fd.get('birthDate') || null,
             phone:                 fd.get('phone'),
             email:                 fd.get('email'),
             faculty:               fd.get('faculty'),
@@ -586,6 +587,9 @@ const DelegateDashboard = () => {
                                     <div className="text-gray-900">{person.email}</div>
                                     <div className="text-xs text-gray-500">{person.dni}</div>
                                     {person.phone && <div className="text-xs text-gray-500">{person.phone}</div>}
+                                    <div className="text-xs text-gray-500">
+                                        {person.birthDate ? new Date(person.birthDate).toLocaleDateString('es-AR') : <span className="italic text-amber-600">Sin fecha de nac.</span>}
+                                    </div>
                                 </td>
                                 {managedFaculties.length > 1 && (
                                     <td className="px-4 py-3 text-xs text-gray-500 max-w-[140px]">
@@ -809,6 +813,10 @@ const DelegateDashboard = () => {
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">DNI</label>
                                 <input name="dni" defaultValue={editingReg.dni} className="border p-2 rounded w-full text-sm" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Fecha de Nacimiento</label>
+                                <input type="date" name="birthDate" defaultValue={editingReg.birthDate ? editingReg.birthDate.slice(0, 10) : ''} className="border p-2 rounded w-full text-sm" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Celular</label>

@@ -109,6 +109,7 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
       name:                  fd.get('name'),
       lastname:              fd.get('lastname'),
       dni:                   fd.get('dni'),
+      birthDate:             fd.get('birthDate') || null,
       phone:                 fd.get('phone'),
       email:                 fd.get('email'),
       faculty:               fd.get('faculty'),
@@ -143,6 +144,10 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">DNI</label>
               <input name="dni" defaultValue={reg.dni} className="border p-2 rounded w-full text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Fecha de Nacimiento</label>
+              <input type="date" name="birthDate" defaultValue={reg.birthDate ? reg.birthDate.slice(0, 10) : ''} className="border p-2 rounded w-full text-sm" />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Celular</label>
@@ -531,6 +536,7 @@ const RegistrationsPanel = () => {
                   <th className="px-4 py-3 text-left font-bold uppercase tracking-wide text-xs">#</th>
                   <th className="px-4 py-3 text-left font-bold uppercase tracking-wide text-xs">Nombre</th>
                   <th className="px-4 py-3 text-left font-bold uppercase tracking-wide text-xs">DNI</th>
+                  <th className="px-4 py-3 text-left font-bold uppercase tracking-wide text-xs">Fecha Nac.</th>
                   <th className="px-4 py-3 text-left font-bold uppercase tracking-wide text-xs">Email</th>
                   <th className="px-4 py-3 text-left font-bold uppercase tracking-wide text-xs">Delegación</th>
                   <th className="px-4 py-3 text-left font-bold uppercase tracking-wide text-xs">Etapa</th>
@@ -547,6 +553,9 @@ const RegistrationsPanel = () => {
                       {r.lastname}, {r.name}
                     </td>
                     <td className="px-4 py-3 text-gray-600 font-mono">{r.dni}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">
+                        {r.birthDate ? new Date(r.birthDate).toLocaleDateString('es-AR') : <span className="italic text-amber-600">—</span>}
+                    </td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{r.email}</td>
                     <td className="px-4 py-3 text-gray-700 text-xs max-w-[180px] truncate" title={r.faculty}>
                       {r.faculty}
