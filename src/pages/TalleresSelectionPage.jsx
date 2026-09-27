@@ -217,7 +217,10 @@ const TalleresSelectionPage = () => {
     };
 
     const openConfirmModal = () => {
-        if (!isWindowOpen) { setError('La ventana de elección no está abierta.'); return; }
+        // Esta página es admin-only (ver App.jsx) y el backend ya deja pasar
+        // a los admins sin importar la ventana real (ver IsAdminEmailAsync en
+        // ActivitySelectionController) — el badge de "Ventana cerrada" en el
+        // Header es solo informativo, no bloquea nada acá.
         if (!currentBlock?.yourSelectionActivityId) { setError('Todavía no elegiste una opción en esta categoría.'); return; }
         setError(null);
         setConfirmModalOpen(true);
@@ -357,7 +360,7 @@ const TalleresSelectionPage = () => {
                                 option={opt}
                                 picked={currentBlock.yourSelectionActivityId === opt.id}
                                 onOpen={setOpenOption}
-                                disabled={saving || !isWindowOpen}
+                                disabled={saving}
                             />
                         ))}
                     </div>

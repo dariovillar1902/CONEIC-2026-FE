@@ -18,7 +18,7 @@ const navLinksFor = (role) => {
                 { to: '/admin/users', label: 'Usuarios' },
                 // Habilitado por ahora SOLO para admin (ver App.jsx) mientras
                 // se prueba la elección de talleres/simultáneas/solidarias.
-                { to: '/admin/talleres', label: 'Talleres y Solidarias' },
+                { to: '/admin/talleres', label: 'Talleres, Charlas y Solidarias' },
             ] : []),
             MANUAL_PORTENO_LINK,
         ];
