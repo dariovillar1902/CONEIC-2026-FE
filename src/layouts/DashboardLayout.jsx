@@ -1,5 +1,6 @@
 import { Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import BirthDateGate from '../components/BirthDateGate';
 
 // Links del sidebar por rol — se comparten entre la versión de escritorio
 // (aside fijo) y la de mobile (tira horizontal), para no tener que
@@ -115,7 +116,9 @@ const DashboardLayout = ({ allowedRoles = [] }) => {
 
                 {/* Main Content */}
                 <main className="flex-grow min-w-0 overflow-hidden">
-                    <Outlet />
+                    <BirthDateGate>
+                        <Outlet />
+                    </BirthDateGate>
                 </main>
             </div>
         </div>

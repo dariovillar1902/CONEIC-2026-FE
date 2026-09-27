@@ -224,7 +224,7 @@ const ActivitySelectionPage = () => {
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email }),
+                body: JSON.stringify({ email: user.email, blockId: block?.id }),
             },
             { onRetry: (n) => setRetryNotice(`Confirmando — reintentando (${n})...`) },
         );

@@ -117,7 +117,6 @@ const TalleresSelectionPage = () => {
     const [windowInfo, setWindowInfo] = useState(null); // { isWindowOpen, windowOpensAt, windowClosesAt }
     const [status, setStatus] = useState(null);
     const [activeCategory, setActiveCategory] = useState('Taller');
-    const [showSummary, setShowSummary] = useState(false);
     const [saving, setSaving] = useState(false);
     const [retryNotice, setRetryNotice] = useState(null);
     const [error, setError] = useState(null);
@@ -160,15 +159,22 @@ const TalleresSelectionPage = () => {
     const chosenTaller = tallerBlock?.options.find((o) => o.id === tallerBlock.yourSelectionActivityId);
     const chosenFamily = chosenTaller?.family ?? null;
 
+    // La confirmación es individual por categoría, no todo-o-nada — cada
+    // bloque tiene su propio estado de "ya confirmado" (pedido del equipo,
+    // 2026-09-27).
+    const confirmedByBlockId = Object.fromEntries(
+        (status?.selections ?? []).filter((s) => s.isConfirmed).map((s) => [s.blockId, s])
+    );
+    const allConfirmed = orderedBlocks.length > 0 && orderedBlocks.every((b) => confirmedByBlockId[b.id]);
+
     // La Simultánea queda bloqueada hasta elegir Taller, y solo se muestran
     // las opciones de su misma Familia (Guía de Elección v1).
     const currentBlock = activeCategory === 'Simultanea' && simultaneaBlock
         ? { ...simultaneaBlock, options: simultaneaBlock.options.filter((o) => o.family === chosenFamily) }
         : orderedBlocks.find((b) => b.category === activeCategory);
     const simultaneaLocked = activeCategory === 'Simultanea' && !chosenTaller;
+    const currentBlockConfirmed = currentBlock && !!confirmedByBlockId[currentBlock.id];
 
-    const allDone = orderedBlocks.length > 0 && orderedBlocks.every((b) => b.yourSelectionActivityId != null);
-    const isConfirmed = !!status?.isConfirmed;
     const isWindowOpen = windowInfo?.isWindowOpen ?? false;
 
     const choose = async (activityId) => {
@@ -212,12 +218,12 @@ const TalleresSelectionPage = () => {
 
     const openConfirmModal = () => {
         if (!isWindowOpen) { setError('La ventana de elección no está abierta.'); return; }
-        if (!allDone) { setError('Todavía falta elegir en alguna categoría.'); return; }
+        if (!currentBlock?.yourSelectionActivityId) { setError('Todavía no elegiste una opción en esta categoría.'); return; }
         setError(null);
         setConfirmModalOpen(true);
     };
 
-    const confirmFinal = async () => {
+    const confirmCurrentBlock = async () => {
         setConfirmSaving(true);
         setError(null);
         const { ok, data } = await apiWithRetry(
@@ -225,7 +231,7 @@ const TalleresSelectionPage = () => {
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email }),
+                body: JSON.stringify({ email: user.email, blockId: currentBlock.id }),
             },
             { onRetry: (n) => setRetryNotice(`Confirmando — reintentando (${n})...`) },
         );
@@ -233,7 +239,7 @@ const TalleresSelectionPage = () => {
         setConfirmSaving(false);
 
         if (!ok) {
-            setError(data?.message ?? 'No se pudo confirmar la selección. Probá de nuevo.');
+            setError(data?.message ?? 'No se pudo confirmar la categoría. Probá de nuevo.');
             setConfirmModalOpen(false);
             return;
         }
@@ -250,7 +256,7 @@ const TalleresSelectionPage = () => {
         <div className="mb-6">
             <h1 className="text-3xl font-bold text-institutional font-title">Talleres, Simultáneas y Solidarias</h1>
             <p className="text-sm text-gray-500 mt-1 max-w-2xl">
-                Elegí una opción de cada categoría. Se guarda como borrador hasta que confirmes la selección definitiva — después no se puede cambiar.
+                Elegí una opción de cada categoría y confirmala — cada categoría se confirma por separado. Una vez confirmada, esa categoría ya no se puede cambiar.
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
@@ -265,141 +271,15 @@ const TalleresSelectionPage = () => {
                             : `Ventana cerrada — abre ${formatEventDate(windowInfo.windowOpensAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`}
                     </span>
                 )}
+                {allConfirmed && (
+                    <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border text-green-700 bg-green-50 border-green-200">
+                        ✅ Las 3 categorías confirmadas
+                    </span>
+                )}
             </div>
         </div>
     );
 
-    // ── Vista confirmada (solo lectura) ─────────────────────────────────────
-    if (isConfirmed) {
-        return (
-            <div className="max-w-6xl mx-auto p-4">
-                <Header />
-                <div className="max-w-3xl mx-auto mb-8">
-                    <div className="bg-green-50 border border-green-300 rounded-xl p-6 text-center">
-                        <p className="text-4xl mb-2">✅</p>
-                        <p className="font-bold text-lg text-green-800">Selección confirmada</p>
-                        <p className="text-sm mt-1 text-green-700">Ya no se puede modificar.</p>
-                    </div>
-                    <div className="space-y-3 mt-4">
-                        {status?.selections?.map((s) => (
-                            <div key={s.blockId} className="bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center">
-                                <div>
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                                        {CATEGORY_LABEL[orderedBlocks.find((b) => b.id === s.blockId)?.category] ?? `Bloque ${s.blockId}`}
-                                    </p>
-                                    <p className="font-bold text-gray-800">{s.activityCode} — {s.activityTitle}</p>
-                                </div>
-                                <span className="text-xs text-gray-400 shrink-0">{formatEventDate(s.confirmedAt)}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Tabs, ahora solo de consulta */}
-                <div className="flex gap-2 mb-6 border-b border-gray-200">
-                    {orderedBlocks.map((b) => (
-                        <button
-                            key={b.id}
-                            onClick={() => setActiveCategory(b.category)}
-                            className={`px-4 py-2 font-bold text-sm uppercase tracking-wide transition border-b-2 -mb-px ${
-                                activeCategory === b.category ? 'border-institutional text-institutional' : 'border-transparent text-gray-500 hover:text-institutional'
-                            }`}
-                        >
-                            {CATEGORY_LABEL[b.category] ?? b.name}
-                        </button>
-                    ))}
-                </div>
-
-                {currentBlock && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        {currentBlock.options.map((opt) => (
-                            <OptionCard
-                                key={opt.id}
-                                option={opt}
-                                picked={currentBlock.yourSelectionActivityId === opt.id}
-                                onOpen={setOpenOption}
-                                disabled={false}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                <OptionModal
-                    option={openOption}
-                    picked={openOption && currentBlock?.yourSelectionActivityId === openOption.id}
-                    onClose={() => setOpenOption(null)}
-                    readOnly
-                />
-            </div>
-        );
-    }
-
-    // ── Resumen previo a confirmar ───────────────────────────────────────────
-    if (showSummary) {
-        return (
-            <div className="max-w-3xl mx-auto p-4">
-                <Header />
-                {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">{error}</div>}
-                <h2 className="font-bold text-gray-700 mb-3">Revisá tu selección antes de confirmar</h2>
-                <div className="space-y-3 mb-8">
-                    {orderedBlocks.map((b) => {
-                        const chosen = b.options.find((o) => o.id === b.yourSelectionActivityId);
-                        return (
-                            <div key={b.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4">
-                                <div className="flex-grow min-w-0">
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{CATEGORY_LABEL[b.category] ?? b.name}</p>
-                                    <p className="font-bold text-gray-800 truncate">{chosen ? `${chosen.code} — ${chosen.title}` : '—'}</p>
-                                </div>
-                                <button
-                                    onClick={() => { setActiveCategory(b.category); setShowSummary(false); }}
-                                    className="text-sm font-bold text-institutional underline shrink-0"
-                                >
-                                    Cambiar
-                                </button>
-                            </div>
-                        );
-                    })}
-                </div>
-                <button
-                    onClick={openConfirmModal}
-                    className="w-full bg-primary-red text-white font-bold py-4 rounded-xl hover:opacity-90 transition text-lg"
-                >
-                    Guardar Selección Definitiva
-                </button>
-                <p className="text-xs text-gray-400 text-center mt-2">Esta acción no se puede deshacer.</p>
-
-                {confirmModalOpen && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-                            <p className="font-bold text-xl text-gray-800 mb-2">¿Confirmar selección?</p>
-                            <p className="text-sm text-gray-500 mb-6">
-                                Una vez confirmada, no se va a poder cambiar ninguna de las 3 elecciones. Revisá bien antes de continuar.
-                            </p>
-                            {retryNotice && <p className="text-xs text-amber-600 mb-3">{retryNotice}</p>}
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setConfirmModalOpen(false)}
-                                    disabled={confirmSaving}
-                                    className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-lg hover:bg-gray-200 transition disabled:opacity-50"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={confirmFinal}
-                                    disabled={confirmSaving}
-                                    className="flex-1 bg-primary-red text-white font-bold py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50"
-                                >
-                                    {confirmSaving ? 'Confirmando...' : 'Sí, confirmar'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-    }
-
-    // ── Wizard: tabs por categoría ───────────────────────────────────────────
     return (
         <div className="max-w-6xl mx-auto p-4">
             <Header />
@@ -411,6 +291,7 @@ const TalleresSelectionPage = () => {
             <div className="flex gap-2 mb-6 border-b border-gray-200">
                 {orderedBlocks.map((b) => {
                     const locked = b.category === 'Simultanea' && !chosenTaller;
+                    const confirmed = !!confirmedByBlockId[b.id];
                     return (
                         <button
                             key={b.id}
@@ -421,7 +302,8 @@ const TalleresSelectionPage = () => {
                         >
                             {CATEGORY_LABEL[b.category] ?? b.name}
                             {locked && <span title="Elegí un taller primero">🔒</span>}
-                            {!locked && b.yourSelectionActivityId != null && <span className="text-green-500">✓</span>}
+                            {!locked && confirmed && <span className="text-green-500" title="Confirmada">✅</span>}
+                            {!locked && !confirmed && b.yourSelectionActivityId != null && <span className="text-amber-500" title="Borrador, sin confirmar">●</span>}
                         </button>
                     );
                 })}
@@ -431,6 +313,30 @@ const TalleresSelectionPage = () => {
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-500 text-sm">
                     Primero elegí un <strong>Taller</strong> — al elegirlo se habilitan las charlas simultáneas de su misma familia.
                 </div>
+            ) : currentBlock && currentBlockConfirmed ? (
+                // ── Categoría ya confirmada: solo lectura ────────────────────
+                <section>
+                    <div className="bg-green-50 border border-green-300 rounded-xl p-4 mb-4 flex items-center justify-between gap-4">
+                        <div>
+                            <p className="font-bold text-green-800">✅ {CATEGORY_LABEL[currentBlock.category]} confirmada</p>
+                            <p className="text-sm text-green-700">Ya no se puede cambiar.</p>
+                        </div>
+                        <span className="text-xs text-green-600 shrink-0">
+                            {formatEventDate(confirmedByBlockId[currentBlock.id]?.confirmedAt)}
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        {currentBlock.options.map((opt) => (
+                            <OptionCard
+                                key={opt.id}
+                                option={opt}
+                                picked={currentBlock.yourSelectionActivityId === opt.id}
+                                onOpen={setOpenOption}
+                                disabled={false}
+                            />
+                        ))}
+                    </div>
+                </section>
             ) : currentBlock && (
                 <section>
                     <p className="text-xs text-gray-400 mb-4">
@@ -455,18 +361,48 @@ const TalleresSelectionPage = () => {
                             />
                         ))}
                     </div>
+
+                    <div className="mt-8 flex justify-end">
+                        <button
+                            onClick={openConfirmModal}
+                            disabled={!currentBlock.yourSelectionActivityId}
+                            className="bg-primary-red text-white font-bold px-6 py-3 rounded-xl hover:opacity-90 transition disabled:opacity-40"
+                        >
+                            {currentBlock.yourSelectionActivityId
+                                ? `Confirmar ${CATEGORY_LABEL[currentBlock.category]?.toLowerCase()} definitivamente`
+                                : 'Elegí una opción para continuar'}
+                        </button>
+                    </div>
                 </section>
             )}
 
-            <div className="mt-8 flex justify-end">
-                <button
-                    onClick={() => setShowSummary(true)}
-                    disabled={!allDone}
-                    className="bg-institutional text-white font-bold px-6 py-3 rounded-xl hover:opacity-90 transition disabled:opacity-40"
-                >
-                    {allDone ? 'Ver resumen y confirmar' : `Elegí las 3 categorías para continuar (${orderedBlocks.filter(b => b.yourSelectionActivityId != null).length}/${orderedBlocks.length})`}
-                </button>
-            </div>
+            {confirmModalOpen && currentBlock && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+                        <p className="font-bold text-xl text-gray-800 mb-2">¿Confirmar {CATEGORY_LABEL[currentBlock.category]?.toLowerCase()}?</p>
+                        <p className="text-sm text-gray-500 mb-6">
+                            Una vez confirmada esta categoría, no se va a poder cambiar. Las demás categorías siguen editables hasta que las confirmes por separado.
+                        </p>
+                        {retryNotice && <p className="text-xs text-amber-600 mb-3">{retryNotice}</p>}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setConfirmModalOpen(false)}
+                                disabled={confirmSaving}
+                                className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-lg hover:bg-gray-200 transition disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmCurrentBlock}
+                                disabled={confirmSaving}
+                                className="flex-1 bg-primary-red text-white font-bold py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+                            >
+                                {confirmSaving ? 'Confirmando...' : 'Sí, confirmar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <OptionModal
                 option={openOption}
@@ -474,6 +410,7 @@ const TalleresSelectionPage = () => {
                 onClose={() => setOpenOption(null)}
                 onChoose={choose}
                 choosing={saving}
+                readOnly={currentBlockConfirmed}
             />
         </div>
     );
