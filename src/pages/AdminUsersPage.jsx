@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { ALL_FACULTIES_BY_REGION } from '../data/filiales';
 
 const AdminUsersPage = () => {
     const { user } = useAuth();
@@ -8,6 +9,8 @@ const AdminUsersPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [addModalFaculty, setAddModalFaculty] = useState('');
+    const [addModalError, setAddModalError] = useState(null);
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -74,12 +77,15 @@ const AdminUsersPage = () => {
       // Add Manual Handler (Admin)
     const handleAddManual = async (e) => {
         e.preventDefault();
+        setAddModalError(null);
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
         data.stageName = 'ManualAdmin';
         data.price = 0;
         data.status = 'Pending';
-        if(!data.faculty) data.faculty = "Sin Asignar"; // Admin must specify or default
+        if (data.faculty === 'Otra') data.faculty = data.facultyOther || 'Sin Asignar';
+        delete data.facultyOther;
+        if (!data.faculty) data.faculty = 'Sin Asignar'; // Admin must specify or default
 
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations`, {
@@ -91,12 +97,21 @@ const AdminUsersPage = () => {
                 const newReg = await response.json();
                 setAttendees([...attendees, newReg]);
                 setIsAddModalOpen(false);
+                setAddModalFaculty('');
                 alert('Inscripto agregado correctamente');
             } else {
-                alert('Error al agregar');
+                // El backend valida con [Required] en el modelo (ApiController
+                // los devuelve como { errors: { Campo: [mensajes] } }, o a veces
+                // { message: "..." } para conflictos de DNI/email duplicado) —
+                // mostramos el detalle real en vez de un genérico "Error al agregar".
+                const body = await response.json().catch(() => null);
+                const detail = body?.errors
+                    ? Object.values(body.errors).flat().join(' ')
+                    : body?.message;
+                setAddModalError(detail || `Error al agregar (HTTP ${response.status}).`);
             }
         } catch (e) {
-            alert('Error de conexión');
+            setAddModalError('Error de conexión — no se pudo contactar al servidor.');
         }
     };
 
@@ -186,6 +201,9 @@ const AdminUsersPage = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in-up max-h-[90vh] overflow-y-auto">
                         <h3 className="text-xl font-bold text-institutional mb-4">Agregar Inscripto (Admin)</h3>
+                        {addModalError && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2 mb-4">{addModalError}</div>
+                        )}
                         <form onSubmit={handleAddManual} className="space-y-4">
                              <div className="grid grid-cols-2 gap-4">
                                 <input name="name" placeholder="Nombre" required className="border p-2 rounded w-full" />
@@ -193,9 +211,35 @@ const AdminUsersPage = () => {
                             </div>
                             <input name="dni" placeholder="DNI" required className="border p-2 rounded w-full" />
                             <input name="email" type="email" placeholder="Email" required className="border p-2 rounded w-full" />
-                            <input name="faculty" placeholder="Delegación (Obligatorio)" required className="border p-2 rounded w-full" />
+                            <select
+                                name="faculty"
+                                required
+                                value={addModalFaculty}
+                                onChange={e => setAddModalFaculty(e.target.value)}
+                                className="border p-2 rounded w-full bg-white"
+                            >
+                                <option value="">Seleccionar delegación...</option>
+                                {ALL_FACULTIES_BY_REGION.filter(r => r.region !== 'Internacional').map(({ region, faculties }) => (
+                                    <optgroup key={region} label={region}>
+                                        {faculties.map(f => <option key={f} value={f}>{f}</option>)}
+                                    </optgroup>
+                                ))}
+                                <optgroup label="Comité Organizador">
+                                    <option value="Comité Organizador">Comité Organizador (CONEIC)</option>
+                                </optgroup>
+                                <optgroup label="Otra">
+                                    <option value="Otra">Otra (especificar)</option>
+                                </optgroup>
+                            </select>
+                            {addModalFaculty === 'Otra' && (
+                                <input name="facultyOther" placeholder="Especificar delegación" required className="border p-2 rounded w-full" />
+                            )}
                             <input name="phone" placeholder="Celular" required className="border p-2 rounded w-full" />
-                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <input name="emergencyContactName" placeholder="Contacto de emergencia (nombre)" required className="border p-2 rounded w-full" />
+                                <input name="emergencyContactPhone" placeholder="Tel. de emergencia" required className="border p-2 rounded w-full" />
+                            </div>
+
                             <div className="flex gap-4 pt-4">
                                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 text-gray-500 font-bold hover:bg-gray-100 p-2 rounded transition">Cancelar</button>
                                 <button type="submit" className="flex-1 bg-primary-green text-white font-bold p-2 rounded hover:bg-green-700 transition">Guardar</button>
