@@ -115,6 +115,7 @@ const TalleresSelectionPage = () => {
     const { user } = useAuth();
     const [blocks, setBlocks] = useState(null);
     const [windowInfo, setWindowInfo] = useState(null); // { isWindowOpen, windowOpensAt, windowClosesAt }
+    const [isMaccaferri, setIsMaccaferri] = useState(false);
     const [status, setStatus] = useState(null);
     const [activeCategory, setActiveCategory] = useState('Taller');
     const [saving, setSaving] = useState(false);
@@ -139,6 +140,7 @@ const TalleresSelectionPage = () => {
                 windowOpensAt: blocksRes.data?.windowOpensAt,
                 windowClosesAt: blocksRes.data?.windowClosesAt,
             });
+            setIsMaccaferri(blocksRes.data?.isMaccaferri ?? false);
         }
         if (statusRes.ok) setStatus(statusRes.data);
         return { blocksData, statusData: statusRes.data };
@@ -173,6 +175,7 @@ const TalleresSelectionPage = () => {
         ? { ...simultaneaBlock, options: simultaneaBlock.options.filter((o) => o.family === chosenFamily) }
         : orderedBlocks.find((b) => b.category === activeCategory);
     const simultaneaLocked = activeCategory === 'Simultanea' && !chosenTaller;
+    const maccaferriLocked = isMaccaferri && (activeCategory === 'Taller' || activeCategory === 'Simultanea');
     const currentBlockConfirmed = currentBlock && !!confirmedByBlockId[currentBlock.id];
 
     const isWindowOpen = windowInfo?.isWindowOpen ?? false;
@@ -293,7 +296,8 @@ const TalleresSelectionPage = () => {
             {/* Tabs */}
             <div className="flex gap-2 mb-6 border-b border-gray-200">
                 {orderedBlocks.map((b) => {
-                    const locked = b.category === 'Simultanea' && !chosenTaller;
+                    const maccaferriBlocked = isMaccaferri && (b.category === 'Taller' || b.category === 'Simultanea');
+                    const locked = maccaferriBlocked || (b.category === 'Simultanea' && !chosenTaller);
                     const confirmed = !!confirmedByBlockId[b.id];
                     return (
                         <button
@@ -304,7 +308,7 @@ const TalleresSelectionPage = () => {
                             }`}
                         >
                             {CATEGORY_LABEL[b.category] ?? b.name}
-                            {locked && <span title="Elegí un taller primero">🔒</span>}
+                            {locked && <span title={maccaferriBlocked ? 'Cubierto por el Desafío de Barreras' : 'Elegí un taller primero'}>🔒</span>}
                             {!locked && confirmed && <span className="text-green-500" title="Confirmada">✅</span>}
                             {!locked && !confirmed && b.yourSelectionActivityId != null && <span className="text-amber-500" title="Borrador, sin confirmar">●</span>}
                         </button>
@@ -312,7 +316,11 @@ const TalleresSelectionPage = () => {
                 })}
             </div>
 
-            {simultaneaLocked ? (
+            {maccaferriLocked ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center text-amber-800 text-sm">
+                    Esta persona está anotada en el <strong>Desafío de Barreras (Maccaferri)</strong> — esa actividad ya cubre el Taller y la Charla Simultánea, así que no corresponde elegir acá. Sí le corresponde elegir su <strong>Actividad de Compromiso Social</strong>.
+                </div>
+            ) : simultaneaLocked ? (
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-500 text-sm">
                     Primero elegí un <strong>Taller</strong> — al elegirlo se habilitan las charlas simultáneas de su misma familia.
                 </div>
