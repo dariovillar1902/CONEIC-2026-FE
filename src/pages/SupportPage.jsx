@@ -60,6 +60,29 @@ const SPONSORS_BRONCE = [
     },
 ];
 
+// Empresas conseguidas por canje (no por pago directo) — van después de
+// Bronce, con su propio rótulo.
+const SPONSORS_ALIADOS = [
+    {
+        name: 'Pozo',
+        logoUrl: '/assets/sponsors/logo-pozo.png',
+        url: 'https://productospozo.com.ar/site/',
+        cardBg: 'bg-white',
+    },
+    {
+        name: 'Quimera Audiovisual',
+        logoUrl: '/assets/sponsors/logo-quimera.png',
+        url: 'https://www.instagram.com/quimera_audiovisual/',
+        cardBg: 'bg-[#0a0a0a]',
+    },
+    {
+        name: 'Storing',
+        logoUrl: '/assets/sponsors/logo-storing.png',
+        url: 'https://storingmedical.com/',
+        cardBg: 'bg-white',
+    },
+];
+
 /* ══════════════════════════════════════════════════════════════════════════════
    ENDORSERS DATA
 ══════════════════════════════════════════════════════════════════════════════ */
@@ -510,6 +533,14 @@ const SponsorsTab = () => (
             <TierDivider label="Bronce" className="text-orange-500" />
             <div className="flex flex-wrap justify-center gap-8 items-center">
                 {SPONSORS_BRONCE.map((s) => <SponsorCard key={s.name} s={s} />)}
+            </div>
+        </div>
+
+        {/* Aliados Estratégicos — canje */}
+        <div className="mb-14">
+            <TierDivider label="Aliados Estratégicos" className="text-sky-600" />
+            <div className="flex flex-wrap justify-center gap-8 items-center">
+                {SPONSORS_ALIADOS.map((s) => <SponsorCard key={s.name} s={s} />)}
             </div>
         </div>
 

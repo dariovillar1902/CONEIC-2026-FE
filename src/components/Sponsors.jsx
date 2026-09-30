@@ -51,6 +51,29 @@ const SPONSORS_BRONCE = [
     },
 ];
 
+// Empresas conseguidas por canje (no por pago directo) — van después de
+// Bronce, con su propio rótulo.
+const SPONSORS_ALIADOS = [
+    {
+        name: 'Pozo',
+        logoUrl: '/assets/sponsors/logo-pozo.png',
+        url: 'https://productospozo.com.ar/site/',
+        cardBg: 'bg-white',
+    },
+    {
+        name: 'Quimera Audiovisual',
+        logoUrl: '/assets/sponsors/logo-quimera.png',
+        url: 'https://www.instagram.com/quimera_audiovisual/',
+        cardBg: 'bg-[#0a0a0a]',
+    },
+    {
+        name: 'Storing',
+        logoUrl: '/assets/sponsors/logo-storing.png',
+        url: 'https://storingmedical.com/',
+        cardBg: 'bg-white',
+    },
+];
+
 const SponsorCard = ({ sponsor, size = 'md' }) => {
     const sizeClass = size === 'lg' ? 'w-80 h-44' : 'w-64 h-36';
 
@@ -147,6 +170,16 @@ const Sponsors = () => (
                 <TierLabel label="Bronce" color="bg-orange-100 text-orange-700 border-orange-300" />
                 <div className="flex flex-wrap justify-center gap-8 items-center">
                     {SPONSORS_BRONCE.map((s) => (
+                        <SponsorCard key={s.name} sponsor={s} />
+                    ))}
+                </div>
+            </div>
+
+            {/* Aliados Estratégicos — canje */}
+            <div className="mb-14">
+                <TierLabel label="Aliados Estratégicos" color="bg-sky-100 text-sky-700 border-sky-300" />
+                <div className="flex flex-wrap justify-center gap-8 items-center">
+                    {SPONSORS_ALIADOS.map((s) => (
                         <SponsorCard key={s.name} sponsor={s} />
                     ))}
                 </div>
