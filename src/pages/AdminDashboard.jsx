@@ -120,6 +120,7 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
       emergencyContactPhone: fd.get('emergencyContactPhone'),
       observations:          fd.get('observations') || null,
       interestedInMaccaferri: fd.get('interestedInMaccaferri') === 'on',
+      isDelegate:            fd.get('isDelegate') === 'on',
     };
     await onSave(updated);
   };
@@ -197,6 +198,17 @@ const EditRegModal = ({ reg, onClose, onSave }) => {
                   className="w-4 h-4 accent-institutional"
                 />
                 <span className="text-sm font-bold text-gray-700">Desafío Barreras de Maccaferri</span>
+              </label>
+            </div>
+            <div className="col-span-2">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  name="isDelegate"
+                  defaultChecked={!!reg.isDelegate}
+                  className="w-4 h-4 accent-institutional"
+                />
+                <span className="text-sm font-bold text-gray-700">Es Delegado/a (también anotado como delegado de una delegación)</span>
               </label>
             </div>
           </div>
