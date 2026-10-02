@@ -1,4 +1,4 @@
-import { Outlet, Navigate, Link } from 'react-router-dom';
+import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import BirthDateGate from '../components/BirthDateGate';
 
@@ -46,11 +46,15 @@ const navLinksFor = (role) => {
 
 const DashboardLayout = ({ allowedRoles = [] }) => {
     const { user, logout, hasRole, loading } = useAuth();
+    const location = useLocation();
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
 
     if (!user) {
-        return <Navigate to="/login" replace />;
+        // Guardamos a dónde quería ir (p. ej. /mi-cronograma) para poder
+        // volver ahí después de loguearse, en vez de mandarlo siempre a la
+        // página por defecto de su rol (ver LoginPage.jsx).
+        return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
     if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {

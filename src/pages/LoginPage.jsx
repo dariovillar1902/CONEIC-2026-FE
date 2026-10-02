@@ -27,6 +27,11 @@ const LoginPage = () => {
             // First-login: must set a new password before anything else
             if (user.mustChangePassword) {
                 navigate('/change-password');
+            } else if (from !== '/') {
+                // Venía de un link protegido específico (p. ej. /mi-cronograma
+                // desde el botón en Cronograma y Sedes) — lo mandamos ahí en
+                // vez de a la página por defecto de su rol.
+                navigate(from);
             } else if (user.role === 'admin' || user.role === 'tesoreria') navigate('/admin');
             else if (user.role === 'delegate') navigate('/delegate');
             else if (user.role === 'assistant') navigate('/my-ticket');
