@@ -30,6 +30,7 @@ const navLinksFor = (role) => {
             // Ventana 8-10/9 cerrada: el link sigue visible pero la página
             // ahora es de solo lectura (no se puede elegir/cambiar visita).
             { to: '/eleccion-actividades', label: 'Elección de Actividades' },
+            { to: '/mi-cronograma', label: 'Mi Cronograma' },
             MANUAL_PORTENO_LINK,
         ];
     }

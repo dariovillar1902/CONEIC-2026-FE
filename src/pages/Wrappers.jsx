@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 /* ─── Reutilizable: página en construcción ──────────────────────────── */
 const ComingSoon = ({ title, subtitle, icon = '🔧' }) => (
@@ -82,13 +83,23 @@ const PONENCIAS_CRONOGRAMA = [
   { fase: 'Ponencias (CoNEIC)', fecha: '13 Octubre', modalidad: 'Presencial' },
 ];
 
-export const SchedulePage = () => (
+export const SchedulePage = () => {
+  const { user } = useAuth();
+  return (
   <div className="pt-24 min-h-screen bg-complementary-light font-body">
     <div className="bg-institutional text-white py-12 px-4 text-center">
       <h1 className="text-4xl md:text-5xl font-bold font-title mb-2">Cronograma y Sedes</h1>
       <p className="text-gray-300 font-subtitle max-w-2xl mx-auto">
         Actividades y lugares del XVIII&nbsp;CONEIC · Buenos Aires · 13 al 16 de octubre&nbsp;2026.
       </p>
+      {user?.role === 'assistant' && (
+        <Link
+          to="/mi-cronograma"
+          className="inline-flex items-center gap-2 bg-complementary-gold text-institutional font-bold px-6 py-2.5 rounded-full hover:opacity-90 transition-colors shadow-md text-sm mt-5"
+        >
+          📅 Ver mi cronograma
+        </Link>
+      )}
     </div>
 
     {/* ── Schedule section ── */}
@@ -251,7 +262,8 @@ export const SchedulePage = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 /* ─── Sedes ─────────────────────────────────────────────────────────── */
 export const VenuesPage = () => (

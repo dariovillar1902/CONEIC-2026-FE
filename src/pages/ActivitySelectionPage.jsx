@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { formatEventDate } from '../utils/formatEventDate';
 
@@ -249,11 +250,19 @@ const ActivitySelectionPage = () => {
     }
 
     const Header = () => (
-        <div className="mb-6">
-            <h1 className="text-3xl font-bold text-institutional font-title">Elección de Actividades</h1>
-            <p className="text-sm text-gray-500 mt-1 max-w-2xl">
-                Elegí tu visita técnica para el CONEIC XVIII. Una vez que confirmes tu elección definitiva, no vas a poder cambiarla.
-            </p>
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h1 className="text-3xl font-bold text-institutional font-title">Elección de Actividades</h1>
+                <p className="text-sm text-gray-500 mt-1 max-w-2xl">
+                    Elegí tu visita técnica para el CONEIC XVIII. Una vez que confirmes tu elección definitiva, no vas a poder cambiarla.
+                </p>
+            </div>
+            <Link
+                to="/mi-cronograma"
+                className="inline-flex items-center gap-2 bg-institutional text-white font-bold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors shadow-md text-sm whitespace-nowrap shrink-0"
+            >
+                📅 Ver mi cronograma
+            </Link>
         </div>
     );
 

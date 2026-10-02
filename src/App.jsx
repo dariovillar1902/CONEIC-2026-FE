@@ -12,6 +12,7 @@ import AdminUsersPage from './pages/AdminUsersPage';
 import TalleresSelectionPage from './pages/TalleresSelectionPage';
 import CheckInScannerPage from './pages/CheckInScannerPage';
 import ActivitySelectionPage from './pages/ActivitySelectionPage';
+import MySchedulePage from './pages/MySchedulePage';
 import DelegateDashboard from './pages/DelegateDashboard';
 import AssistantDashboard from './pages/AssistantDashboard';
 import GalleryPage from './pages/GalleryPage';
@@ -92,6 +93,13 @@ const router = createBrowserRouter([
     element: <DashboardLayout allowedRoles={['assistant']} />,
     children: [
       { index: true, element: <ActivitySelectionPage /> },
+    ]
+  },
+  {
+    path: '/mi-cronograma',
+    element: <DashboardLayout allowedRoles={['assistant']} />,
+    children: [
+      { index: true, element: <MySchedulePage /> },
     ]
   },
   {
