@@ -92,7 +92,7 @@ export const SchedulePage = () => {
       <p className="text-gray-300 font-subtitle max-w-2xl mx-auto">
         Actividades y lugares del XVIII&nbsp;CONEIC · Buenos Aires · 13 al 16 de octubre&nbsp;2026.
       </p>
-      {user?.role === 'assistant' && (
+      {(user?.role === 'assistant' || user?.role === 'admin') && (
         <Link
           to="/mi-cronograma"
           className="inline-flex items-center gap-2 bg-complementary-gold text-institutional font-bold px-6 py-2.5 rounded-full hover:opacity-90 transition-colors shadow-md text-sm mt-5"

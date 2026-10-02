@@ -97,7 +97,9 @@ const router = createBrowserRouter([
   },
   {
     path: '/mi-cronograma',
-    element: <DashboardLayout allowedRoles={['assistant']} />,
+    // 'admin' habilitado por ahora también, para poder probar la vista
+    // (pedido del equipo) — ver DashboardLayout.jsx.
+    element: <DashboardLayout allowedRoles={['assistant', 'admin']} />,
     children: [
       { index: true, element: <MySchedulePage /> },
     ]

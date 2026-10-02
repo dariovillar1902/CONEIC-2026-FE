@@ -19,6 +19,10 @@ const navLinksFor = (role) => {
                 // Habilitado por ahora SOLO para admin (ver App.jsx) mientras
                 // se prueba la elección de talleres/simultáneas/solidarias.
                 { to: '/admin/talleres', label: 'Talleres, Charlas y Solidarias' },
+                // Habilitado por ahora también para admin (pedido del
+                // equipo) para poder probar la vista antes de activarla
+                // más ampliamente.
+                { to: '/mi-cronograma', label: 'Mi Cronograma' },
             ] : []),
             MANUAL_PORTENO_LINK,
         ];
