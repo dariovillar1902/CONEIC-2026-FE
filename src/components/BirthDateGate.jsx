@@ -15,18 +15,36 @@ const BirthDateGate = ({ children }) => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
 
+    const [attempt, setAttempt] = useState(0);
+
     useEffect(() => {
         if (!user?.email) return;
-        fetch(`${API_URL}/api/registrations/by-email/${encodeURIComponent(user.email)}`)
-            .then((r) => (r.ok ? r.json() : null))
-            .then((reg) => {
-                // Sin registro asociado (p. ej. cuentas institucionales de
-                // prueba) — no hay nada que pedir, dejamos pasar.
-                if (!reg) { setStatus('ready'); return; }
-                setStatus(reg.birthDate ? 'ready' : 'needsBirthDate');
-            })
-            .catch(() => setStatus('ready')); // ante una falla de red no bloqueamos el flujo principal
-    }, [user]);
+        let cancelled = false;
+        // Solo dejamos pasar sin pedir la fecha si el servidor confirma que no
+        // hay inscripción para este email (404). Ante una falla de red o un
+        // 5xx (el servidor a veces tarda en responder) reintentamos y, si
+        // sigue fallando, mostramos un aviso con botón de reintento: antes se
+        // salteaba el paso en silencio y la persona nunca veía el popup.
+        const load = async () => {
+            for (let i = 0; i < 4; i++) {
+                try {
+                    const r = await fetch(`${API_URL}/api/registrations/by-email/${encodeURIComponent(user.email)}`);
+                    if (cancelled) return;
+                    if (r.status === 404) { setStatus('ready'); return; }
+                    if (r.ok) {
+                        const reg = await r.json();
+                        if (!cancelled) setStatus(reg.birthDate ? 'ready' : 'needsBirthDate');
+                        return;
+                    }
+                } catch { /* reintenta */ }
+                await new Promise((res) => setTimeout(res, 600 * (i + 1)));
+            }
+            if (!cancelled) setStatus('error');
+        };
+        setStatus('loading');
+        load();
+        return () => { cancelled = true; };
+    }, [user, attempt]);
 
     const submit = async (e) => {
         e.preventDefault();
@@ -53,6 +71,23 @@ const BirthDateGate = ({ children }) => {
 
     if (status === 'loading') {
         return <div className="max-w-3xl mx-auto p-8 text-center text-gray-400">Cargando...</div>;
+    }
+
+    if (status === 'error') {
+        return (
+            <div className="max-w-md mx-auto p-4 mt-10">
+                <div className="bg-white border border-gray-200 rounded-2xl shadow-md p-6 text-center">
+                    <h2 className="text-xl font-bold text-institutional mb-2">No pudimos cargar tus datos</h2>
+                    <p className="text-sm text-gray-500 mb-5">Hubo un problema de conexión con el servidor. Probá de nuevo en unos segundos.</p>
+                    <button
+                        onClick={() => setAttempt((n) => n + 1)}
+                        className="w-full bg-institutional text-white font-bold py-3 rounded-lg hover:opacity-90 transition"
+                    >
+                        Reintentar
+                    </button>
+                </div>
+            </div>
+        );
     }
 
     if (status === 'needsBirthDate') {
