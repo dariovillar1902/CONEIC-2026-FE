@@ -9,6 +9,10 @@ const API = import.meta.env.VITE_API_URL;
 // esto solo evita mostrar el botón a quien no puede usarlo.
 const OVERRIDE_EMAIL = 'directorio@coneic2026.com.ar';
 
+// IDs fijos de los bloques (ver ActivitySelectionController.cs).
+const BLOCK_LABEL = { 1: 'Visita Técnica', 2: 'Taller', 3: 'Charla Simultánea', 4: 'Actividad Solidaria' };
+const DATE_FORMAT = { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' };
+
 /**
  * Tabla de "quién eligió qué" en la Elección de Actividades.
  *
@@ -28,7 +32,9 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [categoryFilter, setCategoryFilter] = useState(''); // '' | '1' | '2' | '3' | '4'
     const [activityFilter, setActivityFilter] = useState('');
+    const [exporting, setExporting] = useState(false);
     const [facultyFilter, setFacultyFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [sortDir, setSortDir] = useState('desc'); // 'desc' = más reciente primero
@@ -203,9 +209,11 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
 
     const activityOptions = useMemo(() => {
         const map = new Map();
-        rows.forEach(r => map.set(r.activityCode, r.activityTitle));
+        rows
+            .filter(r => !categoryFilter || String(r.blockId) === categoryFilter)
+            .forEach(r => map.set(r.activityCode, r.activityTitle));
         return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-    }, [rows]);
+    }, [rows, categoryFilter]);
 
     const facultyOptions = useMemo(() => {
         const set = new Set([...rows, ...noSelectionRows].map(r => r.faculty).filter(Boolean));
@@ -216,6 +224,7 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
 
     const filteredRows = useMemo(() => {
         let items = activityFilter === NO_SELECTION_VALUE ? [...noSelectionRows] : [...rows];
+        if (categoryFilter && activityFilter !== NO_SELECTION_VALUE) items = items.filter(r => String(r.blockId) === categoryFilter);
         if (activityFilter && activityFilter !== NO_SELECTION_VALUE) items = items.filter(r => r.activityCode === activityFilter);
         if (facultyFilter) items = items.filter(r => r.faculty === facultyFilter);
         if (searchTerm) {
@@ -231,7 +240,57 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
             return sortDir === 'asc' ? diff : -diff;
         });
         return items;
-    }, [rows, noSelectionRows, activityFilter, facultyFilter, searchTerm, sortDir]);
+    }, [rows, noSelectionRows, categoryFilter, activityFilter, facultyFilter, searchTerm, sortDir]);
+
+    // Exporta exactamente las filas que se están viendo (con filtros y orden
+    // aplicados). Las fechas viajan ya formateadas en hora local para que el
+    // Excel coincida con lo que muestra la tabla.
+    const exportExcel = async () => {
+        setExporting(true);
+        try {
+            const filterParts = [
+                searchTerm && `Búsqueda: "${searchTerm}"`,
+                categoryFilter && `Categoría: ${BLOCK_LABEL[categoryFilter]}`,
+                activityFilter === NO_SELECTION_VALUE
+                    ? 'Actividad: Ninguna (sin elegir todavía)'
+                    : activityFilter && `Actividad: ${activityFilter} — ${activityOptions.find(([c]) => c === activityFilter)?.[1] ?? ''}`,
+                facultyFilter && `Delegación: ${facultyFilter}`,
+                `Orden por fecha: ${sortDir === 'asc' ? 'más antigua primero' : 'más reciente primero'}`,
+            ].filter(Boolean);
+
+            const res = await fetch(`${API}/api/activityselection/export`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filters: filterParts.join(' | '),
+                    rows: filteredRows.map(r => ({
+                        lastname: r.lastname,
+                        name: r.name,
+                        email: r.email,
+                        faculty: r.faculty,
+                        blockId: r.blockId,
+                        activityCode: r.activityCode,
+                        activityTitle: r.activityTitle,
+                        isConfirmed: !!r.isConfirmed,
+                        selectedAt: r.selectedAt ? formatEventDate(r.selectedAt, DATE_FORMAT) : '',
+                        confirmedAt: r.confirmedAt ? formatEventDate(r.confirmedAt, DATE_FORMAT) : '',
+                    })),
+                }),
+            });
+            if (!res.ok) throw new Error('No se pudo generar el Excel.');
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `eleccion_actividades_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            alert(`Error exportando: ${e.message}`);
+        } finally {
+            setExporting(false);
+        }
+    };
 
     if (loading) return <div className="text-center py-12 text-gray-400">Cargando selecciones...</div>;
     if (error)   return <div className="text-red-600 text-center py-12">{error}</div>;
@@ -248,11 +307,21 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                     onChange={e => setSearchTerm(e.target.value)}
                 />
                 <select
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white min-w-[160px]"
+                    value={categoryFilter}
+                    onChange={e => { setCategoryFilter(e.target.value); setActivityFilter(''); }}
+                >
+                    <option value="">Todas las categorías</option>
+                    {Object.entries(BLOCK_LABEL).map(([id, label]) => (
+                        <option key={id} value={id}>{label}</option>
+                    ))}
+                </select>
+                <select
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white min-w-[200px]"
                     value={activityFilter}
                     onChange={e => setActivityFilter(e.target.value)}
                 >
-                    <option value="">Todas las visitas</option>
+                    <option value="">Todas las actividades</option>
                     <option value={NO_SELECTION_VALUE}>Ninguna (sin elegir todavía)</option>
                     {activityOptions.map(([code, title]) => (
                         <option key={code} value={code}>{code} — {title}</option>
@@ -276,6 +345,15 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                 >
                     Fecha {sortDir === 'asc' ? '↑ más antigua primero' : '↓ más reciente primero'}
                 </button>
+                {scope === 'admin' && (
+                    <button
+                        onClick={exportExcel}
+                        disabled={exporting || filteredRows.length === 0}
+                        className="text-xs font-bold text-white bg-green-600 border border-green-600 rounded-lg px-3 py-2 hover:bg-green-700 transition disabled:opacity-50"
+                    >
+                        {exporting ? 'Generando...' : '📥 Exportar a Excel'}
+                    </button>
+                )}
                 {canOverride && (
                     <button
                         onClick={openAdd}
@@ -296,7 +374,8 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Apellido y Nombre</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delegación</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visita elegida</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actividad elegida</th>
                             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                             {canOverride && <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>}
                         </tr>
@@ -313,6 +392,9 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                                 <td className="px-4 py-3 text-gray-600">{r.email}</td>
                                 <td className="px-4 py-3 text-xs text-gray-500 max-w-[160px] truncate" title={r.faculty ?? ''}>
                                     {r.faculty?.replace('UTN - ', '') ?? '—'}
+                                </td>
+                                <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+                                    {r.activityCode ? (BLOCK_LABEL[r.blockId] ?? `Bloque ${r.blockId}`) : '—'}
                                 </td>
                                 <td className="px-4 py-3 text-gray-700">
                                     {r.activityCode ? (
@@ -342,7 +424,7 @@ const ActivitySelectionsPanel = ({ scope, email, viewerEmail }) => {
                         ))}
                         {filteredRows.length === 0 && (
                             <tr>
-                                <td colSpan={canOverride ? 7 : 6} className="px-4 py-10 text-center text-gray-400 text-sm">
+                                <td colSpan={canOverride ? 8 : 7} className="px-4 py-10 text-center text-gray-400 text-sm">
                                     No hay selecciones para los filtros aplicados.
                                 </td>
                             </tr>

@@ -148,6 +148,7 @@ const TalleresSelectionPage = () => {
             setBlocks(blocksData);
             setWindowInfo({
                 isWindowOpen: blocksRes.data?.isWindowOpen ?? false,
+                canSelect: blocksRes.data?.canSelect ?? false,
                 windowOpensAt: blocksRes.data?.windowOpensAt,
                 windowClosesAt: blocksRes.data?.windowClosesAt,
             });
@@ -190,11 +191,11 @@ const TalleresSelectionPage = () => {
     const maccaferriLocked = isMaccaferri && (activeCategory === 'Taller' || activeCategory === 'Simultanea');
     const currentBlockConfirmed = currentBlock && !!confirmedByBlockId[currentBlock.id];
 
-    const isWindowOpen = windowInfo?.isWindowOpen ?? false;
-    // Los admins pueden elegir fuera de ventana (el backend los deja pasar);
-    // el resto solo mientras la ventana está abierta.
-    const canSelect = isWindowOpen || user?.role === 'admin';
-    const windowClosed = !canSelect;
+    // El backend decide si esta cuenta puede elegir ahora (asistentes dentro de
+    // la ventana de elección; admins solo hasta el corte previo a la apertura).
+    // Si no puede, la pantalla queda en solo lectura.
+    const windowClosed = !(windowInfo?.canSelect ?? false);
+    const beforeOpening = windowInfo?.windowOpensAt ? new Date() < new Date(windowInfo.windowOpensAt) : false;
 
     const choose = async (activityId) => {
         if (windowClosed) return;
@@ -278,21 +279,14 @@ const TalleresSelectionPage = () => {
             <p className="text-sm text-gray-500 mt-1 max-w-2xl">
                 Elegí una opción de cada categoría y confirmala — cada categoría se confirma por separado. Una vez confirmada, esa categoría ya no se puede cambiar.
             </p>
+            {windowClosed && (
+                <div className="mt-3 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg px-4 py-3 max-w-2xl">
+                    {beforeOpening
+                        ? 'Por ahora esta pantalla es solo de consulta: podés ver todas las actividades, sedes y horarios, pero todavía no se puede elegir.'
+                        : 'Esta pantalla es solo de consulta: ya no se pueden elegir ni modificar actividades.'}
+                </div>
+            )}
             <div className="mt-2 flex flex-wrap gap-2">
-                {windowInfo && (
-                    <span className={`inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border ${
-                        isWindowOpen ? 'text-green-700 bg-green-50 border-green-200' : 'text-gray-500 bg-gray-50 border-gray-200'
-                    }`}>
-                        {isWindowOpen
-                            ? `Ventana abierta hasta ${formatEventDate(windowInfo.windowClosesAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`
-                            : `Ventana cerrada — abre ${formatEventDate(windowInfo.windowOpensAt, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`}
-                    </span>
-                )}
-                {windowClosed && windowInfo && (
-                    <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border text-amber-700 bg-amber-50 border-amber-200">
-                        {new Date() < new Date(windowInfo.windowOpensAt) ? 'Todavía no se puede elegir' : 'La elección ya cerró'}
-                    </span>
-                )}
                 {allConfirmed && (
                     <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border text-green-700 bg-green-50 border-green-200">
                         ✅ Las 3 categorías confirmadas
