@@ -54,6 +54,7 @@ const VENUES = [
     name: 'UCA - Puerto Madero',
     address: 'Pontificia Universidad Católica Argentina, Puerto Madero, Ciudad Autónoma de Buenos Aires',
     icon: '🏫',
+    logoUrl: '/assets/avales/logo-uca-horizontal.png',
     color: 'border-complementary-gold',
     badge: 'bg-complementary-gold/10 text-complementary-gold',
     activities: ['Talleres y Charlas Simultáneas (Familias 2 y 3)'],
@@ -236,7 +237,9 @@ export const SchedulePage = () => {
         {VENUES.map(v => (
           <div key={v.name} className={`bg-white rounded-2xl shadow-sm border-t-4 ${v.color} overflow-hidden hover:shadow-lg transition-shadow`}>
             <div className="p-6">
-              <div className="text-4xl mb-4">{v.icon}</div>
+              {v.logoUrl
+                ? <img src={v.logoUrl} alt={v.name} className="h-14 w-auto object-contain mb-4" />
+                : <div className="text-4xl mb-4">{v.icon}</div>}
               <span className={`inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 ${v.badge}`}>{v.days}</span>
               <h3 className="text-lg font-bold text-institutional font-title mb-1">{v.name}</h3>
               <p className="text-gray-500 text-xs mb-4">{v.address}</p>

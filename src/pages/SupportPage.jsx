@@ -96,6 +96,14 @@ const ENDORSERS = [
         description: 'Una de las facultades de ingeniería más grandes y prestigiosas del país. Se destaca por su excelencia académica en la formación de profesionales, su fuerte impulso a la investigación científica, la transferencia tecnológica al sistema productivo y un profundo compromiso con el desarrollo social y sostenible de la región.',
     },
     {
+        shortName: 'UCA',
+        fullName: 'Pontificia Universidad Católica Argentina — Facultad de Ingeniería y Ciencias Agrarias',
+        url: 'https://uca.edu.ar',
+        logoUrl: '/assets/avales/logo-uca.png',
+        logoBg: 'bg-white',
+        description: 'Su Facultad de Ingeniería y Ciencias Agrarias respalda al congreso con su aval institucional y recibe a los asistentes en su sede de Puerto Madero durante los talleres y charlas simultáneas del miércoles 14 de octubre.',
+    },
+    {
         shortName: 'ANEIC',
         fullName: 'ANEIC Argentina',
         url: 'https://sites.google.com/view/aneicarg/inicio?authuser=0',
