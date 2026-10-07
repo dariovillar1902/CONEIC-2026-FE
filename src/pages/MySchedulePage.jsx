@@ -55,12 +55,19 @@ const FixedItem = ({ item }) => (
 
 // Línea "Sede · Hora de inicio" — las Solidarias todavía no tienen hora
 // confirmada, así que se muestra "A confirmar".
-const MetaLine = ({ venue, startTime }) => (
-    <p className="text-xs text-gray-600 mt-1.5">
-        {venue && <><span className="font-bold">Sede:</span> {venue}</>}
-        {venue && ' · '}
-        <span className="font-bold">Hora de inicio:</span> {startTime ? `${startTime} hs` : 'A confirmar'}
-    </p>
+const MetaLine = ({ venue, startTime, meetingPoint }) => (
+    <>
+        <p className="text-xs text-gray-600 mt-1.5">
+            {venue && <><span className="font-bold">Sede:</span> {venue}</>}
+            {venue && ' · '}
+            <span className="font-bold">Hora de inicio:</span> {startTime ? `${startTime} hs` : 'A confirmar'}
+        </p>
+        {meetingPoint && (
+            <p className="text-xs text-gray-600 mt-0.5">
+                <span className="font-bold">Punto de encuentro:</span> {meetingPoint}
+            </p>
+        )}
+    </>
 );
 
 const PersonalItem = ({ item, picked, isMaccaferri }) => {
@@ -95,7 +102,7 @@ const PersonalItem = ({ item, picked, isMaccaferri }) => {
             <p className="font-bold text-gray-800">{picked.code ? `${picked.code} — ` : ''}{picked.title}</p>
             {picked.speaker && <p className="text-xs text-gray-500 mt-0.5">{picked.speaker}</p>}
             {item.showTime ? (
-                <MetaLine venue={picked.venue} startTime={picked.startTime} />
+                <MetaLine venue={picked.venue} startTime={picked.startTime} meetingPoint={picked.meetingPoint} />
             ) : (
                 <p className="text-xs text-gray-400 mt-1">{item.location}</p>
             )}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { formatEventDate } from '../utils/formatEventDate';
+import FormattedText from '../components/FormattedText';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -64,6 +65,7 @@ const OptionCard = ({ option, picked, onOpen, disabled }) => {
                 <p className="text-sm font-bold text-gray-800 leading-snug line-clamp-3">{option.title}</p>
                 {option.speaker && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{option.speaker}</p>}
                 {metaLine(option) && <p className="text-[11px] font-semibold text-sostenibilidad mt-1">{metaLine(option)}</p>}
+                {option.meetingPoint && <p className="text-[11px] font-semibold text-institutional mt-0.5">Punto de encuentro: {option.meetingPoint}</p>}
             </div>
         </button>
     );
@@ -86,9 +88,10 @@ const OptionModal = ({ option, picked, onClose, onChoose, choosing, readOnly = f
                 {option.speaker && <p className="text-sm text-gray-500 font-semibold mb-2">{option.speaker}</p>}
                 <div className="text-xs text-gray-600 mb-3 space-y-0.5">
                     {option.venue && <p><span className="font-bold">Sede:</span> {option.venue}</p>}
+                    {option.meetingPoint && <p><span className="font-bold">Punto de encuentro:</span> {option.meetingPoint}</p>}
                     <p><span className="font-bold">Hora de inicio:</span> {option.startTime ? `${option.startTime} hs` : 'A confirmar'}{option.endTime ? ` (finaliza ${option.endTime} hs)` : ''}</p>
                 </div>
-                {option.description && <p className="text-sm text-gray-600 leading-relaxed mb-4">{option.description}</p>}
+                {option.description && <FormattedText text={option.description} className="text-sm text-gray-600 leading-relaxed mb-4" />}
 
                 <div className="mb-4">
                     <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
