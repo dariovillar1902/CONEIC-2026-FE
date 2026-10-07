@@ -95,6 +95,16 @@ const router = createBrowserRouter([
       { index: true, element: <ActivitySelectionPage /> },
     ]
   },
+  // Elección de Talleres, Charlas Simultáneas y Solidarias — abierta a
+  // asistentes (la ventana real la controla el backend: 07/10 23:00 a 08/10
+  // 23:00 ART). Admin sigue entrando para probar.
+  {
+    path: '/eleccion-talleres',
+    element: <DashboardLayout allowedRoles={['assistant', 'admin']} />,
+    children: [
+      { index: true, element: <TalleresSelectionPage /> },
+    ]
+  },
   {
     path: '/mi-cronograma',
     // 'admin' habilitado por ahora también, para poder probar la vista

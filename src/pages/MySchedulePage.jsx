@@ -22,9 +22,9 @@ const DAYS = [
         label: 'Miércoles',
         date: '14 de octubre',
         items: [
-            { type: 'personal', blockId: 2, label: 'Tu Taller', location: 'UTN Medrano', maccaferriReplaces: true },
-            { type: 'personal', blockId: 3, label: 'Tu Charla Simultánea', location: 'UTN Medrano', maccaferriReplaces: true },
-            { type: 'personal', blockId: 4, label: 'Tu actividad Solidaria', location: 'UTN BA - Campus' },
+            { type: 'personal', blockId: 2, label: 'Tu Taller', showTime: true, electionPath: '/eleccion-talleres', maccaferriReplaces: true },
+            { type: 'personal', blockId: 3, label: 'Tu Charla Simultánea', showTime: true, electionPath: '/eleccion-talleres', maccaferriReplaces: true },
+            { type: 'personal', blockId: 4, label: 'Tu actividad Solidaria', showTime: true, electionPath: '/eleccion-talleres' },
         ],
     },
     {
@@ -53,13 +53,24 @@ const FixedItem = ({ item }) => (
     </div>
 );
 
+// Línea "Sede · Hora de inicio" — las Solidarias todavía no tienen hora
+// confirmada, así que se muestra "A confirmar".
+const MetaLine = ({ venue, startTime }) => (
+    <p className="text-xs text-gray-600 mt-1.5">
+        {venue && <><span className="font-bold">Sede:</span> {venue}</>}
+        {venue && ' · '}
+        <span className="font-bold">Hora de inicio:</span> {startTime ? `${startTime} hs` : 'A confirmar'}
+    </p>
+);
+
 const PersonalItem = ({ item, picked, isMaccaferri }) => {
     if (isMaccaferri && item.maccaferriReplaces) {
         return (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                 <p className="text-xs font-bold text-amber-700 uppercase tracking-widest mb-1">{item.label}</p>
-                <p className="font-bold text-amber-800">Participás en el Desafío de Barreras de Maccaferri</p>
+                <p className="font-bold text-amber-800">Desafío de Barreras - Maccaferri</p>
                 <p className="text-xs text-amber-600 mt-0.5">Esta actividad reemplaza Talleres y Simultáneas para vos.</p>
+                <MetaLine venue="UTN BA - Campus" startTime="09:00" />
             </div>
         );
     }
@@ -68,7 +79,12 @@ const PersonalItem = ({ item, picked, isMaccaferri }) => {
         return (
             <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{item.label}</p>
-                <p className="text-sm text-gray-400 italic">No llegaste a elegir esta actividad.</p>
+                <p className="text-sm text-gray-400 italic">Todavía no elegiste esta actividad.</p>
+                {item.electionPath && (
+                    <Link to={item.electionPath} className="inline-block text-xs font-bold text-institutional underline mt-1">
+                        Ir a elegir →
+                    </Link>
+                )}
             </div>
         );
     }
@@ -78,7 +94,11 @@ const PersonalItem = ({ item, picked, isMaccaferri }) => {
             <p className="text-xs font-bold text-institutional uppercase tracking-widest mb-1">{item.label}</p>
             <p className="font-bold text-gray-800">{picked.code ? `${picked.code} — ` : ''}{picked.title}</p>
             {picked.speaker && <p className="text-xs text-gray-500 mt-0.5">{picked.speaker}</p>}
-            <p className="text-xs text-gray-400 mt-1">{item.location}</p>
+            {item.showTime ? (
+                <MetaLine venue={picked.venue} startTime={picked.startTime} />
+            ) : (
+                <p className="text-xs text-gray-400 mt-1">{item.location}</p>
+            )}
         </div>
     );
 };
