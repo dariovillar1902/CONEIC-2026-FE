@@ -52,14 +52,14 @@ const VENUES = [
   },
   {
     name: 'UCA - Puerto Madero',
-    address: 'Pontificia Universidad Católica Argentina, Puerto Madero, Ciudad Autónoma de Buenos Aires',
+    address: 'Av. Alicia Moreau de Justo 1300, C1107 Cdad. Autónoma de Buenos Aires',
     icon: '🏫',
     logoUrl: '/assets/avales/logo-uca-horizontal.png',
     color: 'border-complementary-gold',
     badge: 'bg-complementary-gold/10 text-complementary-gold',
     activities: ['Talleres y Charlas Simultáneas (Familias 2 y 3)'],
     days: 'Miércoles',
-    mapsUrl: 'https://maps.google.com/?q=Universidad+Cat%C3%B3lica+Argentina,+Puerto+Madero,+Buenos+Aires,+Argentina',
+    mapsUrl: 'https://maps.google.com/?q=Av.+Alicia+Moreau+de+Justo+1300,+C1107,+Buenos+Aires,+Argentina',
   },
   {
     name: 'UTN BA - Campus',
