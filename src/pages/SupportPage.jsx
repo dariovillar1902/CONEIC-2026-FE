@@ -31,13 +31,13 @@ const SPONSORS_ORO = [
     {
         name: 'SACDE',
         logoUrl: '/assets/sponsors/logo-sacde.png',
-        url: 'https://www.sacde.com/',
+        url: 'https://www.sacde.com.ar/',
         cardBg: 'bg-white',
     },
     {
         name: 'Ischebeck Titan',
         logoUrl: '/assets/sponsors/logo-ischebeck.png',
-        url: 'https://www.ischebeck.com/',
+        url: 'https://www.ischebecksud.com.ar/',
         cardBg: 'bg-white',
     },
 ];
