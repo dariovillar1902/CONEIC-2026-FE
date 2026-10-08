@@ -28,6 +28,18 @@ const SPONSORS_ORO = [
         url: 'http://evel.com.ar/',
         cardBg: 'bg-white',
     },
+    {
+        name: 'SACDE',
+        logoUrl: '/assets/sponsors/logo-sacde.png',
+        url: 'https://www.sacde.com/',
+        cardBg: 'bg-white',
+    },
+    {
+        name: 'Ischebeck Titan',
+        logoUrl: '/assets/sponsors/logo-ischebeck.png',
+        url: 'https://www.ischebeck.com/',
+        cardBg: 'bg-white',
+    },
 ];
 
 const SPONSORS_PLATA = [
