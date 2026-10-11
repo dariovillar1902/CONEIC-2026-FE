@@ -1,0 +1,110 @@
+// Programa detallado (solo orden, sin horarios) de los días con auditorio común.
+// Es el valor inicial: cuando un admin guarda cambios, se persiste en AppSettings
+// ("ProgramDetail") y pasa a mandar esa versión.
+// kind: 'general' | 'ponencia' | 'magistral' | 'pausa'
+
+export const PROGRAM_SETTING_KEY = 'ProgramDetail';
+
+export const KIND_LABELS = {
+    general: 'Actividad general',
+    ponencia: 'Ponencia estudiantil',
+    magistral: 'Charla magistral',
+    pausa: 'Pausa',
+};
+
+const item = (id, kind, label, extra = {}) => ({
+    id, kind, label, title: '', speakers: '', axis: '', sponsor: '', description: '', ...extra,
+});
+
+export const DEFAULT_PROGRAM = {
+    martes: [
+        item('m-acred', 'general', 'Acreditaciones'),
+        item('m-apertura', 'general', 'Acto de apertura y palabras de autoridades'),
+        item('m-show', 'general', 'Show tradicional'),
+        item('m-aneic', 'general', 'Espacio ANEIC'),
+        item('m-almuerzo', 'pausa', 'Almuerzo libre'),
+        item('m-p1', 'ponencia', 'Ponencia 1', {
+            title: 'Evaluación del comportamiento sísmico de una vivienda de adobe reforzado mediante modelación estructural',
+            speakers: 'Julieta Rosas y Ana Luz Herrera — UTN-FRM (Mendoza)',
+            axis: 'Estructuras',
+            description: 'A pesar de su bajo costo y disponibilidad, el adobe es altamente vulnerable a sismos. Se diseñó y modeló una vivienda de adobe reforzado en zona de alta peligrosidad sísmica (E.080 adaptada a Argentina), comprobando que los refuerzos mejoran el comportamiento estructural y reducen la vulnerabilidad.',
+        }),
+        item('m-p2', 'ponencia', 'Ponencia 2', {
+            title: 'Análisis comparativo de naves industriales',
+            speakers: 'Renzo Agustín Bastiani, Ayrton Manuel Mazo y Mariano Newton — UNNE (Chaco/Corrientes)',
+            axis: 'Estructuras',
+            description: 'Herramienta propia AutoPort 2D (Python) + IA para el diseño óptimo de naves industriales en Gran Resistencia, Chaco. Analiza pórticos según CIRSOC 102/301/303/201, predice el peso mínimo de acero con error <1% y demuestra que la unión rígida cercha-columna es la más eficiente frente a la succión de viento.',
+        }),
+        item('m-p3', 'ponencia', 'Ponencia 3', {
+            title: 'Optimización asistida de rasantes urbanas mediante Solver y VBA',
+            speakers: 'Nicolás Reig — UTN-FRRO (Rosario)',
+            axis: 'Vías',
+            description: 'Herramienta desarrollada en Rosario (VBA + Excel Solver) que optimiza la rasante de calles a partir de perfiles de vereda. Mediante programación no lineal garantiza escurrimiento, evita anegamientos y respeta cotas de umbral. Reduce un 80% el tiempo de proyecto y fue validada en casos críticos de la ciudad.',
+        }),
+        item('m-p4', 'ponencia', 'Ponencia 4', {
+            title: 'Campo solar en la Puna salteña: análisis estructural y geotécnico de fundaciones mediante pilotes hincados',
+            speakers: 'Gimena Alvarez Matthews — UNSa (Salta)',
+            axis: 'Sostenibilidad',
+            description: 'Evaluación estructural y geotécnica de pilotes metálicos hincados para un parque de 8,17 MWp en Tolar Grande. Modelación en SAP2000/RFEM + viento por CFD (RWIND 3) y calibración con ensayos pull-out. La estructura verifica (48% de eficiencia), pero las fundaciones perimetrales fallan a compresión por viento sin apantallamiento. Se proponen soluciones localizadas de bajo costo.',
+        }),
+        item('m-coffee', 'pausa', 'Coffee break'),
+        item('m-mag1', 'magistral', 'Magistral 1', {
+            title: 'Salvando de la corrosión al acero de refuerzo',
+            speakers: 'Emmanuel Alejandro Ramírez Gutiérrez',
+            axis: 'Estructuras',
+            description: 'Director Técnico para Latinoamérica de la Asociación de Galvanizadores de América.',
+        }),
+        item('m-mag2', 'magistral', 'Magistral 2', {
+            title: 'Energía undimotriz: transformando el movimiento del mar en energía',
+            speakers: 'Julieta Martino, Facundo Flores y Tiago Contreras',
+            axis: 'Sostenibilidad',
+        }),
+        item('m-mag3', 'magistral', 'Magistral 3', {
+            title: 'El futuro no empieza cuando te graduás',
+            speakers: 'Lionel Campi',
+            axis: 'Habilidades blandas',
+            description: 'Ing. Civil (UNLP). Experto en Dirección Estratégica de Proyectos de Infraestructura. Coach Ejecutivo Senior de Empresas y Líderes.',
+        }),
+    ],
+    viernes: [
+        item('v-mag4', 'magistral', 'Magistral 4', {
+            title: 'Protección contra caída de rocas en la infraestructura vial',
+            speakers: 'Ing. Francisco Parodi',
+            axis: 'Vías',
+            sponsor: 'Maccaferri',
+        }),
+        item('v-mag5', 'magistral', 'Magistral 5', {
+            title: 'Proyectando sistemas inteligentes de tránsito y la importancia de la normalización en etapas tempranas',
+            speakers: 'D.I. Fernando Fariña',
+            axis: 'Vías',
+        }),
+        item('v-coffee1', 'pausa', 'Coffee break'),
+        item('v-mag6', 'magistral', 'Magistral 6', {
+            title: 'Durabilidad de las estructuras',
+            speakers: 'Arq. Ariel Stipelman',
+            axis: 'Estructuras',
+            sponsor: 'Penetron',
+            description: 'Country Manager de Penetron Argentina.',
+        }),
+        item('v-mag7', 'magistral', 'Magistral 7', {
+            title: 'Nuevos desafíos en la tecnología del hormigonado',
+            speakers: 'Ing. Fabio Pozzi',
+            axis: 'Estructuras',
+            sponsor: 'PERI',
+            description: 'Ingeniero Civil, Ingeniero Hidráulico e Ingeniero en Vías de Comunicación (UNLP).',
+        }),
+        item('v-almuerzo', 'pausa', 'Almuerzo libre'),
+        item('v-mag8', 'magistral', 'Magistral 8', {
+            speakers: 'Ing. Pablo Brottier',
+            axis: 'Vías',
+            sponsor: 'SACDE',
+        }),
+        item('v-coffee2', 'pausa', 'Coffee break'),
+        item('v-cierre', 'general', 'Acto de cierre', { speakers: 'ANEIC Argentina', description: 'Con entrega de premios.' }),
+    ],
+};
+
+export const PROGRAM_DAYS = [
+    { key: 'martes', label: 'Martes 13 de octubre' },
+    { key: 'viernes', label: 'Viernes 16 de octubre' },
+];

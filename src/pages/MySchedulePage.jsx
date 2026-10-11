@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ProgramDetail, { useProgram } from '../components/ProgramDetail';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -115,6 +116,7 @@ const MySchedulePage = () => {
     const [blocks, setBlocks] = useState(null);
     const [isMaccaferri, setIsMaccaferri] = useState(false);
     const [error, setError] = useState(false);
+    const program = useProgram();
 
     useEffect(() => {
         if (!user?.email) return;
@@ -170,8 +172,14 @@ const MySchedulePage = () => {
                             <h2 className="text-lg font-bold text-institutional font-title uppercase tracking-widest">{day.label}</h2>
                             <span className="text-xs text-gray-400">{day.date}</span>
                         </div>
+                        {program?.[day.key]?.length > 0 && (
+                            <>
+                                <p className="text-xs text-gray-400 mb-2">Programa en orden de presentación (los horarios se informan en el lugar).</p>
+                                <ProgramDetail items={program[day.key]} />
+                            </>
+                        )}
                         <div className="space-y-3">
-                            {day.items.map((item, idx) =>
+                            {day.items.filter((item) => !(program?.[day.key]?.length > 0 && item.type === 'fixed')).map((item, idx) =>
                                 item.type === 'fixed' ? (
                                     <FixedItem key={idx} item={item} />
                                 ) : (
