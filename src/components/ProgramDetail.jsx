@@ -29,9 +29,16 @@ const STYLES = {
     general: 'bg-gray-50 border-gray-200',
 };
 
+const timeRange = (item) => {
+    if (item.start && item.end) return `${item.start} a ${item.end} hs`;
+    if (item.start) return `${item.start} hs`;
+    return '';
+};
+
 const ProgramItem = ({ item }) => {
+    const when = timeRange(item);
     if (item.kind === 'pausa') {
-        return <p className="text-xs text-gray-400 italic px-4">{item.label}</p>;
+        return <p className="text-xs text-gray-400 italic px-4">{item.label}{when && ` · ${when}`}</p>;
     }
     return (
         <div className={`border rounded-xl p-4 ${STYLES[item.kind] ?? STYLES.general}`}>
@@ -49,6 +56,13 @@ const ProgramItem = ({ item }) => {
                 <p className="text-sm text-gray-400 italic mt-1">Título a confirmar</p>
             )}
             {item.speakers && <p className="text-sm text-gray-600 mt-0.5">{item.speakers}</p>}
+            {(when || item.location) && (
+                <p className="text-xs text-gray-600 mt-1">
+                    {when && <span className="font-bold">{when}</span>}
+                    {when && item.location && ' · '}
+                    {item.location}
+                </p>
+            )}
             {item.description && <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">{item.description}</p>}
         </div>
     );

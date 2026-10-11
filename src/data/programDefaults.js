@@ -13,7 +13,8 @@ export const KIND_LABELS = {
 };
 
 const item = (id, kind, label, extra = {}) => ({
-    id, kind, label, title: '', speakers: '', axis: '', sponsor: '', description: '', ...extra,
+    id, kind, label, title: '', speakers: '', axis: '', sponsor: '', description: '',
+    start: '', end: '', location: kind === 'pausa' ? '' : 'Auditorio Belgrano', ...extra,
 });
 
 export const DEFAULT_PROGRAM = {

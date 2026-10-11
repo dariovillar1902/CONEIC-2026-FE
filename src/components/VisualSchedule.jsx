@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import ProgramDetail, { useProgram } from './ProgramDetail';
+import { PROGRAM_DAYS } from '../data/programDefaults';
+
 /**
  * VisualSchedule — grid estilo tabla de cronograma.
  * Coincide con el diseño de la imagen de referencia:
@@ -53,7 +57,29 @@ const Cell = ({ name, location, span = 1 }) => (
   </td>
 );
 
+const ProgramSection = () => {
+  const program = useProgram();
+  const [day, setDay] = useState('martes');
+  if (!program) return null;
+  return (
+    <section className="mt-10">
+      <h3 className="text-xl font-bold text-institutional font-title mb-1">Programa detallado</h3>
+      <p className="text-sm text-gray-500 mb-4">Charlas Magistrales y Ponencias Estudiantiles, en orden de presentación.</p>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {PROGRAM_DAYS.map((d) => (
+          <button key={d.key} onClick={() => setDay(d.key)}
+            className={`px-4 py-2 rounded-lg text-sm font-bold ${day === d.key ? 'bg-institutional text-white' : 'bg-gray-100 text-gray-600'}`}>
+            {d.label}
+          </button>
+        ))}
+      </div>
+      <ProgramDetail items={program[day]} />
+    </section>
+  );
+};
+
 const VisualSchedule = () => (
+  <>
   <div className="overflow-x-auto rounded-2xl shadow-md border border-gray-200">
     <table className="w-full border-collapse min-w-[560px]">
       <thead>
@@ -81,6 +107,8 @@ const VisualSchedule = () => (
       </tbody>
     </table>
   </div>
+  <ProgramSection />
+  </>
 );
 
 export default VisualSchedule;

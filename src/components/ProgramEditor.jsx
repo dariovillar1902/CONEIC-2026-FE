@@ -10,8 +10,9 @@ const FIELDS = [
     ['title', 'Título'],
     ['speakers', 'Disertante(s) / autores'],
     ['sponsor', 'Sponsor'],
+    ['location', 'Ubicación (ej. Auditorio Belgrano)'],
 ];
-const WIDE = new Set(['title', 'speakers']);
+const WIDE = new Set(['title', 'speakers', 'location']);
 const inputCls = 'w-full border border-gray-300 rounded px-2 py-1 text-sm';
 
 const swap = (list, a, b) => {
@@ -37,6 +38,7 @@ const ProgramEditor = () => {
         setItems(items.map((it, idx) => (idx === i ? { ...it, [field]: value } : it)));
     const add = (kind) => setItems([...items, {
         id: `n-${Date.now()}`, kind, label: KIND_LABELS[kind], title: '', speakers: '', axis: '', sponsor: '', description: '',
+        start: '', end: '', location: kind === 'pausa' ? '' : 'Auditorio Belgrano',
     }]);
     const remove = (i) => {
         if (window.confirm('¿Quitar este ítem del programa?')) setItems(items.filter((_, idx) => idx !== i));
@@ -66,8 +68,8 @@ const ProgramEditor = () => {
     return (
         <div className="max-w-4xl">
             <p className="text-sm text-gray-500 mb-4">
-                Programa detallado de los días con auditorio común. Solo se muestra el <b>orden</b> (sin horarios) y
-                aparece en <b>Mi Cronograma</b> de todos los asistentes.
+                Programa detallado de los días con auditorio común. Se muestra en el orden de esta lista; los horarios son opcionales (si los dejás
+                vacíos no se muestran). Aparece en <b>Mi Cronograma</b> y en el <b>cronograma público</b>.
             </p>
             <div className="flex gap-2 mb-4">
                 {PROGRAM_DAYS.map((d) => (
@@ -100,6 +102,12 @@ const ProgramEditor = () => {
                                 <input key={f} value={it[f] ?? ''} onChange={(e) => patch(i, f, e.target.value)}
                                     placeholder={placeholder} className={`${inputCls} ${WIDE.has(f) ? 'sm:col-span-2' : ''}`} />
                             ))}
+                            <label className="text-xs text-gray-500 flex items-center gap-2">Inicio
+                                <input type="time" value={it.start ?? ''} onChange={(e) => patch(i, 'start', e.target.value)} className={inputCls} />
+                            </label>
+                            <label className="text-xs text-gray-500 flex items-center gap-2">Fin
+                                <input type="time" value={it.end ?? ''} onChange={(e) => patch(i, 'end', e.target.value)} className={inputCls} />
+                            </label>
                             <textarea value={it.description ?? ''} onChange={(e) => patch(i, 'description', e.target.value)}
                                 placeholder="Resumen / presentación del disertante" rows={2}
                                 className={`${inputCls} sm:col-span-2`} />
