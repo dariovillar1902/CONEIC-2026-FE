@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ActivitySelectionsPanel from '../components/ActivitySelectionsPanel';
 import ProgramEditor from '../components/ProgramEditor';
+import AttendancePanel from '../components/AttendancePanel';
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 const API = import.meta.env.VITE_API_URL;
@@ -919,6 +920,7 @@ const AdminDashboard = () => {
     { id: 'registrations', label: '📋 Inscripciones' },
     { id: 'selecciones',   label: '🗺️ Elección de Actividades' },
     { id: 'programa',      label: '🎤 Programa' },
+    { id: 'asistencia',    label: '✅ Asistencia' },
     ...(isTesoreria ? [
       { id: 'comprobantes',  label: '📄 Comprobantes' },
     ] : []),
@@ -961,6 +963,7 @@ const AdminDashboard = () => {
       {activeTab === 'registrations' && <RegistrationsPanel />}
       {activeTab === 'selecciones'   && <ActivitySelectionsPanel scope="admin" viewerEmail={user?.email} />}
       {activeTab === 'programa'      && <ProgramEditor />}
+      {activeTab === 'asistencia'    && <AttendancePanel />}
       {activeTab === 'comprobantes'  && <ComprobantesPanel />}
     </div>
   );
