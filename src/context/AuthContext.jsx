@@ -22,7 +22,8 @@ export const AuthProvider = ({ children }) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email, password }),
+            // Se recortan espacios (típicos al copiar/pegar la clave del mail o del autocompletado del celular).
+            body: JSON.stringify({ email: email.trim(), password: password.trim() }),
         });
 
         if (!response.ok) {
