@@ -67,6 +67,7 @@ export const DEFAULT_PROGRAM = {
             description: 'Ing. Civil (UNLP). Experto en Dirección Estratégica de Proyectos de Infraestructura. Coach Ejecutivo Senior de Empresas y Líderes.',
         }),
     ],
+    jueves: [],
     viernes: [
         item('v-mag4', 'magistral', 'Magistral 4', {
             title: 'Protección contra caída de rocas en la infraestructura vial',
@@ -106,5 +107,6 @@ export const DEFAULT_PROGRAM = {
 
 export const PROGRAM_DAYS = [
     { key: 'martes', label: 'Martes 13 de octubre' },
+    { key: 'jueves', label: 'Jueves 15 de octubre' },
     { key: 'viernes', label: 'Viernes 16 de octubre' },
 ];

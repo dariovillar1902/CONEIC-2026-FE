@@ -11,7 +11,7 @@ export const loadProgram = async () => {
         const { value } = await r.json();
         if (!value) return DEFAULT_PROGRAM;
         const parsed = JSON.parse(value);
-        return { martes: parsed.martes ?? [], viernes: parsed.viernes ?? [] };
+        return { ...DEFAULT_PROGRAM, ...parsed };
     } catch {
         return DEFAULT_PROGRAM;
     }

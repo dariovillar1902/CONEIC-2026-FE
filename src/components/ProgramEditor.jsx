@@ -38,7 +38,7 @@ const ProgramEditor = () => {
         setItems(items.map((it, idx) => (idx === i ? { ...it, [field]: value } : it)));
     const add = (kind) => setItems([...items, {
         id: `n-${Date.now()}`, kind, label: KIND_LABELS[kind], title: '', speakers: '', axis: '', sponsor: '', description: '',
-        start: '', end: '', location: kind === 'pausa' ? '' : 'Auditorio Belgrano',
+        start: '', end: '', location: kind === 'pausa' ? '' : (day === 'jueves' ? 'UTN.BA - Campus' : 'Auditorio Belgrano'),
     }]);
     const remove = (i) => {
         if (window.confirm('¿Quitar este ítem del programa?')) setItems(items.filter((_, idx) => idx !== i));
