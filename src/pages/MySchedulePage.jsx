@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ProgramDetail, { useProgram } from '../components/ProgramDetail';
+import { useRooms } from '../components/ActivityRooms';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -56,13 +57,18 @@ const FixedItem = ({ item }) => (
 
 // Línea "Sede · Hora de inicio" — las Solidarias todavía no tienen hora
 // confirmada, así que se muestra "A confirmar".
-const MetaLine = ({ venue, startTime, meetingPoint }) => (
+const MetaLine = ({ venue, startTime, meetingPoint, room }) => (
     <>
         <p className="text-xs text-gray-600 mt-1.5">
             {venue && <><span className="font-bold">Sede:</span> {venue}</>}
             {venue && ' · '}
             <span className="font-bold">Hora de inicio:</span> {startTime ? `${startTime} hs` : 'A confirmar'}
         </p>
+        {room && (
+            <p className="text-xs text-gray-600 mt-0.5">
+                <span className="font-bold">Aula:</span> {room}
+            </p>
+        )}
         {meetingPoint && (
             <p className="text-xs text-gray-600 mt-0.5">
                 <span className="font-bold">Punto de encuentro:</span> {meetingPoint}
@@ -71,14 +77,14 @@ const MetaLine = ({ venue, startTime, meetingPoint }) => (
     </>
 );
 
-const PersonalItem = ({ item, picked, isMaccaferri }) => {
+const PersonalItem = ({ item, picked, isMaccaferri, rooms }) => {
     if (isMaccaferri && item.maccaferriReplaces) {
         return (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                 <p className="text-xs font-bold text-amber-700 uppercase tracking-widest mb-1">{item.label}</p>
                 <p className="font-bold text-amber-800">Desafío de Barreras - Maccaferri</p>
                 <p className="text-xs text-amber-600 mt-0.5">Esta actividad reemplaza Talleres y Simultáneas para vos.</p>
-                <MetaLine venue="UTN BA - Campus" startTime="09:00" />
+                <MetaLine venue="UTN BA - Campus" startTime="09:00" room={rooms?.maccaferri} />
             </div>
         );
     }
@@ -103,7 +109,7 @@ const PersonalItem = ({ item, picked, isMaccaferri }) => {
             <p className="font-bold text-gray-800">{picked.code ? `${picked.code} — ` : ''}{picked.title}</p>
             {picked.speaker && <p className="text-xs text-gray-500 mt-0.5">{picked.speaker}</p>}
             {item.showTime ? (
-                <MetaLine venue={picked.venue} startTime={picked.startTime} meetingPoint={picked.meetingPoint} />
+                <MetaLine venue={picked.venue} startTime={picked.startTime} meetingPoint={picked.meetingPoint} room={rooms?.[picked.code]} />
             ) : (
                 <p className="text-xs text-gray-400 mt-1">{item.location}</p>
             )}
@@ -117,6 +123,7 @@ const MySchedulePage = () => {
     const [isMaccaferri, setIsMaccaferri] = useState(false);
     const [error, setError] = useState(false);
     const program = useProgram();
+    const rooms = useRooms();
 
     useEffect(() => {
         if (!user?.email) return;
@@ -188,6 +195,7 @@ const MySchedulePage = () => {
                                         item={item}
                                         picked={pickedForBlock(item.blockId)}
                                         isMaccaferri={isMaccaferri}
+                                        rooms={rooms}
                                     />
                                 ),
                             )}

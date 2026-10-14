@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import ActivitySelectionsPanel from '../components/ActivitySelectionsPanel';
 import ProgramEditor from '../components/ProgramEditor';
 import AttendancePanel from '../components/AttendancePanel';
+import RoomsEditor from '../components/RoomsEditor';
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 const API = import.meta.env.VITE_API_URL;
@@ -920,6 +921,7 @@ const AdminDashboard = () => {
     { id: 'registrations', label: '📋 Inscripciones' },
     { id: 'selecciones',   label: '🗺️ Elección de Actividades' },
     { id: 'programa',      label: '🎤 Programa' },
+    { id: 'aulas',         label: '🚪 Aulas' },
     { id: 'asistencia',    label: '✅ Asistencia' },
     ...(isTesoreria ? [
       { id: 'comprobantes',  label: '📄 Comprobantes' },
@@ -963,6 +965,7 @@ const AdminDashboard = () => {
       {activeTab === 'registrations' && <RegistrationsPanel />}
       {activeTab === 'selecciones'   && <ActivitySelectionsPanel scope="admin" viewerEmail={user?.email} />}
       {activeTab === 'programa'      && <ProgramEditor />}
+      {activeTab === 'aulas'         && <RoomsEditor />}
       {activeTab === 'asistencia'    && <AttendancePanel />}
       {activeTab === 'comprobantes'  && <ComprobantesPanel />}
     </div>
