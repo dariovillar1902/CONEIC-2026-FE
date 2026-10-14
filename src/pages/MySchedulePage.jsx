@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ProgramDetail, { useProgram } from '../components/ProgramDetail';
 import { useRooms } from '../components/ActivityRooms';
+import MyAttendance from '../components/MyAttendance';
 import { effectiveStartTime, isUcaActivity, UCA_COFFEE } from '../utils/activityStartTime';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -228,6 +229,7 @@ const MySchedulePage = () => {
                         </div>
                     </section>
                 ))}
+                <MyAttendance email={user?.email} />
             </div>
         </div>
     );
