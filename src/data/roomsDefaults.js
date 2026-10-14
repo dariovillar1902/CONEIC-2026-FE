@@ -10,4 +10,12 @@ export const DEFAULT_ROOMS = {
     '1.06': 'Subsuelo 07',
     '1.05': 'Subsuelo 08',
     '1.04': 'Aula 140',
+    '1.07': 'Subsuelo 3 - Edificio Moro',
+    '1.08': 'Subsuelo 4 - Edificio Magno',
+    '1.09': 'Aula 409 - Edificio Moro',
+    '1.10': 'Aula 108',
+    '1.11': 'Auditorio - Edificio Magno',
+    '2.05': 'Auditorio - Edificio Magno',
+    '2.06': 'Aula 409 - Edificio Moro',
+    '2.07': 'Aula 106 - Edificio San José',
 };
