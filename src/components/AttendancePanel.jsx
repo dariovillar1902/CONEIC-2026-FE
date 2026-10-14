@@ -3,16 +3,18 @@ import { useAuth } from '../context/AuthContext';
 
 const API = import.meta.env.VITE_API_URL;
 
-// Tomas de asistencia del congreso (el martes la acreditación es la primera; el jueves solo la visita técnica).
+// El miércoles 14 la asistencia se toma por actividad: una lista por cada Taller,
+// Simultánea y Solidaria ("Taller 1.01 · título"). Cada asistente debe figurar en las tres suyas.
+const ACTIVITY_TYPES = { 2: 'Taller', 3: 'Simultánea', 4: 'Solidaria' };
+const ACTIVITY_NAME = /^(Taller|Simultánea|Solidaria) (\d\.\d{2}) /;
+const activityCode = (name) => ACTIVITY_NAME.exec(name)?.[2] ?? null;
+const activitySessionName = (blockId, option) => `${ACTIVITY_TYPES[blockId]} ${option.code} · ${option.title.slice(0, 70)}`;
+
 const STANDARD_SESSIONS = [
     'Martes 13 · Acreditación',
     'Martes 13 · Salida a almuerzo',
     'Martes 13 · Vuelta de almuerzo',
     'Martes 13 · Fin de jornada',
-    'Miércoles 14 · Ingreso',
-    'Miércoles 14 · Salida a almuerzo',
-    'Miércoles 14 · Vuelta de almuerzo',
-    'Miércoles 14 · Fin de jornada',
     'Jueves 15 · Visita técnica',
     'Viernes 16 · Ingreso',
     'Viernes 16 · Salida a almuerzo',
@@ -29,6 +31,7 @@ const AttendancePanel = () => {
     const [data, setData] = useState(null);
     const [error, setError] = useState('');
     const [view, setView] = useState('cargar');
+    const [catalog, setCatalog] = useState([]);
 
     const load = useCallback(async () => {
         try {
@@ -43,9 +46,17 @@ const AttendancePanel = () => {
 
     useEffect(() => { load(); }, [load]);
 
+    useEffect(() => {
+        fetch(`${API}/api/activityselection/blocks?email=${encodeURIComponent(user?.email ?? '')}&includeInactive=true`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => setCatalog((d?.blocks ?? []).filter((b) => ACTIVITY_TYPES[b.id])
+                .flatMap((b) => (b.options ?? []).map((o) => activitySessionName(b.id, o)))))
+            .catch(() => {});
+    }, [user]);
+
     const createStandard = async () => {
         const existing = new Set(data.sessions.map((s) => s.name ?? s.Name));
-        for (const name of STANDARD_SESSIONS.filter((n) => !existing.has(n))) {
+        for (const name of [...STANDARD_SESSIONS, ...catalog].filter((n) => !existing.has(n))) {
             await fetch(`${API}/api/attendance/sessions`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -61,18 +72,20 @@ const AttendancePanel = () => {
     const usedIds = new Set(data.people.flatMap((p) => p.sessions));
     const allSessions = data.sessions.map((s) => ({ id: s.id ?? s.Id, name: s.name ?? s.Name }));
     // Se ocultan las instancias de prueba viejas (sin registros y fuera de las tomas del congreso).
-    const sessions = allSessions.filter((s) => STANDARD_SESSIONS.includes(s.name) || usedIds.has(s.id));
+    const sessions = allSessions.filter((s) =>
+        STANDARD_SESSIONS.includes(s.name) || activityCode(s.name) || usedIds.has(s.id));
     const people = data.people.map((p) => ({
-        id: p.id, name: p.name, lastname: p.lastname, faculty: p.faculty, dni: p.dni, sessions: new Set(p.sessions),
+        id: p.id, name: p.name, lastname: p.lastname, faculty: p.faculty, dni: p.dni,
+        sessions: new Set(p.sessions), enrolled: new Set(p.enrolled ?? []),
     }));
-    const missingStandard = STANDARD_SESSIONS.filter((n) => !sessions.some((s) => s.name === n));
+    const missingStandard = [...STANDARD_SESSIONS, ...catalog].filter((n) => !sessions.some((s) => s.name === n));
 
     return (
         <div className="max-w-5xl">
             {missingStandard.length > 0 && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center gap-3 flex-wrap">
                     <p className="text-sm text-amber-800 flex-1">
-                        Faltan crear {missingStandard.length} de las {STANDARD_SESSIONS.length} tomas de asistencia del congreso.
+                        Faltan crear {missingStandard.length} tomas de asistencia (tomas fijas y una por actividad del miércoles).
                     </p>
                     <button onClick={createStandard} className="px-4 py-2 bg-institutional text-white text-sm font-bold rounded-lg">
                         Crear tomas del congreso
@@ -180,8 +193,10 @@ const ByEvent = ({ sessions, people }) => {
     const [show, setShow] = useState('presentes');
     const [q, setQ] = useState('');
     const id = Number(sessionId);
+    const code = activityCode(sessions.find((s) => s.id === id)?.name ?? '');
     const present = people.filter((p) => p.sessions.has(id));
-    const absent = people.filter((p) => !p.sessions.has(id));
+    // En una toma por actividad, los ausentes son los inscriptos a esa actividad que no figuran.
+    const absent = people.filter((p) => !p.sessions.has(id) && (!code || p.enrolled.has(code)));
     const rows = (show === 'presentes' ? present : absent).filter((p) => !q || norm(`${fullName(p)} ${p.faculty} ${p.dni} ${p.id}`).includes(norm(q)));
 
     return (
@@ -208,7 +223,10 @@ const ByEvent = ({ sessions, people }) => {
                     <tbody>
                         {rows.map((p) => (
                             <tr key={p.id} className="border-b border-gray-100">
-                                <td className="py-1">{p.id}</td><td>{fullName(p)}</td><td>{p.faculty}</td><td>{p.dni}</td>
+                                <td className="py-1">{p.id}</td>
+                                <td>{fullName(p)}{code && show === 'presentes' && !p.enrolled.has(code) && (
+                                    <span className="ml-2 text-[10px] font-bold text-amber-700 bg-amber-50 rounded px-1.5 py-0.5">no inscripto/a</span>
+                                )}</td><td>{p.faculty}</td><td>{p.dni}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -250,9 +268,12 @@ const ByPerson = ({ sessions, people, user, onChange }) => {
             {person && (
                 <div>
                     <p className="font-bold text-gray-800">{fullName(person)} <span className="font-normal text-gray-400 text-sm">· {person.faculty} · ID {person.id} · DNI {person.dni}</span></p>
-                    <p className="text-sm text-gray-500 mb-3">Asistió a {person.sessions.size} de {sessions.length} tomas. Tocá una fila para corregirla.</p>
+                    <p className="text-sm text-gray-500 mb-3">Tocá una fila para corregirla.</p>
                     <div className="space-y-1">
-                        {sessions.map((s) => {
+                        {sessions.filter((s) => {
+                            const c = activityCode(s.name);
+                            return !c || person.enrolled.has(c) || person.sessions.has(s.id);
+                        }).map((s) => {
                             const isIn = person.sessions.has(s.id);
                             return (
                                 <button key={s.id} onClick={() => toggle(s.id, isIn)}
