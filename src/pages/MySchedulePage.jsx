@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ProgramDetail, { useProgram } from '../components/ProgramDetail';
 import { useRooms } from '../components/ActivityRooms';
-import { effectiveStartTime } from '../utils/activityStartTime';
+import { effectiveStartTime, isUcaActivity, UCA_COFFEE } from '../utils/activityStartTime';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -78,6 +78,13 @@ const MetaLine = ({ venue, startTime, meetingPoint, room }) => (
     </>
 );
 
+const CoffeeItem = () => (
+    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <p className="font-bold text-gray-700">{UCA_COFFEE.title}</p>
+        <MetaLine venue={UCA_COFFEE.venue} startTime={UCA_COFFEE.startTime} room={UCA_COFFEE.room} />
+    </div>
+);
+
 const PersonalItem = ({ item, picked, isMaccaferri, rooms }) => {
     if (isMaccaferri && item.maccaferriReplaces) {
         return (
@@ -145,6 +152,22 @@ const MySchedulePage = () => {
         return option ?? null;
     };
 
+    const hasUca = (blocks ?? []).some((b) => isUcaActivity(b.options?.find((o) => o.id === b.yourSelectionActivityId)));
+
+    // Cards del día: los personales del miércoles se ordenan por hora cuando hay coffee de UCA.
+    const dayCards = (day) => {
+        const base = day.items
+            .filter((item) => !(program?.[day.key]?.length > 0 && item.type === 'fixed'))
+            .map((item, idx) => ({ item, key: `i${idx}` }));
+        if (day.key !== 'miercoles' || !hasUca) return base;
+        const withTime = base.map((c) => ({
+            ...c,
+            time: effectiveStartTime(pickedForBlock(c.item.blockId)) || '99:99',
+        }));
+        return [...withTime, { coffee: true, key: 'coffee', time: UCA_COFFEE.startTime }]
+            .sort((a, b) => a.time.localeCompare(b.time));
+    };
+
     if (error) {
         return (
             <div className="max-w-3xl mx-auto p-8 text-center text-gray-400">
@@ -187,12 +210,14 @@ const MySchedulePage = () => {
                             </>
                         )}
                         <div className="space-y-3">
-                            {day.items.filter((item) => !(program?.[day.key]?.length > 0 && item.type === 'fixed')).map((item, idx) =>
-                                item.type === 'fixed' ? (
-                                    <FixedItem key={idx} item={item} />
+                            {dayCards(day).map(({ item, key, coffee }) =>
+                                coffee ? (
+                                    <CoffeeItem key={key} />
+                                ) : item.type === 'fixed' ? (
+                                    <FixedItem key={key} item={item} />
                                 ) : (
                                     <PersonalItem
-                                        key={idx}
+                                        key={key}
                                         item={item}
                                         picked={pickedForBlock(item.blockId)}
                                         isMaccaferri={isMaccaferri}

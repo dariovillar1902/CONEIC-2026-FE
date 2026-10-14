@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { formatEventDate } from '../utils/formatEventDate';
 import FormattedText from '../components/FormattedText';
-import { effectiveStartTime } from '../utils/activityStartTime';
+import { effectiveStartTime, effectiveEndTime } from '../utils/activityStartTime';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -90,7 +90,7 @@ const OptionModal = ({ option, picked, onClose, onChoose, choosing, readOnly = f
                 <div className="text-xs text-gray-600 mb-3 space-y-0.5">
                     {option.venue && <p><span className="font-bold">Sede:</span> {option.venue}</p>}
                     {option.meetingPoint && <p><span className="font-bold">Punto de encuentro:</span> {option.meetingPoint}</p>}
-                    <p><span className="font-bold">Hora de inicio:</span> {effectiveStartTime(option) ? `${effectiveStartTime(option)} hs` : 'A confirmar'}{option.endTime ? ` (finaliza ${option.endTime} hs)` : ''}</p>
+                    <p><span className="font-bold">Hora de inicio:</span> {effectiveStartTime(option) ? `${effectiveStartTime(option)} hs` : 'A confirmar'}{effectiveEndTime(option) ? ` (finaliza ${effectiveEndTime(option)} hs)` : ''}</p>
                 </div>
                 {option.description && <FormattedText text={option.description} className="text-sm text-gray-600 leading-relaxed mb-4" />}
 

@@ -25,7 +25,7 @@ const SCHEDULE = [
   // Bloque mañana
   [
     { name: 'Acreditaciones y Apertura',  location: 'Auditorio Belgrano' },
-    { name: 'Talleres y Simultáneas',     location: '' },
+    { name: 'Talleres y Simultáneas',     location: 'En UCA: coffee break 11:00 hs (Auditorio, Edificio Magno)' },
     { name: 'Visitas Técnicas',           location: '', span: 2 },
     { name: 'Charlas Magistrales',        location: 'Auditorio Belgrano' },
   ],
