@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ProgramDetail, { useProgram } from '../components/ProgramDetail';
 import { useRooms } from '../components/ActivityRooms';
+import { effectiveStartTime } from '../utils/activityStartTime';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -109,7 +110,7 @@ const PersonalItem = ({ item, picked, isMaccaferri, rooms }) => {
             <p className="font-bold text-gray-800">{picked.code ? `${picked.code} — ` : ''}{picked.title}</p>
             {picked.speaker && <p className="text-xs text-gray-500 mt-0.5">{picked.speaker}</p>}
             {item.showTime ? (
-                <MetaLine venue={picked.venue} startTime={picked.startTime} meetingPoint={picked.meetingPoint} room={rooms?.[picked.code]} />
+                <MetaLine venue={picked.venue} startTime={effectiveStartTime(picked)} meetingPoint={picked.meetingPoint} room={rooms?.[picked.code]} />
             ) : (
                 <p className="text-xs text-gray-400 mt-1">{item.location}</p>
             )}

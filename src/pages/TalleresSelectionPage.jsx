@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { formatEventDate } from '../utils/formatEventDate';
 import FormattedText from '../components/FormattedText';
+import { effectiveStartTime } from '../utils/activityStartTime';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -38,7 +39,7 @@ const CATEGORY_LABEL = { Taller: 'Talleres', Simultanea: 'Simultáneas', Solidar
 const CATEGORY_SINGULAR = { Taller: 'taller', Simultanea: 'simultánea', Solidaria: 'solidaria' };
 const CATEGORY_CONFIRMED = { Taller: 'Taller confirmado', Simultanea: 'Simultánea confirmada', Solidaria: 'Solidaria confirmada' };
 
-const metaLine = (o) => [o.venue, o.startTime ? `${o.startTime} hs` : null].filter(Boolean).join(' · ');
+const metaLine = (o) => [o.venue, effectiveStartTime(o) ? `${effectiveStartTime(o)} hs` : null].filter(Boolean).join(' · ');
 
 const OptionCard = ({ option, picked, onOpen, disabled }) => {
     const full = option.taken >= option.capacity && !picked;
@@ -89,7 +90,7 @@ const OptionModal = ({ option, picked, onClose, onChoose, choosing, readOnly = f
                 <div className="text-xs text-gray-600 mb-3 space-y-0.5">
                     {option.venue && <p><span className="font-bold">Sede:</span> {option.venue}</p>}
                     {option.meetingPoint && <p><span className="font-bold">Punto de encuentro:</span> {option.meetingPoint}</p>}
-                    <p><span className="font-bold">Hora de inicio:</span> {option.startTime ? `${option.startTime} hs` : 'A confirmar'}{option.endTime ? ` (finaliza ${option.endTime} hs)` : ''}</p>
+                    <p><span className="font-bold">Hora de inicio:</span> {effectiveStartTime(option) ? `${effectiveStartTime(option)} hs` : 'A confirmar'}{option.endTime ? ` (finaliza ${option.endTime} hs)` : ''}</p>
                 </div>
                 {option.description && <FormattedText text={option.description} className="text-sm text-gray-600 leading-relaxed mb-4" />}
 

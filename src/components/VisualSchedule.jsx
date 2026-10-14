@@ -32,14 +32,14 @@ const SCHEDULE = [
   // Bloque tarde temprano
   [
     { name: 'Ponencias Estudiantiles',         location: 'Auditorio Belgrano' },
-    { name: 'Solidarias – Compromiso Social',  location: '' },
+    { name: 'Solidarias – Compromiso Social',  location: 'Inicio: 15:00 hs' },
     null,
     { name: 'Charlas Magistrales',             location: 'Auditorio Belgrano' },
   ],
   // Bloque tarde
   [
     { name: 'Charlas Magistrales',             location: 'Auditorio Belgrano' },
-    { name: 'Solidarias – Compromiso Social',  location: '' },
+    { name: 'Solidarias – Compromiso Social',  location: 'Inicio: 15:00 hs' },
     { name: 'Asamblea ANEIC + Recreativa',     location: 'UTN Campus' },
     { name: 'Acto de Cierre',                  location: 'Auditorio Belgrano' },
   ],
