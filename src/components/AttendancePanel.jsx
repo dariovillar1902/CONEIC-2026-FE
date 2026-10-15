@@ -8,7 +8,7 @@ const API = import.meta.env.VITE_API_URL;
 const ACTIVITY_TYPES = { 2: 'Taller', 3: 'Simultánea', 4: 'Solidaria' };
 const ACTIVITY_NAME = /^(Taller|Simultánea|Solidaria) (\d\.\d{2}) /;
 const activityCode = (name) => ACTIVITY_NAME.exec(name)?.[2] ?? null;
-const activitySessionName = (blockId, option) => `${ACTIVITY_TYPES[blockId]} ${option.code} · ${option.title.slice(0, 70)}`;
+const activitySessionName = (blockId, option) => `${ACTIVITY_TYPES[blockId]} ${option.code} · ${option.title.slice(0, 70).trim()}`;
 
 const STANDARD_SESSIONS = [
     'Martes 13 · Acreditación',
