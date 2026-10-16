@@ -15,7 +15,6 @@ import ActivitySelectionPage from './pages/ActivitySelectionPage';
 import MySchedulePage from './pages/MySchedulePage';
 import DelegateDashboard from './pages/DelegateDashboard';
 import AssistantDashboard from './pages/AssistantDashboard';
-import GalleryPage from './pages/GalleryPage';
 import GamesPage from './pages/GamesPage';
 import AboutPage from './pages/AboutPage';
 import { SchedulePage, VenuesPage, ActivitiesPage, RegistrationPage, RegistrationPage2, RegistrationInternationalPage, RegistrationInternationalPage2 } from './pages/Wrappers';
@@ -42,7 +41,7 @@ const router = createBrowserRouter([
       { path: 'registration2', element: <RegistrationPage2 /> },
       { path: 'registration-international', element: <RegistrationInternationalPage /> },
       { path: 'registration-international2', element: <RegistrationInternationalPage2 /> },
-      { path: 'gallery', element: <GalleryPage /> },
+      { path: 'gallery', element: <Navigate to="/" replace /> }, // Galería oculta por ahora
       { path: 'games', element: <GamesPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'subcomisiones', element: <SubcommitteesPage /> },
