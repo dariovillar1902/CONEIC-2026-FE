@@ -16,10 +16,9 @@ const STANDARD_SESSIONS = [
     'Martes 13 · Vuelta de almuerzo',
     'Martes 13 · Fin de jornada',
     'Jueves 15 · Visita técnica',
-    'Viernes 16 · Ingreso',
+    'Viernes 16 · Inicio de mañana',
     'Viernes 16 · Salida a almuerzo',
     'Viernes 16 · Vuelta de almuerzo',
-    'Viernes 16 · Fin de jornada',
 ];
 
 const norm = (s) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -93,7 +92,7 @@ const AttendancePanel = () => {
                 </div>
             )}
             <div className="flex gap-2 mb-5 flex-wrap">
-                {[['cargar', '📝 Cargar planilla'], ['evento', '📅 Por evento'], ['persona', '👤 Por persona']].map(([k, label]) => (
+                {[['cargar', '📝 Cargar planilla'], ['evento', '📅 Por evento'], ['persona', '👤 Por persona'], ['certificados', '🎓 Certificados']].map(([k, label]) => (
                     <button key={k} onClick={() => setView(k)}
                         className={`px-4 py-2 rounded-lg text-sm font-bold ${view === k ? 'bg-institutional text-white' : 'bg-gray-100 text-gray-600'}`}>
                         {label}
@@ -103,6 +102,7 @@ const AttendancePanel = () => {
             {view === 'cargar' && <LoadSheet sessions={sessions} user={user} onDone={load} />}
             {view === 'evento' && <ByEvent sessions={sessions} people={people} />}
             {view === 'persona' && <ByPerson sessions={sessions} people={people} user={user} onChange={load} />}
+            {view === 'certificados' && <Certificates user={user} />}
         </div>
     );
 };
@@ -285,6 +285,85 @@ const ByPerson = ({ sessions, people, user, onChange }) => {
                     </div>
                 </div>
             )}
+        </div>
+    );
+};
+
+const Certificates = ({ user }) => {
+    const [onlyLoaded, setOnlyLoaded] = useState(false);
+    const [report, setReport] = useState(null);
+    const [error, setError] = useState('');
+    const [q, setQ] = useState('');
+    const [filter, setFilter] = useState('todos');
+    const email = encodeURIComponent(user?.email ?? '');
+
+    useEffect(() => {
+        setReport(null);
+        fetch(`${API}/api/attendance/certificates?requesterEmail=${email}&onlyLoaded=${onlyLoaded}`)
+            .then((r) => (r.ok ? r.json() : Promise.reject()))
+            .then(setReport)
+            .catch(() => setError('No se pudo calcular (¿tenés permiso de admin?).'));
+    }, [email, onlyLoaded]);
+
+    if (error) return <p className="text-red-600">{error}</p>;
+    if (!report) return <p className="text-gray-400">Calculando…</p>;
+
+    const eligible = report.people.filter((p) => p.eligible);
+    const unloaded = report.sessions.filter((s) => !s.loaded);
+    const rows = report.people.filter((p) =>
+        (filter === 'todos' || (filter === 'si' ? p.eligible : !p.eligible))
+        && (!q || norm(`${p.lastname} ${p.name} ${p.dni} ${p.faculty}`).includes(norm(q))));
+
+    return (
+        <div>
+            <p className="text-sm text-gray-500 mb-3">
+                Certificado para quien asistió a, al menos, el <b>75%</b> de las tomas que le correspondían: Martes (4), Miércoles
+                (su Taller, Simultánea y Solidaria), Jueves (visita técnica, si tenía una confirmada) y Viernes (3).
+                Solo inscriptos con pago confirmado.
+            </p>
+            <div className="flex flex-wrap gap-4 items-center mb-4">
+                <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-2">
+                    <p className="text-2xl font-bold text-green-700">{eligible.length}</p>
+                    <p className="text-xs text-green-700">con certificado</p>
+                </div>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
+                    <p className="text-2xl font-bold text-gray-700">{report.people.length - eligible.length}</p>
+                    <p className="text-xs text-gray-500">sin certificado</p>
+                </div>
+                <label className="text-sm flex items-center gap-2">
+                    <input type="checkbox" checked={onlyLoaded} onChange={(e) => setOnlyLoaded(e.target.checked)} />
+                    Contar solo las tomas ya cargadas
+                </label>
+                <a href={`${API}/api/attendance/certificates/export?requesterEmail=${email}&onlyLoaded=${onlyLoaded}`}
+                    className="px-4 py-2 bg-institutional text-white text-sm font-bold rounded-lg">Descargar Excel</a>
+            </div>
+            {unloaded.length > 0 && (
+                <details className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+                    <summary className="cursor-pointer font-bold">{unloaded.length} tomas todavía sin asistencia cargada</summary>
+                    <ul className="mt-2 columns-2 text-xs">{unloaded.map((s) => <li key={s.name}>{s.name}</li>)}</ul>
+                    {!onlyLoaded && <p className="mt-2 text-xs">Mientras no se carguen, cuentan como ausencia para todos.</p>}
+                </details>
+            )}
+            <div className="flex gap-2 flex-wrap mb-3">
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar…" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                {[['todos', 'Todos'], ['si', 'Con certificado'], ['no', 'Sin certificado']].map(([k, label]) => (
+                    <button key={k} onClick={() => setFilter(k)}
+                        className={`px-3 py-2 rounded-lg text-sm font-bold ${filter === k ? 'bg-institutional text-white' : 'bg-gray-100'}`}>{label}</button>
+                ))}
+            </div>
+            <table className="w-full text-sm">
+                <thead><tr className="text-left text-gray-500 border-b"><th className="py-1">Apellido y nombre</th><th>Delegación</th><th>Asistió</th><th>%</th><th>Certificado</th></tr></thead>
+                <tbody>
+                    {rows.slice(0, 300).map((p) => (
+                        <tr key={p.id} className="border-b border-gray-100">
+                            <td className="py-1">{p.lastname}, {p.name}</td><td>{p.faculty}</td>
+                            <td>{p.attended} de {p.expected}</td><td>{p.percent}%</td>
+                            <td className={p.eligible ? 'text-green-700 font-bold' : 'text-gray-400'}>{p.eligible ? 'Sí' : 'No'}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            {rows.length > 300 && <p className="text-xs text-gray-400 mt-2">Se muestran 300 de {rows.length}; el Excel trae todos.</p>}
         </div>
     );
 };

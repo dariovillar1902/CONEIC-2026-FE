@@ -229,7 +229,7 @@ const MySchedulePage = () => {
                         </div>
                     </section>
                 ))}
-                {user?.role !== 'assistant' && <MyAttendance email={user?.email} />}
+                {(user?.role === 'admin' || user?.role === 'tesoreria') && <MyAttendance email={user?.email} />}
             </div>
         </div>
     );
