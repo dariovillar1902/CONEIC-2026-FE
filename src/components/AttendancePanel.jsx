@@ -3,10 +3,10 @@ import { useAuth } from '../context/AuthContext';
 
 const API = import.meta.env.VITE_API_URL;
 
-// El miércoles 14 la asistencia se toma por actividad: una lista por cada Taller,
-// Simultánea y Solidaria ("Taller 1.01 · título"). Cada asistente debe figurar en las tres suyas.
-const ACTIVITY_TYPES = { 2: 'Taller', 3: 'Simultánea', 4: 'Solidaria' };
-const ACTIVITY_NAME = /^(Taller|Simultánea|Solidaria) (\d\.\d{2}) /;
+// El miércoles 14 y el jueves 15 la asistencia se toma por actividad: una lista por cada Taller,
+// Simultánea, Solidaria y Visita técnica ("Taller 1.01 · título"). Cada asistente figura en las suyas.
+const ACTIVITY_TYPES = { 1: 'Visita técnica', 2: 'Taller', 3: 'Simultánea', 4: 'Solidaria' };
+const ACTIVITY_NAME = /^(Taller|Simultánea|Solidaria|Visita técnica) (\d\.\d{2}) /;
 const activityCode = (name) => ACTIVITY_NAME.exec(name)?.[2] ?? null;
 const activitySessionName = (blockId, option) => `${ACTIVITY_TYPES[blockId]} ${option.code} · ${option.title.slice(0, 70).trim()}`;
 
@@ -15,7 +15,6 @@ const STANDARD_SESSIONS = [
     'Martes 13 · Salida a almuerzo',
     'Martes 13 · Vuelta de almuerzo',
     'Martes 13 · Fin de jornada',
-    'Jueves 15 · Visita técnica',
     'Viernes 16 · Inicio de mañana',
     'Viernes 16 · Salida a almuerzo',
     'Viernes 16 · Vuelta de almuerzo',
@@ -318,7 +317,7 @@ const Certificates = ({ user }) => {
         <div>
             <p className="text-sm text-gray-500 mb-3">
                 Certificado para quien asistió a, al menos, el <b>75%</b> de las tomas que le correspondían: Martes (4), Miércoles
-                (su Taller, Simultánea y Solidaria), Jueves (visita técnica, si tenía una confirmada) y Viernes (3).
+                (su Taller, Simultánea y Solidaria), Jueves (la toma de su visita técnica, si tenía una confirmada) y Viernes (3).
                 Solo inscriptos con pago confirmado.
             </p>
             <div className="flex flex-wrap gap-4 items-center mb-4">
